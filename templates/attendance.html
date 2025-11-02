@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}출석 이벤트{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>{{ current_month_str }} 출석부</h2>
+    </div>
+    <hr class="main-divider">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class.="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            <br>
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="attendance-form">
+        <button type="submit" class="submit-button" {{ 'disabled' if has_checked_in_today else '' }}>
+            {% if has_checked_in_today %}
+                오늘 출석 완료 (✔️)
+            {% else %}
+                오늘 날짜 출석하기
+            {% endif %}
+        </button>
+    </form>
+    
+    <table class="calendar">
+        <thead>
+            <tr>
+                <th>월</th>
+                <th>화</th>
+                <th>수</th>
+                <th>목</th>
+                <th>금</th>
+                <th>토</th>
+                <th>일</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for week in calendar_weeks %}
+            <tr>
+                {% for day in week %}
+                    
+                    {% if day == 0 %}
+                        <td class="empty"></td>
+                    
+                    {% else %}
+                        <td class="{{ 'today' if day == today_day else '' }}">
+                            <div class="day-number">{{ day }}</div>
+                            
+                            {% if day in checked_in_days %}
+                                <span class="check-mark">✔️</span>
+                            {% endif %}
+                        </td>
+                    {% endif %}
+                    
+                {% endfor %}
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+<style>
+    .attendance-form {
+        margin: 15px 0;
+        text-align: center;
+    }
+    .attendance-form .submit-button {
+        width: 100%;
+        max-width: 400px;
+        padding: 15px;
+        font-size: 1.1em;
+    }
+    .attendance-form .submit-button:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
+    }
+
+    .calendar {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* 칸 너비 고정 */
+    }
+    .calendar th {
+        background-color: #f8f9fa;
+        padding: 10px;
+        text-align: center;
+        font-weight: 600;
+        border: 1px solid #dee2e6;
+    }
+    .calendar td {
+        height: 80px; /* 칸 높이 */
+        padding: 8px;
+        border: 1px solid #dee2e6;
+        vertical-align: top;
+        position: relative;
+    }
+    
+    /* 이번 달이 아닌 날짜 (빈 칸) */
+    .calendar td.empty {
+        background-color: #fdfdfd;
+    }
+
+    .day-number {
+        font-weight: 500;
+    }
+
+    /* 오늘 날짜 하이라이트 */
+    .calendar td.today .day-number {
+        background-color: #D90429;
+        color: white;
+        border-radius: 50%;
+        width: 28px;
+        height: 28px;
+        display: inline-block;
+        text-align: center;
+        line-height: 28px;
+    }
+
+    /* 출석 체크 마크 */
+    .check-mark {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 2.5em; /* 체크마크 크기 */
+        color: #D90429;
+        opacity: 0.6;
+    }
+</style>
+{% endblock %}

@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}커스텀{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>커스텀</h2>
+    </div>
+    <hr class="main-divider">
+
+    <div class="main-menu">
+        <a href="{{ url_for('custom_design_list', design_type='card') }}" class="menu-button">
+            카드 디자인
+        </a>
+        <a href="{{ url_for('custom_design_list', design_type='effect') }}" class="menu-button">
+            효과 디자인
+        </a>
+        <a href="{{ url_for('custom_design_list', design_type='button') }}" class="menu-button">
+            버튼 디자인
+        </a>
+    </div>
+{% endblock %}

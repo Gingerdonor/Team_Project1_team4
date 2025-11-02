@@ -1,413 +1,97 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>궁합 점수 계산기</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f7f6;
-            color: #333;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 800px;
-            margin: 0 auto;
-            background-color: #ffffff;
-            padding: 25px 40px;
-            border-radius: 12px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.07);
-        }
+{% extends "base.html" %}
 
-        /* --- [추가됨] Navigation Tabs Style --- */
-        .nav-tabs {
-            width: 100%;
-            margin-bottom: 25px;
-            border-bottom: 2px solid #eee;
-        }
-        .nav-tabs ul {
-            list-style-type: none;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-        .nav-tabs li a {
-            display: block;
-            padding: 12px 20px;
-            text-decoration: none;
-            color: #555;
-            font-weight: 500;
-            border-bottom: 3px solid transparent;
-            margin-bottom: -2px; /* 탭의 border가 컨테이너 border와 겹치도록 */
-            transition: all 0.2s ease;
-        }
-        .nav-tabs li a:hover {
-            color: #1a73e8;
-        }
-        .nav-tabs li.active a {
-            color: #1a73e8;
-            font-weight: 600;
-            border-bottom-color: #1a73e8;
-        }
-        /* --- [추가됨] End Nav Tabs --- */
+{% block title %}My Destina에 오신 것을 환영합니다{% endblock %}
 
-        h1 {
-            text-align: center;
-            color: #1a73e8;
-            margin-bottom: 30px;
-        }
-        form {
-            display: flex;
-            flex-wrap: wrap; /* 화면이 좁아지면 세로로 쌓임 */
-            justify-content: space-between;
-        }
-        .person-inputs {
-            width: 100%; /* 모바일에선 100% */
-            min-width: 250px; /* 최소 너비 */
-            border: 1px solid #ddd;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            box-sizing: border-box; /* 패딩 포함 */
-        }
-        /* 데스크탑 화면에서는 48% 너비로 가로 배치 */
-        @media (min-width: 600px) {
-            .person-inputs {
-                width: 48%;
-            }
-        }
-        .person-inputs h2 {
-            margin-top: 0;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #eee;
-        }
-        .input-group {
-            margin-bottom: 15px;
-        }
-        .input-group label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-        }
-        .input-group input[type="number"],
-        .input-group select {
-            width: 100%;
-            padding: 10px;
-            box-sizing: border-box; 
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        button[type="submit"] {
-            width: 100%;
-            padding: 15px;
-            background-color: #1a73e8;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button[type="submit"]:hover {
-            background-color: #1558b0;
-        }
-        #results-container, #interpretation-container {
-            display: none; /* 결과는 JS로 표시 */
-            margin-top: 30px;
-            border-top: 2px solid #eee;
-            padding-top: 20px;
-        }
-        #results-container h3, #interpretation-container h3 {
-            color: #1a73e8;
-            margin-top: 0;
-        }
-        #results-display {
-            background-color: #f9f9f9;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            line-height: 1.7;
-        }
-        #results-display h4 {
-            margin-top: 15px;
-            margin-bottom: 10px;
-            border-bottom: 1px solid #ddd;
-            padding-bottom: 5px;
-        }
-        #results-display h4:first-child {
-            margin-top: 0;
-        }
-        #results-display p {
-            margin: 5px 0 10px;
-        }
-
-        #interpretation-display {
-            background-color: #fdfdfd;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            padding: 20px;
-            line-height: 1.7;
-            color: #495057;
-        }
-
-        .loading {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #555;
-            padding: 20px;
-        }
-        .error {
-            color: #d93025;
-            font-weight: bold;
-            text-align: center;
-            padding: 20px;
-        }
-
-        /* 성향 분석 태그 스타일 */
-        .propensity-list {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px; /* 태그 사이의 간격 */
-            padding: 5px 0;
-        }
-        .propensity-item {
-            padding: 5px 12px;
-            border-radius: 20px; /* 둥근 모서리 */
-            color: white;
-            font-size: 0.9rem;
-            font-weight: 500;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+{% block content %}
+<div class="landing-container">
+    <div class="landing-box">
+        <h1>My Destina</h1>
+        <p>당신의 운명을 발견하세요.</p>
         
-        .p-color-0 { background-color: #E63946; } /* 열정 (Red) */
-        .p-color-1 { background-color: #8338ec; } /* 예민 (Purple) */
-        .p-color-2 { background-color: #fb8500; } /* 감정기복 (Orange) */
-        .p-color-3 { background-color: #A8201A; } /* 강함 (Dark Red) */
-        .p-color-4 { background-color: #1d3557; } /* 책임감 (Dark Blue) */
-        .p-color-5 { background-color: #6d6875; } /* 충돌 (Gray) */
-        .p-color-6 { background-color: #d4a373; } /* 카리스마 (Gold/Brown) */
-        .p-color-7 { background-color: #2a9d8f; } /* 의지 (Teal/Green) */
-        .p-color-default { background-color: #495057; } /* '무난' (Dark Gray) */
-
-    </style>
-</head>
-<body>
-
-    <div class="container">
-
-        <nav class="nav-tabs">
-            <ul>
-                <li class="active"><a href="/">궁합 보기</a></li>
-                <li><a href="/personal">개인 분석</a></li>
-            </ul>
-        </nav>
-        
-        <h1>궁합 점수 계산기</h1>
-        
-        <form id="saju-form">
-            <div class="person-inputs">
-                <h2>첫번째 사람</h2>
-                <div class="input-group">
-                    <label for="p0_year">태어난 연도 (2000-2021)</label>
-                    <input type="number" id="p0_year" min="2000" max="2021" required>
-                </div>
-                <div class="input-group">
-                    <label for="p0_month">태어난 월</label>
-                    <input type="number" id="p0_month" min="1" max="12" required>
-                </div>
-                <div class="input-group">
-                    <label for="p0_day">태어난 일</label>
-                    <input type="number" id="p0_day" min="1" max="31" required>
-                </div>
-                <div class="input-group">
-                    <label for="p0_gender">성별</label>
-                    <select id="p0_gender">
-                        <option value="0" selected>여자</option>
-                        <option value="1">남자</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="person-inputs">
-                <h2>두번째 사람</h2>
-                <div class="input-group">
-                    <label for="p1_year">태어난 연도 (2000-2021)</label>
-                    <input type="number" id="p1_year" min="2000" max="2021" required>
-                </div>
-                <div class="input-group">
-                    <label for="p1_month">태어난 월</label>
-                    <input type="number" id="p1_month" min="1" max="12" required>
-                </div>
-                <div class="input-group">
-                    <label for="p1_day">태어난 일</label>
-                    <input type="number" id="p1_day" min="1" max="31" required>
-                </div>
-                <div class="input-group">
-                    <label for="p1_gender">성별</label>
-                    <select id="p1_gender">
-                        <option value="0" selected>여자</option>
-                        <option value="1">남자</option>
-                    </select>
-                </div>
-            </div>
-
-            <button type="submit">결과 보기</button>
-        </form>
-
-        <div id="results-container">
-            <h3>계산 결과</h3>
-            <div id="results-display">
-                </div>
+        <div class="cta-buttons">
+            <a href="{{ url_for('login') }}" class="cta-button primary">로그인</a>
+            <a href="{{ url_for('register') }}" class="cta-button secondary">회원가입</a>
         </div>
-        
-        <div id="interpretation-container">
-            <h3>사주 결과 해설</h3>
-            <div id="interpretation-display">
-                </div>
-        </div>
-
     </div>
+</div>
 
-    <script>
-        // ss 배열을 JS로 가져와서 매핑에 사용합니다.
-        const propensityMap = [
-            "열정 에너지 예술 중독", 
-            "예민 직감 영적 불안", 
-            "감정기복 갈등 오해 고독", 
-            "강함 용감 충동 변화", 
-            "책임감 의리 완벽 자존심 인내", 
-            "충돌 자유 고집", 
-            "카리스마 승부욕 용감 외로움", 
-            "의지 솔직 직설 개성 고집 독립심",
-            "무난" // '무난'은 9번째 (인덱스 8)로 처리
-        ];
+<style>
+    /* base.html의 main 스타일 덮어쓰기 */
+    body > main {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+        background-color: transparent;
+        box-shadow: none;
+    }
 
-        // 성향 배열을 받아서 색상 태그 HTML을 생성하는 헬퍼 함수
-        function createPropensityHtml(analysisArray) {
-            let html = '<div class="propensity-list">';
-            analysisArray.forEach(text => {
-                let index = propensityMap.indexOf(text);
-                let colorClass = 'p-color-default'; // 기본값 ('무난' 또는 오류)
-                
-                if (text === "무난") {
-                    index = 8;
-                }
+    /* 페이지 전체를 채우고 중앙 정렬 */
+    .landing-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        /* 헤더(60px)와 푸터(약 60px)를 제외한 높이 */
+        min-height: calc(100vh - 120px); 
+        padding: 20px;
+    }
 
-                if (index !== -1) {
-                    colorClass = `p-color-${index}`;
-                }
-                // 'span' 태그로 감싸고 CSS 클래스 적용
-                html += `<span class="propensity-item ${colorClass}">${text}</span>`;
-            });
-            html += '</div>';
-            return html;
-        }
+    .landing-box {
+        max-width: 500px;
+    }
 
-        // 결과 해설을 동적으로 생성하는 헬퍼 함수 (예시)
-        function createInterpretationHtml(results) {
-            let html = `<p><strong>종합 진단:</strong> 두 분의 최종 점수는 <strong>${results.final_score.toFixed(2)}점</strong>입니다. `;
+    .landing-box h1 {
+        font-size: 3.5em; /* 2.8em -> 3.5em */
+        font-weight: 800;
+        color: #D90429; /* 메인 레드 색상 */
+        margin: 0;
+    }
 
-            if (results.warning === '위험') {
-                html += `현재 스트레스 지수(${results.stress_score.toFixed(2)})가 높고 점수가 낮아 <strong>'위험'</strong> 단계입니다. 서로의 성향을 이해하고 갈등 요소를 줄이려는 노력이 필요합니다.</p>`;
-            } else {
-                html += `스트레스 지수(${results.stress_score.toFixed(2)})도 <strong>'양호'</strong> 수준으로, 전반적으로 좋은 궁합입니다.</p>`;
-            }
+    .landing-box p {
+        font-size: 1.3em;
+        color: #555;
+        margin-top: 10px;
+        margin-bottom: 40px; /* 버튼과의 간격 */
+    }
 
-            html += `<p><strong>Original Score(${results.original_score.toFixed(2)})</strong>는 모델이 예측한 두 사람의 타고난 조화도이며, `;
-            html += `<strong>Final Score(${results.final_score.toFixed(2)})</strong>는 각자의 내적 성향(스트레스 요인)을 반영하여 조정한 최종 점수입니다.</p>`;
-            
-            // 성향 분석에 대한 코멘트 (예시)
-            const allPropensities = [...results.person0_analysis, ...results.person1_analysis];
-            if (allPropensities.includes("충돌 자유 고집")) {
-                 html += `<p><strong>성향 조언:</strong> 두 분 모두 또는 한 분이 '충돌' 성향을 가지고 있습니다. 이는 강한 고집이나 독립심을 의미할 수 있으며, 때로 의견 대립의 원인이 될 수 있습니다. 서로의 의견을 존중하는 자세가 중요합니다.</p>`;
-            }
-            if (allPropensities.includes("감정기복 갈등 오해 고독")) {
-                 html += `<p><strong>성향 조언:</strong> '감정기복' 성향은 예민하고 감수성이 풍부함을 의미하지만, 오해나 갈등으로 이어질 수 있습니다. 꾸준하고 진솔한 대화를 통해 서로의 감정을 공유하는 것이 좋습니다.</p>`;
-            }
-            return html;
-        }
+    /* CTA 버튼 컨테이너 */
+    .cta-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 15px; /* 버튼 사이 간격 */
+    }
 
+    /* CTA 버튼 공통 스타일 */
+    .cta-button {
+        display: block;
+        padding: 18px 30px;
+        font-size: 1.2em;
+        font-weight: bold;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.2s ease-out;
+    }
 
-        document.getElementById('saju-form').addEventListener('submit', async function(e) {
-            e.preventDefault(); 
+    /* 기본 버튼 (로그인) */
+    .cta-button.primary {
+        background-color: #D90429;
+        color: white;
+    }
+    .cta-button.primary:hover {
+        background-color: #b80023;
+        transform: translateY(-2px);
+    }
 
-            const resultsContainer = document.getElementById('results-container');
-            const resultsDisplay = document.getElementById('results-display');
-            const interpretationContainer = document.getElementById('interpretation-container');
-            const interpretationDisplay = document.getElementById('interpretation-display');
-            
-            // 로딩 상태 표시
-            resultsContainer.style.display = 'block';
-            interpretationContainer.style.display = 'none'; // 해설은 결과 나온 뒤 표시
-            resultsDisplay.innerHTML = '<div class="loading">계산 중... (모델 예측으로 몇 초 정도 걸릴 수 있습니다)</div>';
-
-            const data = {
-                p0_year: document.getElementById('p0_year').value,
-                p0_month: document.getElementById('p0_month').value,
-                p0_day: document.getElementById('p0_day').value,
-                p0_gender: document.getElementById('p0_gender').value,
-                p1_year: document.getElementById('p1_year').value,
-                p1_month: document.getElementById('p1_month').value,
-                p1_day: document.getElementById('p1_day').value,
-                p1_gender: document.getElementById('p1_gender').value
-            };
-
-            try {
-                const response = await fetch('/calculate', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                const results = await response.json();
-                resultsDisplay.classList.remove('loading');
-
-                if (!response.ok) {
-                    throw new Error(results.error || '알 수 없는 서버 오류');
-                }
-
-                // --- 성공적인 결과 포맷팅 (textContent -> innerHTML) ---
-                
-                // 1. 점수 분석 HTML 생성
-                let resultsHtml = '<h4>매칭 점수 분석</h4>';
-                resultsHtml += `<p><strong>Original Score:</strong> ${results.original_score.toFixed(2)}</p>`;
-                resultsHtml += `<p><strong>Final Score:</strong> ${results.final_score.toFixed(2)}</p>`;
-                resultsHtml += `<p><strong>Stress Score:</strong> ${results.stress_score.toFixed(2)}</p>`;
-                resultsHtml += `<p><strong>결과:</strong> ${results.warning}</p>`;
-                
-                // 2. 첫번째 사람 성향 HTML 생성 (헬퍼 함수 사용)
-                resultsHtml += '<h4>첫번째 사람 성향 분석</h4>';
-                resultsHtml += createPropensityHtml(results.person0_analysis);
-                
-                // 3. 두번째 사람 성향 HTML 생성 (헬퍼 함수 사용)
-                resultsHtml += '<h4>두번째 사람 성향 분석</h4>';
-                resultsHtml += createPropensityHtml(results.person1_analysis);
-
-                // 4. 결과창에 HTML 삽입
-                resultsDisplay.innerHTML = resultsHtml;
-
-                // 5. 해설창 표시 및 내용 삽입
-                interpretationContainer.style.display = 'block';
-                interpretationDisplay.innerHTML = createInterpretationHtml(results);
-
-
-            } catch (error) {
-                // 네트워크 오류 또는 서버 오류 처리
-                console.error('Calculation error:', error);
-                resultsDisplay.innerHTML = `<div class="error">오류가 발생했습니다: ${error.message}</div>`;
-                interpretationContainer.style.display = 'none'; // 오류 시 해설창 숨김
-            }
-        });
-    </script>
-
-</body>
-</html>
+    /* 보조 버튼 (회원가입) */
+    .cta-button.secondary {
+        background-color: #f1f3f5;
+        color: #333;
+        border: 1px solid #dee2e6;
+    }
+    .cta-button.secondary:hover {
+        background-color: #e9ecef;
+        transform: translateY(-2px);
+    }
+</style>
+{% endblock %}

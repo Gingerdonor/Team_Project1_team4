@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block title %}고객 지원{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>고객 지원</h2>
+    </div>
+    <hr class="main-divider">
+
+    <div class="support-section">
+        <h3>공지사항</h3>
+        <ul class="support-list">
+            <li><a href="#">[안내] My Destina 정식 오픈 (2025-11-03)</a></li>
+            <li><a href="#">[안내] 개인정보처리방침 변경 안내 (2025-10-30)</a></li>
+        </ul>
+    </div>
+
+    <div class="support-section">
+        <h3>자주 묻는 질문 (FAQ)</h3>
+        <ul class="support-list">
+            <li><a href="#">아이디/비밀번호를 잊어버렸어요.</a></li>
+            <li><a href="#">카드 생성은 하루에 몇 번 가능한가요?</a></li>
+            <li><a href="#">회원 탈퇴는 어떻게 하나요?</a></li>
+        </ul>
+    </div>
+
+    <div class="support-section">
+        <h3>1:1 문의하기</h3>
+        <p>서비스 이용 중 불편한 점이 있으시면 언제든지 문의해주세요.</p>
+        <a href="mailto:support@mydestina.example.com" class="submit-button">이메일로 문의하기</a>
+    </div>
+{% endblock %}

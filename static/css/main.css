@@ -1,0 +1,174 @@
+/* 1. 공통 레이아웃 (main-header, divider) */
+.main-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+}
+.main-header h2 {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.8em;
+}
+.main-divider {
+    border: 0;
+    border-top: 1px solid #f1f3f5;
+    margin: 20px 0;
+}
+
+/* 2. 메뉴 버튼 (main.html, settings_menu.html) */
+.main-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.menu-button {
+    display: block;
+    padding: 20px 25px;
+    background-color: #fdfdfd;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    text-align: left;
+    text-decoration: none;
+    color: #343a40;
+    font-size: 1.1em;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.03);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+}
+.menu-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.07);
+}
+
+/* '카드 생성' 전용 큰 버튼 */
+.menu-button.large {
+    padding-top: 25px;
+    padding-bottom: 25px;
+    background: linear-gradient(135deg, #e0f7fa 0%, #b2ebf2 100%);
+    border-color: #b2ebf2;
+}
+.menu-button.large h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #00796b;
+}
+.menu-button.large p {
+    margin: 0;
+    font-size: 0.9em;
+    color: #004d40;
+}
+
+/* 3. 설정 페이지 폼 (settings_account.html, settings_features.html) */
+.settings-form {
+    max-width: 600px;
+}
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    font-size: 1.1em;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+.form-group input[type="text"],
+.form-group input[type="tel"],
+.form-group select {
+    width: 100%;
+    padding: 12px;
+    font-size: 1em;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+.form-group input:disabled {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+}
+
+/* 4. 공통 버튼 (폼 제출용) */
+.submit-button {
+    padding: 12px 20px;
+    font-size: 1em;
+    font-weight: bold;
+    color: white;
+    background-color: #D90429; /* 메인 레드 */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+.submit-button:hover {
+    opacity: 0.9;
+}
+
+/* 5. 플래시 알림 메시지 (settings_...html) */
+.alert {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    color: white;
+}
+.alert-success { background-color: #28a745; }
+.alert-danger { background-color: #dc3545; }
+.alert-warning { background-color: #ffc107; color: #333; }
+.alert-info { background-color: #17a2b8; }
+
+/* 6. 회원 탈퇴 (settings_account.html) */
+.danger-zone {
+    margin-top: 30px;
+    padding: 20px;
+    border: 2px solid #dc3545;
+    border-radius: 8px;
+    background-color: #fff6f6;
+}
+.danger-zone h3 { color: #dc3545; margin-top: 0; }
+.delete-button {
+    display: inline-block;
+    padding: 10px 15px;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: white;
+    background-color: #dc3545;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* 7. 고객 지원 (settings_support.html) */
+.support-section {
+    margin-bottom: 30px;
+}
+.support-section h3 {
+    font-size: 1.3em;
+    font-weight: 600;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.support-list {
+    list-style: none;
+    padding-left: 0;
+}
+.support-list li { margin-bottom: 10px; }
+.support-list li a { text-decoration: none; color: #0056b3; }
+.support-list li a:hover { text-decoration: underline; }
+/* 고객 지원 '문의하기' 버튼은 파란색 계열로 */
+.support-section .submit-button {
+    background-color: #007bff;
+}
+
+/* 8. 편의 기능 (settings_features.html) */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+.checkbox-group input[type="checkbox"] {
+    margin-right: 10px;
+    width: 18px;
+    height: 18px;
+}

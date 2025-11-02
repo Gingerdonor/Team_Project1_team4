@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>{{ title }}</h2>
+    </div>
+    <hr class="main-divider">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            <br>
+        {% endif %}
+    {% endwith %}
+
+    <div class="design-gallery">
+        {% for design in all_designs %}
+            
+            {% set is_owned = design.id in owned_design_ids %}
+            {% set is_active = design.id == active_design_id %}
+
+            <div class="design-card {{ 'owned' if is_owned else 'locked' }} {{ 'active' if is_active else '' }}">
+                <div class="thumbnail-placeholder">
+                    [썸네일]
+                </div>
+                <h3>{{ design.name }}</h3>
+                <p>{{ design.description }}</p>
+
+                <div class="card-footer">
+                    {% if is_owned %}
+                        {% if is_active %}
+                            <button class="design-button active" disabled>✔️ 적용됨</button>
+                        {% else %}
+                            <button class="design-button apply-btn" data-design-id="{{ design.id }}">적용하기</button>
+                        {% endif %}
+                    {% else %}
+                        <span class="lock-icon">🔒 잠김</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+<style>
+    .design-gallery {
+        display: grid;
+        /* 1fr = 1 fractional unit, 1개의 균등한 비율 */
+        /* 250px보다 작아질 수 없음, 최대 1fr(균등) */
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    .design-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+    }
+    .thumbnail-placeholder {
+        height: 150px;
+        background: #f4f4f4;
+        border-radius: 12px 12px 0 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        font-weight: bold;
+    }
+    .design-card h3 {
+        font-size: 1.2em;
+        margin: 15px;
+        color: #333;
+    }
+    .design-card p {
+        font-size: 0.9em;
+        color: #666;
+        margin: 0 15px 15px;
+        flex-grow: 1; /* p 태그가 남은 공간을 채움 */
+    }
+    .card-footer {
+        padding: 15px;
+        border-top: 1px solid #f0f0f0;
+        background: #fcfcfc;
+        border-radius: 0 0 12px 12px;
+    }
+    
+    /* 디자인 버튼 (적용하기) */
+    .design-button {
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        font-weight: bold;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+    }
+    .design-button.apply-btn {
+        background-color: #007bff;
+        color: white;
+    }
+    .design-button.active {
+        background-color: #28a745;
+        color: white;
+    }
+    
+    /* 잠긴 카드 스타일 */
+    .design-card.locked {
+        background: #f9f9f9;
+        opacity: 0.7;
+    }
+    .design-card.locked .thumbnail-placeholder {
+        background: #eee;
+    }
+    .lock-icon {
+        font-size: 1em;
+        font-weight: bold;
+        color: #888;
+        text-align: center;
+        display: block;
+    }
+
+    /* 활성화된 카드 스타일 */
+    .design-card.active {
+        border: 2px solid #28a745; /* 녹색 테두리 */
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+    }
+</style>
+
+<script>
+    // '적용하기' 버튼들에 이벤트 리스너 추가
+    document.querySelectorAll('.apply-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const designId = this.dataset.designId;
+            
+            // 1. API에 POST 요청
+            fetch('{{ url_for("set_active_design") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ design_id: designId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 2. 성공 시, 페이지 새로고침
+                    // (또는 JS로 '적용됨' 상태로 즉시 변경할 수도 있습니다)
+                    alert(data.message); // "적용했습니다" 알림
+                    window.location.reload(); 
+                } else {
+                    // 3. 실패 시, 에러 메시지
+                    alert('오류: ' + data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('네트워크 오류가 발생했습니다.');
+            });
+        });
+    });
+</script>
+{% endblock %}

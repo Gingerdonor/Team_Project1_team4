@@ -1,0 +1,175 @@
+/* 기존 base.html의 여백과 헤더/푸터를 숨깁니다. */
+body > header, body > footer {
+    display: none;
+}
+body > main {
+    max-width: 100%;
+    padding: 0;
+}
+/* 페이지 전체를 중앙 정렬합니다. */
+.login-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 40px);
+    padding: 20px;
+    box-sizing: border-box;
+}
+/* 로그인 박스 */
+.login-box {
+    width: 100%;
+    max-width: 350px;
+    text-align: center;
+}
+/* 1. 로고 */
+.login-logo {
+    margin-bottom: 25px;
+}
+.login-logo p {
+    font-size: 14px;
+    color: #888;
+    margin: 0;
+}
+.login-logo h1 {
+    font-size: 28px;
+    font-weight: 800;
+    margin: 5px 0;
+    color: #333;
+}
+/* 2. 플래시 메시지 */
+.alert {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    color: white;
+}
+.alert-success { background-color: #28a745; }
+.alert-danger { background-color: #dc3545; }
+.alert-warning { background-color: #ffc107; color: #333; }
+.alert-info { background-color: #17a2b8; }
+/* 3. 로그인 폼 */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* 각 input-group 사이의 간격 */
+}
+
+/* 레이블과 인풋을 묶는 그룹 */
+.login-form .input-group {
+    text-align: left;
+}
+
+/* 레이블 스타일 */
+.login-form label {
+    display: block;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 5px;
+    padding-left: 5px;
+}
+/* 인풋 박스 스타일 */
+.login-form input[type="text"],
+.login-form input[type="password"] {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    
+    border: 1px solid #aaa;  /* 기본 테두리 설정 */
+    background-color: #fff;  /* 배경색 흰색으로 */
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+/* 인풋 박스 클릭 시(focus) 스타일 */
+.login-form input[type="text"]:focus,
+.login-form input[type="password"]:focus {
+    border-color: #333; /* 클릭 시 테두리 색상 진하게 */
+    outline: none;      /* 기본 파란색 테두리 제거 */
+}
+.login-form button {
+    width: 100%;
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background-color: #D90429; /* 메인 레드 색상 */
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 10px; /* 버튼 위의 여백 */
+}
+/* 4. 로그인 옵션 */
+.login-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    font-size: 13px;
+    color: #555;
+}
+.login-options a {
+    color: #555;
+    text-decoration: none;
+}
+.login-options input[type="checkbox"] {
+    margin-right: 5px;
+    vertical-align: middle;
+}
+/* 5. 회원가입 링크 */
+.register-link {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #f0f0f0;
+}
+.register-link a {
+    font-size: 14px;
+    color: #333;
+    text-decoration: underline;
+}
+/* 6. 로그인 전용 푸터 */
+.login-footer {
+    position: absolute;
+    bottom: 20px;
+    text-align: center;
+    font-size: 12px;
+    color: #aaa;
+}
+.login-footer a, .login-footer span {
+    margin: 0 5px;
+    color: #aaa;
+    text-decoration: none;
+}
+
+/* <select> 태그 스타일 */
+.login-form select {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #aaa;
+    background-color: #fff;
+    border-radius: 8px;
+    box-sizing: border-box;
+    
+    /* 기본 OS 스타일 제거 */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    
+    /* 커스텀 화살표 아이콘 */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23AAAAAA%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-13%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2013l128%20128c3.6%203.6%207.8%205.4%2013%205.4s9.4-1.8%2013-5.4l128-128c3.6-3.6%205.4-7.8%205.4-13%200-5-1.8-9.4-5.4-13z%22%2F%3E%3C%2Fsvg%3E');
+    background-repeat: no-repeat;
+    background-position: right 14px top 50%;
+    background-size: 10px auto;
+}
+
+/* <select>의 placeholder 스타일 */
+.login-form select:required:invalid {
+    color: #555;
+}
+.login-form option[value=""][disabled] {
+    display: none;
+}
+.login-form option {
+    color: #333;
+}

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Destina{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <header>
+        <nav>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('main_dashboard') }}" class="brand">My Destina</a>
+            {% else %}
+                <a href="{{ url_for('index') }}" class="brand">My Destina</a>
+            {% endif %}
+            
+            <div class="nav-links">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('main_dashboard') }}">메인</a>
+                    <a href="{{ url_for('settings_menu') }}">설정</a>
+                    <a href="{{ url_for('logout') }}">로그아웃 ({{ current_user.username }})</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}">로그인</a>
+                    <a href="{{ url_for('register') }}">회원가입</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025 My Destina</p>
+    </footer>
+</body>
+</html>

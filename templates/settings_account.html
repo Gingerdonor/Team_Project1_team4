@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}계정 관리{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>계정 관리</h2>
+    </div>
+    <hr class="main-divider">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form class="settings-form" method="POST">
+        <h3>개인정보 수정</h3>
+        
+        <div class="form-group">
+            <label for="username">아이디 (변경 불가)</label>
+            <input type="text" id="username" name="username" value="{{ current_user.username }}" readonly disabled>
+        </div>
+        <div class="form-group">
+            <label for="name">이름</label>
+            <input type="text" id="name" name="name" value="{{ current_user.name }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="birth_date">생년월일</label>
+            <input type="date" id="birth_date" name="birth_date" 
+                   value="{{ current_user.birth_datetime.strftime('%Y-%m-%d') }}" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="birth_time">태어난 시간</label>
+            <input type="time" id="birth_time" name="birth_time" 
+                   value="{{ current_user.birth_datetime.strftime('%H:%M') }}" required>
+        </div>
+
+        <div class="form-group">
+            <label for="gender">성별</label>
+            <select id="gender" name="gender" required>
+                <option value="male" {{ 'selected' if current_user.gender == 'male' else '' }}>남성</option>
+                <option value="female" {{ 'selected' if current_user.gender == 'female' else '' }}>여성</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="phone_number">전화번호 (선택)</label>
+            <input type="tel" id="phone_number" name="phone_number" value="{{ current_user.phone_number or '' }}">
+        </div>
+        
+        <button type="submit" class="submit-button">정보 수정</button>
+    </form>
+
+    <hr class="main-divider">
+
+    <div class="danger-zone">
+        <h3>회원 탈퇴</h3>
+        <p>회원 탈퇴 시 모든 정보가 영구적으로 삭제되며 복구할 수 없습니다.</p>
+        <a href="#" class="delete-button">회원 탈퇴하기</a>
+    </div>
+{% endblock %}
