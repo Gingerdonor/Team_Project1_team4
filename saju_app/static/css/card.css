@@ -1,0 +1,97 @@
+.card-flow-container {
+    text-align: center;
+    padding: 20px;
+}
+
+/* 3가지 단계를 모두 숨기고, 'active' 클래스가 붙은 것만 보여줌 */
+.card-step {
+    display: none;
+}
+.card-step.active {
+    display: block;
+}
+
+/* 1단계: 카드 덱 */
+#card-deck h2 { font-size: 1.8em; }
+.deck-image-placeholder {
+    width: 150px;
+    height: 200px;
+    background: #eee;
+    border: 2px dashed #ccc;
+    border-radius: 10px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+}
+#draw-button {
+    padding: 15px 30px;
+    font-size: 1.2em;
+}
+
+/* 2단계: 로딩 효과 */
+#card-effect p { color: #666; }
+.loader {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #D90429; /* 메인 레드 색상 */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 30px auto;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 3단계: 결과 카드 */
+.result-card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 30px;
+    margin: 20px auto;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    text-align: left;
+}
+.result-card h3 {
+    text-align: center;
+    color: #D90429;
+    margin-top: 0;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+.info-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+    padding: 15px 0;
+    border-bottom: 1px solid #f5f5f5;
+}
+.info-group span {
+    color: #555;
+    font-weight: 500;
+}
+.info-group strong {
+    color: #000;
+    font-weight: 600;
+}
+
+.card-actions {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+.action-button {
+    padding: 10px 20px;
+    font-size: 1em;
+    background-color: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    cursor: pointer;
+}

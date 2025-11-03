@@ -2,13 +2,17 @@
 
 {% block title %}카드 생성{% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="card-flow-container">
 
     <div id="card-deck" class="card-step active">
         <h2>오늘의 카드는?</h2>
         <div class="deck-image-placeholder">[카드 덱 이미지]</div>
-        <button id="draw-button" class="submit-button">카드 뽑기</button>
+        <button id="draw-button" class="submit-button" data-api-url="{{ url_for('main.api_generate_card') }}">카드 뽑기</button>
     </div>
 
     <div id="card-effect" class="card-step">
@@ -42,182 +46,8 @@
     </div>
 
 </div>
+{% endblock %}
 
-<style>
-    .card-flow-container {
-        text-align: center;
-        padding: 20px;
-    }
-    
-    /* 3가지 단계를 모두 숨기고, 'active' 클래스가 붙은 것만 보여줌 */
-    .card-step {
-        display: none;
-    }
-    .card-step.active {
-        display: block;
-    }
-
-    /* 1단계: 카드 덱 */
-    #card-deck h2 { font-size: 1.8em; }
-    .deck-image-placeholder {
-        width: 150px;
-        height: 200px;
-        background: #eee;
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        margin: 20px auto;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #888;
-    }
-    #draw-button {
-        padding: 15px 30px;
-        font-size: 1.2em;
-    }
-
-    /* 2단계: 로딩 효과 */
-    #card-effect p { color: #666; }
-    .loader {
-        border: 8px solid #f3f3f3;
-        border-top: 8px solid #D90429; /* 메인 레드 색상 */
-        border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        animation: spin 1s linear infinite;
-        margin: 30px auto;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* 3단계: 결과 카드 */
-    .result-card {
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 12px;
-        padding: 30px;
-        margin: 20px auto;
-        max-width: 400px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        text-align: left;
-    }
-    .result-card h3 {
-        text-align: center;
-        color: #D90429;
-        margin-top: 0;
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 15px;
-    }
-    .info-group {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-size: 1.1em;
-        padding: 15px 0;
-        border-bottom: 1px solid #f5f5f5;
-    }
-    .info-group span {
-        color: #555;
-        font-weight: 500;
-    }
-    .info-group strong {
-        color: #000;
-        font-weight: 600;
-    }
-    
-    .card-actions {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-        margin-top: 20px;
-    }
-    .action-button {
-        padding: 10px 20px;
-        font-size: 1em;
-        background-color: #f0f0f0;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        cursor: pointer;
-    }
-</style>
-
-<script>
-    // 1. 필요한 HTML 요소들을 가져옵니다.
-    const deckView = document.getElementById('card-deck');
-    const effectView = document.getElementById('card-effect');
-    const resultView = document.getElementById('card-result');
-    const drawButton = document.getElementById('draw-button');
-
-    // 2. '카드 뽑기' 버튼에 클릭 이벤트 리스너를 추가합니다.
-    drawButton.addEventListener('click', function() {
-        
-        // 1단계: 덱 숨기고, 로딩(효과) 보여주기
-        deckView.classList.remove('active');
-        effectView.classList.add('active');
-
-        // 2단계: 백그라운드에서 서버 API 호출
-        fetch('{{ url_for("main.api_generate_card") }}', {
-            method: 'POST'
-            // CSRF 토큰이 필요하면 headers에 추가 (지금은 Flask-Login 세션 쿠키로 인증)
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('서버 응답 오류');
-            }
-            return response.json();
-        })
-        .then(data => {
-            // 3단계: API 성공. 로딩(효과) 숨기기
-            effectView.classList.remove('active');
-            
-            // 4단계: JSON 데이터로 결과 카드 채우기
-            document.getElementById('result-mbti').textContent = data.mbti || 'N/A';
-            document.getElementById('result-color').textContent = data.personal_color || 'N/A';
-            document.getElementById('result-celeb').textContent = data.celebrity || 'N/A';
-
-            // 5단계: 결과 카드 보여주기
-            resultView.classList.add('active');
-        })
-        .catch(error => {
-            // 6단계: API 실패. 로딩(효과) 숨기고 다시 덱 보여주기
-            console.error('카드 생성 실패:', error);
-            effectView.classList.remove('active');
-            deckView.classList.add('active');
-            alert('오류가 발생했습니다. 다시 시도해주세요.');
-        });
-    });
-
-    // --- TODO: 4. 이미지 저장 및 공유 기능 ---
-    const saveButton = document.getElementById('save-image-btn');
-    const shareButton = document.getElementById('share-btn');
-    const cardContent = document.getElementById('result-card-content');
-
-    saveButton.addEventListener('click', function() {
-        // 'html2canvas' 라이브러리가 필요합니다.
-        alert('이미지 저장 기능 구현 필요 (html2canvas)');
-        /* html2canvas(cardContent).then(canvas => {
-            let a = document.createElement('a');
-            a.href = canvas.toDataURL('image/png');
-            a.download = 'my_destina_card.png';
-            a.click();
-        });
-        */
-    });
-
-    shareButton.addEventListener('click', function() {
-        // Web Share API (주로 모바일에서 작동)
-        if (navigator.share) {
-            navigator.share({
-                title: 'My Destina 카드',
-                text: '방금 생성된 제 운명 카드를 확인해보세요!',
-                url: window.location.href
-            }).catch(console.error);
-        } else {
-            alert('공유하기 기능이 지원되지 않는 브라우저입니다.');
-        }
-    });
-
-</script>
+{% block extra_js %}
+  <script src="{{ url_for('static', filename='js/card_generate.js') }}"></script>
 {% endblock %}

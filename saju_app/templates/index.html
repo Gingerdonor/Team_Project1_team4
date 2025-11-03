@@ -2,6 +2,10 @@
 
 {% block title %}My Destina에 오신 것을 환영합니다{% endblock %}
 
+{% block extra_css %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}">
+{% endblock %}
+
 {% block content %}
 <div class="landing-container">
     <div class="landing-box">
@@ -14,84 +18,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    /* base.html의 main 스타일 덮어쓰기 */
-    body > main {
-        max-width: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: transparent;
-        box-shadow: none;
-    }
-
-    /* 페이지 전체를 채우고 중앙 정렬 */
-    .landing-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        /* 헤더(60px)와 푸터(약 60px)를 제외한 높이 */
-        min-height: calc(100vh - 120px); 
-        padding: 20px;
-    }
-
-    .landing-box {
-        max-width: 500px;
-    }
-
-    .landing-box h1 {
-        font-size: 3.5em; /* 2.8em -> 3.5em */
-        font-weight: 800;
-        color: #D90429; /* 메인 레드 색상 */
-        margin: 0;
-    }
-
-    .landing-box p {
-        font-size: 1.3em;
-        color: #555;
-        margin-top: 10px;
-        margin-bottom: 40px; /* 버튼과의 간격 */
-    }
-
-    /* CTA 버튼 컨테이너 */
-    .cta-buttons {
-        display: flex;
-        flex-direction: column;
-        gap: 15px; /* 버튼 사이 간격 */
-    }
-
-    /* CTA 버튼 공통 스타일 */
-    .cta-button {
-        display: block;
-        padding: 18px 30px;
-        font-size: 1.2em;
-        font-weight: bold;
-        text-decoration: none;
-        border-radius: 12px;
-        transition: all 0.2s ease-out;
-    }
-
-    /* 기본 버튼 (로그인) */
-    .cta-button.primary {
-        background-color: #D90429;
-        color: white;
-    }
-    .cta-button.primary:hover {
-        background-color: #b80023;
-        transform: translateY(-2px);
-    }
-
-    /* 보조 버튼 (회원가입) */
-    .cta-button.secondary {
-        background-color: #f1f3f5;
-        color: #333;
-        border: 1px solid #dee2e6;
-    }
-    .cta-button.secondary:hover {
-        background-color: #e9ecef;
-        transform: translateY(-2px);
-    }
-</style>
 {% endblock %}
