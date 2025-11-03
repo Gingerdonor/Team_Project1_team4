@@ -13,19 +13,19 @@
     <header>
         <nav>
             {% if current_user.is_authenticated %}
-                <a href="{{ url_for('main_dashboard') }}" class="brand">My Destina</a>
+                <a href="{{ url_for('main.main_dashboard') }}" class="brand">My Destina</a>
             {% else %}
-                <a href="{{ url_for('index') }}" class="brand">My Destina</a>
+                <a href="{{ url_for('main.index') }}" class="brand">My Destina</a>
             {% endif %}
             
             <div class="nav-links">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('main_dashboard') }}">메인</a>
-                    <a href="{{ url_for('settings_menu') }}">설정</a>
-                    <a href="{{ url_for('logout') }}">로그아웃 ({{ current_user.username }})</a>
+                    <a href="{{ url_for('main.main_dashboard') }}">메인</a>
+                    <a href="{{ url_for('settings.settings_menu') }}">설정</a>
+                    <a href="{{ url_for('auth.logout') }}">로그아웃 ({{ current_user.username }})</a>
                 {% else %}
-                    <a href="{{ url_for('login') }}">로그인</a>
-                    <a href="{{ url_for('register') }}">회원가입</a>
+                    <a href="{{ url_for('auth.login') }}">로그인</a>
+                    <a href="{{ url_for('auth.register') }}">회원가입</a>
                 {% endif %}
             </div>
         </nav>

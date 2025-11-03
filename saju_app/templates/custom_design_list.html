@@ -138,7 +138,7 @@
             const designId = this.dataset.designId;
             
             // 1. API에 POST 요청
-            fetch('{{ url_for("set_active_design") }}', {
+            fetch('{{ url_for("custom.set_active_design") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

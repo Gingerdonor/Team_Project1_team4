@@ -1,5 +1,5 @@
 # saju_logic/calculator.py (수정)
-from tensorflow.keras.models import load_model
+#from tensorflow.keras.models import load_model
 import time
 
 # 모델 로드는 앱 실행 시 1번만 (기존과 동일)

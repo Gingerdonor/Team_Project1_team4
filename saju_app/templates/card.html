@@ -158,7 +158,7 @@
         effectView.classList.add('active');
 
         // 2단계: 백그라운드에서 서버 API 호출
-        fetch('{{ url_for("api_generate_card") }}', {
+        fetch('{{ url_for("main.api_generate_card") }}', {
             method: 'POST'
             // CSRF 토큰이 필요하면 headers에 추가 (지금은 Flask-Login 세션 쿠키로 인증)
         })
