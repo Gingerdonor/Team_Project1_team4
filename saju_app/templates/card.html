@@ -64,8 +64,13 @@
         </div>
         
         <div class="card-actions">
-            <button id="save-image-btn" class="action-button">이미지 저장</button>
-            <button id="share-btn" class="action-button">공유하기</button>
+            <a href="{{ url_for('main.saju_detail') }}" id="detail-btn" class="action-button">
+                사주 상세 분석
+            </a>
+            <div class="sub-actions">
+                <button id="save-image-btn" class="action-button">이미지 저장</button>
+                <button id="share-btn" class="action-button">공유하기</button>
+            </div>
         </div>
     </div>
 

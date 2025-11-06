@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ result.title|default('상세 분석', true) }}
+{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .detail-content-wrapper {
+            padding: 20px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            margin-top: 15px;
+            line-height: 1.7;
+            font-size: 1.1em;
+            color: #333;
+        }
+        
+        .detail-content-wrapper p {
+            margin-top: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div class="main-header">
+        <h2>{{ result.title|default('상세 분석', true) }}</h2>
+    </div>
+    <hr class="main-divider">
+
+    <div class="detail-content-wrapper">
+        <p>
+            {{ result.content|default('상세 분석 내용이 준비 중입니다.', true)|safe }}
+        </p>
+        
+        <h3>오행 분석</h3>
+        <p>{{ result.five_elements|safe }}</p>
+        
+        <h3>십신 분석</h3>
+        <p>{{ result.shipsin|safe }}</p>
+        
+        </div>
+
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{{ url_for('main.index') }}" class="action-button" style="background-color: #6c757d; color: white; text-decoration: none; display: inline-block; padding: 12px 25px;">
+            메인으로 돌아가기
+        </a>
+    </div>
+{% endblock %}

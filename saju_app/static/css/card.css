@@ -257,25 +257,47 @@
 
 .card-actions {
     display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 30px; /* 여백 추가 */
+    flex-direction: column; /* 세로로 쌓기 */
+    align-items: center;    /* 가운데 정렬 */
+    gap: 15px;              /* 버튼 그룹 사이의 간격 */
+    margin-top: 30px;
+    
+    /* 좁은 화면에서도 버튼이 꽉 차도록 좌우 여백 추가 */
+    padding: 0 20px; 
+    box-sizing: border-box; /* 패딩을 너비에 포함 */
 }
-.action-button {
+/* 하위 버튼(저장, 공유) 래퍼 */
+.sub-actions {
+    display: flex;
+    gap: 15px;   /* 저장/공유 버튼 사이 간격 */
+    width: 100%; /* 부모 너비를 100% 사용 */
+}
+/* 모든 .action-button에 공통 스타일 적용 */
+.card-actions .action-button {
+    width: 100%; /* 기본적으로 100% 너비 */
+    max-width: 380px; /* .result-card와 너비 맞춤 */
+    box-sizing: border-box; /* 패딩 포함 너비 계산 */
     padding: 12px 25px;
     font-size: 1em;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
+    font-weight: bold;
     border-radius: 8px;
     cursor: pointer;
-    color: #333;
     transition: all 0.3s ease;
+
+    /* <a> 태그도 <button>처럼 보이게 */
+    text-decoration: none;
+    display: inline-flex; 
+    align-items: center;
+    justify-content: center;
 }
-.action-button:hover {
-    background-color: #e0e0e0;
-    border-color: #bbb;
+.card-actions .action-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+/* 하위 버튼(저장, 공유)은 50%씩 나눠 가짐 */
+.sub-actions .action-button {
+    flex-grow: 1; /* 남은 공간을 1:1로 나눠 가짐 */
+    width: 50%;   /* 기본 너비 */
 }
 #save-image-btn {
     background-color: #4CAF50; /* 저장 버튼 색상 */
@@ -292,4 +314,15 @@
 }
 #share-btn:hover {
     background-color: #0056b3;
+}
+
+/* 상세 분석 버튼 스타일 */
+#detail-btn {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+}
+#detail-btn:hover {
+    background-color: #5a6268;
+    color: white; /* 호버 시 텍스트 색상 유지 */
 }
