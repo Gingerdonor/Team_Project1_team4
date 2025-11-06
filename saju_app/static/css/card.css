@@ -1,9 +1,9 @@
+/* 기존 CSS 내용 유지 */
 .card-flow-container {
     text-align: center;
     padding: 20px;
 }
 
-/* 3가지 단계를 모두 숨기고, 'active' 클래스가 붙은 것만 보여줌 */
 .card-step {
     display: none;
 }
@@ -11,87 +11,275 @@
     display: block;
 }
 
-/* 1단계: 카드 덱 */
 #card-deck h2 { font-size: 1.8em; }
 .deck-image-placeholder {
-    width: 150px;
-    height: 200px;
-    background: #eee;
-    border: 2px dashed #ccc;
-    border-radius: 10px;
+    width: 200px; /* 카드 크기 확대 */
+    height: auto; /* 카드 크기 확대 */
+    background: #f8f8f8; /* 배경색 변경 */
+    border: 1px solid #ddd;
+    border-radius: 12px;
     margin: 20px auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #888;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.1); /* 그림자 추가 */
+    overflow: hidden; /* 이미지 오버플로우 방지 */
 }
-#draw-button {
-    padding: 15px 30px;
-    font-size: 1.2em;
+.deck-card-image {
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
-/* 2단계: 로딩 효과 */
+.stylish-draw-button {
+    padding: 18px 45px; /* 패딩 증가 */
+    font-size: 1.4em; /* 폰트 크기 증가 */
+    font-weight: bold;
+    background: linear-gradient(135deg, #D90429 0%, #a8001d 100%); /* 더 깊은 그라데이션 */
+    color: white;
+    border: 3px solid #FFDDC4; /* 테두리 추가 (My Destina 테마에 어울리는 밝은 색) */
+    border-radius: 50px; /* pill 형태의 버튼 */
+    cursor: pointer;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.3), 0 0 0 5px rgba(255,221,196,0.3); /* 깊은 그림자와 아웃라인 */
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* 더 부드러운 전환 */
+    letter-spacing: 1.5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center; /* 내부 요소를 중앙 정렬 */
+    gap: 12px;
+    text-transform: uppercase;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* 텍스트 그림자 */
+    margin-top: 30px; /* 카드 덱 아래 여백 추가 */
+}
+
+.stylish-draw-button i {
+    font-size: 1.3em;
+    color: #FFDDC4; /* 아이콘 색상도 테두리 색과 맞춤 */
+}
+
+.stylish-draw-button:hover {
+    background: linear-gradient(135deg, #a8001d 0%, #D90429 100%);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.4), 0 0 0 8px rgba(255,221,196,0.5);
+    transform: translateY(-5px) scale(1.02); /* 더 과감한 호버 효과 */
+}
+
+.stylish-draw-button:active {
+    transform: translateY(0);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.2), 0 0 0 2px rgba(255,221,196,0.2);
+    background: #a8001d;
+    border-color: #FFDDC4;
+}
+
 #card-effect p { color: #666; }
-.loader {
+#dynamic-card-effect-container {
+    position: relative;
+    width: 200px; /* 효과 컨테이너 크기 */
+    height: 200px;
+    margin: 30px auto;
+    display: flex; /* 내부 요소를 중앙 정렬하기 위해 flex 사용 */
+    align-items: center;
+    justify-content: center;
+    overflow: hidden; /* 효과가 컨테이너 밖으로 나가지 않도록 */
+}
+
+/* 기본 로딩 스피너 (폴백) */
+.loader-spinner {
     border: 8px solid #f3f3f3;
-    border-top: 8px solid #D90429; /* 메인 레드 색상 */
+    border-top: 8px solid #D90429; /* My Destina 메인 컬러 */
     border-radius: 50%;
     width: 60px;
     height: 60px;
     animation: spin 1s linear infinite;
-    margin: 30px auto;
 }
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
 
+
+/* --- 번개 효과 스타일 --- */
+.lightning-effect {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,0,0.8) 0%, rgba(255,165,0,0.5) 30%, transparent 70%); /* 중앙에서 번개빛 */
+    opacity: 0; /* 초기 투명 */
+    animation: lightning-flash 0.3s ease-out infinite alternate; /* 깜빡이는 애니메이션 */
+    animation-delay: 0.1s; /* 약간의 지연 */
+    transform: scale(0.5); /* 작게 시작 */
+    border-radius: 50%; /* 원형 */
+}
+
+@keyframes lightning-flash {
+    0% { opacity: 0; transform: scale(0.5); }
+    50% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
+/* 번개 선 효과 (선택 사항: 더 복잡한 번개 표현을 위해) */
+.lightning-line-1, .lightning-line-2, .lightning-line-3 {
+    position: absolute;
+    background-color: #FFDDC4; /* 번개 색상 */
+    box-shadow: 0 0 10px #FFDDC4, 0 0 20px #FFDDC4; /* 빛나는 효과 */
+    opacity: 0;
+    animation: lightning-strike 0.5s ease-out infinite;
+    animation-delay: var(--delay); /* CSS 변수를 사용하여 지연 시간 조절 */
+}
+.lightning-line-1 { width: 5px; height: 50px; transform: rotate(45deg); top: 50%; left: 30%; }
+.lightning-line-2 { width: 5px; height: 60px; transform: rotate(-30deg); top: 20%; left: 60%; }
+.lightning-line-3 { width: 5px; height: 40px; transform: rotate(90deg); top: 70%; left: 70%; }
+
+@keyframes lightning-strike {
+    0% { opacity: 0; transform: scale(0.5); }
+    20% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.5); }
+}
+
 /* 3단계: 결과 카드 */
 .result-card {
-    background: #fff;
+    background: linear-gradient(145deg, #ffffff, #f0f0f0); /* 그라데이션 배경 */
     border: 1px solid #ddd;
-    border-radius: 12px;
-    padding: 30px;
+    border-radius: 18px; /* 더 둥글게 */
+    padding: 20px;
     margin: 20px auto;
-    max-width: 400px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    max-width: 380px; /* 너비 조정 */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1); /* 그림자 강화 */
     text-align: left;
+    position: relative;
+    overflow: hidden; /* 내부 요소 넘치는 것 방지 */
 }
 .result-card h3 {
     text-align: center;
     color: #D90429;
     margin-top: 0;
+    margin-bottom: 20px;
     border-bottom: 2px solid #f0f0f0;
     padding-bottom: 15px;
+    font-size: 1.6em;
 }
-.info-group {
+
+/* --- 카드 디자인 요소 --- */
+.card-visual-elements {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
     align-items: center;
-    font-size: 1.1em;
-    padding: 15px 0;
-    border-bottom: 1px solid #f5f5f5;
+    margin-bottom: 25px;
 }
-.info-group span {
+
+.mbti-display-circle {
+    width: 120px;
+    height: 120px;
+    background-color: #f7f7f7;
+    border: 2px solid #D90429; /* My Destina 컬러 */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+}
+
+.bottom-elements {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+    max-width: 280px; /* 하단 요소 너비 제한 */
+}
+
+.personal-color-circle, .celebrity-circle {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* 아이콘과 텍스트 사이 간격 */
+    width: 100px;
+    text-align: center;
+}
+
+.color-swatch {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+    background-color: #ccc; /* 기본 색상 */
+}
+
+.celeb-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+}
+.personal-color-circle span, .celebrity-circle span {
+    font-size: 0.9em;
     color: #555;
     font-weight: 500;
 }
-.info-group strong {
-    color: #000;
+/* --- /카드 디자인 요소 --- */
+
+
+/* 상세 정보 섹션 */
+.info-group.detailed-info {
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1em; /* 텍스트 크기 약간 줄임 */
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+.info-group.detailed-info:last-of-type {
+    border-bottom: none;
+}
+.info-group.detailed-info span {
+    color: #777;
+    font-weight: normal;
+}
+.info-group.detailed-info strong {
+    color: #333;
     font-weight: 600;
 }
+
 
 .card-actions {
     display: flex;
     justify-content: center;
     gap: 15px;
-    margin-top: 20px;
+    margin-top: 30px; /* 여백 추가 */
 }
 .action-button {
-    padding: 10px 20px;
+    padding: 12px 25px;
     font-size: 1em;
     background-color: #f0f0f0;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     border-radius: 8px;
     cursor: pointer;
+    color: #333;
+    transition: all 0.3s ease;
+}
+.action-button:hover {
+    background-color: #e0e0e0;
+    border-color: #bbb;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+#save-image-btn {
+    background-color: #4CAF50; /* 저장 버튼 색상 */
+    color: white;
+    border: none;
+}
+#save-image-btn:hover {
+    background-color: #45a049;
+}
+#share-btn {
+    background-color: #007bff; /* 공유 버튼 색상 */
+    color: white;
+    border: none;
+}
+#share-btn:hover {
+    background-color: #0056b3;
 }

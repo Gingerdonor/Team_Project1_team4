@@ -21,7 +21,9 @@ def analyze_saju(birth_datetime):
     analysis_data = {
         'mbti': 'ENFP',
         'personal_color': '봄 웜톤 (Spring Warm)',
-        'celebrity': '스티브 잡스'
+        'celebrity': '스티브 잡스',
+        'personal_color_code': '#f4a261',
+        'celebrity_image_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg/640px-Steve_Jobs_Headshot_2010-CROP_%28cropped_2%29.jpg'
     }
     
     return analysis_data

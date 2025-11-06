@@ -3,7 +3,8 @@
 {% block title %}카드 생성{% endblock %}
 
 {% block extra_css %}
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/card.css') }}">
 {% endblock %}
 
 {% block content %}
@@ -11,31 +12,56 @@
 
     <div id="card-deck" class="card-step active">
         <h2>오늘의 카드는?</h2>
-        <div class="deck-image-placeholder">[카드 덱 이미지]</div>
-        <button id="draw-button" class="submit-button" data-api-url="{{ url_for('main.api_generate_card') }}">카드 뽑기</button>
+        <div class="deck-image-placeholder">
+            <img src="{{ url_for('static', filename='images/card_back.png') }}" alt="카드 덱" class="deck-card-image">
+        </div>
+        
+        <button id="draw-button" class="stylish-draw-button" data-api-url="{{ url_for('main.api_generate_card') }}">
+            <i class="fas fa-hat-wizard"></i> 운명 카드 뽑기 <i class="fas fa-sparkles"></i>
+        </button>
+        
     </div>
 
     <div id="card-effect" class="card-step">
         <h2>당신의 운명을 분석중...</h2>
-        <div class="loader"></div>
-        <p>Keras 모델이 당신의 데이터를 분석하고 있습니다.</p>
+        
+        <div id="dynamic-card-effect-container">
+            <div class="loader-spinner"></div>
+            </div>
+        
+        <p>My Destina 모델이 당신의 데이터를 분석하고 있습니다.</p>
     </div>
 
     <div id="card-result" class="card-step">
         <div id="result-card-content" class="result-card">
             <h3>당신의 카드</h3>
             
-            <div class="info-group">
+            <div class="card-visual-elements">
+                <div class="mbti-display-circle">
+                    <strong id="result-mbti">MBTI</strong>
+                </div>
+                <div class="bottom-elements">
+                    <div class="personal-color-circle">
+                        <div id="personal-color-display" class="color-swatch"></div>
+                        <span id="result-color-text">퍼스널 컬러</span>
+                    </div>
+                    <div class="celebrity-circle">
+                        <img id="result-celeb-image" src="/static/images/default_celeb.png" alt="유명인" class="celeb-image">
+                        <span id="result-celeb-text">유명인</span>
+                    </div>
+                </div>
+            </div>
+            <div class="info-group detailed-info">
                 <span>MBTI</span>
-                <strong id="result-mbti"></strong>
+                <strong id="detailed-mbti"></strong>
             </div>
-            <div class="info-group">
+            <div class="info-group detailed-info">
                 <span>퍼스널 컬러</span>
-                <strong id="result-color"></strong>
+                <strong id="detailed-color"></strong>
             </div>
-            <div class="info-group">
+            <div class="info-group detailed-info">
                 <span>관련 유명인</span>
-                <strong id="result-celeb"></strong>
+                <strong id="detailed-celeb"></strong>
             </div>
         </div>
         
@@ -46,8 +72,12 @@
     </div>
 
 </div>
+
+<audio id="card-effect-sound" src="{{ url_for('static', filename='sounds/card_draw_effect.mp3') }}" preload="auto"></audio>
+
 {% endblock %}
 
 {% block extra_js %}
-  <script src="{{ url_for('static', filename='js/card_generate.js') }}"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="{{ url_for('static', filename='js/card_generate.js') }}"></script>
 {% endblock %}
