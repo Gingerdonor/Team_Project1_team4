@@ -4,6 +4,7 @@ from flask_login import login_user, logout_user, current_user, login_required
 from ..models import User
 from .. import db, bcrypt
 from datetime import datetime
+import re # 비밀번호 안정성 확인용
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -48,7 +49,22 @@ def register():
 
         # 2. 유효성 검사
         
-        # 2-1. 비밀번호 일치 확인
+        # 2-1. [신규] 비밀번호 안전성 검사
+        if len(password) < 8:
+            flash('비밀번호는 최소 8자리 이상이어야 합니다.', 'danger')
+            return redirect(url_for('auth.register'))
+        
+        # re.search(r"[0-9]", password)는 비밀번호에 숫자가 있는지 확인합니다.
+        if not re.search(r"[0-9]", password):
+            flash('비밀번호에 숫자가 하나 이상 포함되어야 합니다.', 'danger')
+            return redirect(url_for('auth.register'))
+        
+        # 특수문자 포함 여부 확인 (다양한 특수문자 허용)
+        if not re.search(r"[!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\/?~]", password):
+            flash('비밀번호에 특수문자가 하나 이상 포함되어야 합니다.', 'danger')
+            return redirect(url_for('auth.register'))
+        
+        # 2-2. 비밀번호 일치 확인
         if password != password_confirm:
             flash('비밀번호가 일치하지 않습니다. 다시 확인해주세요.', 'danger')
             return redirect(url_for('auth.register'))
