@@ -32,7 +32,7 @@ const Login = () => {
     setErrorMsg("");
 
     const endpoint = isLoginMode ? "/api/login" : "/api/register";
-    const url = `http://localhost:8000${endpoint}`;
+    const url = endpoint;
 
     const payload = isLoginMode
       ? { username, password }

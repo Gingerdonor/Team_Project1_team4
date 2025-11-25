@@ -25,7 +25,7 @@ const Settings = () => {
       navigate("/");
       return;
     }
-    fetch("http://localhost:8000/api/users/me", {
+    fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -45,7 +45,7 @@ const Settings = () => {
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch("http://localhost:8000/api/users/profile", {
+      const res = await fetch("/api/users/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -65,7 +65,7 @@ const Settings = () => {
     if (!confirm("정말 비밀번호를 변경하시겠습니까?")) return;
 
     try {
-      const res = await fetch("http://localhost:8000/api/users/password", {
+      const res = await fetch("/api/users/password", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -96,7 +96,7 @@ const Settings = () => {
     if (promptText !== "DELETE") return;
 
     try {
-      const res = await fetch("http://localhost:8000/api/users/me", {
+      const res = await fetch("/api/users/me", {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

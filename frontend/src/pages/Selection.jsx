@@ -39,7 +39,7 @@ const Selection = () => {
       return;
     }
 
-    fetch("http://localhost:8000/api/users/me", {
+    fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => res.json())
@@ -48,7 +48,7 @@ const Selection = () => {
           nickname: data.nickname || data.username,
           membership: "VIP Member",
         });
-        return fetch("http://localhost:8000/api/analyze/today", {
+        return fetch("/api/analyze/today", {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
