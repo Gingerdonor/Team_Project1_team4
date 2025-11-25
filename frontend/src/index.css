@@ -1,0 +1,22 @@
+/* src/index.css */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+KR:wght@300;400;700&display=swap');
+
+body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Noto Sans KR', sans-serif;
+  background-color: #050505; /* 아주 어두운 배경 */
+  color: white;
+  overflow-x: hidden; /* 가로 스크롤 방지 */
+}
+
+/* 제목용 폰트 */
+h1, h2, .font-space {
+  font-family: 'Orbitron', sans-serif;
+}
+
+button {
+  cursor: pointer;
+  font-family: 'Orbitron', sans-serif;
+}
