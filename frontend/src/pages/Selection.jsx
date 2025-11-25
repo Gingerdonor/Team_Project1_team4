@@ -13,6 +13,23 @@ const Selection = () => {
     membership: "Standard",
   });
 
+  const [analysis, setAnalysis] = useState({
+    my_persona: "Loading...",
+    my_destiny: "Loading...",
+    persona_desc: "분석 중입니다...",
+    destiny_desc: "운명의 상대를 찾는 중...",
+    lucky_color: "#a29bfe", // 기본색
+  });
+
+  // 오행별 색상 매핑
+  const ELEMENT_COLORS = {
+    "목(木)": "#00b894", // 초록
+    "화(火)": "#ff7675", // 빨강
+    "토(土)": "#fdcb6e", // 노랑
+    "금(金)": "#dfe6e9", // 흰색/회색
+    "수(水)": "#74b9ff", // 파랑
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
 
@@ -25,21 +42,24 @@ const Selection = () => {
     fetch("http://localhost:8000/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => {
-        if (!res.ok) throw new Error("토큰 만료");
-        return res.json();
-      })
+      .then((res) => res.json())
       .then((data) => {
         setUserInfo({
           nickname: data.nickname || data.username,
-          // 모든 유저를 일단 VIP로 대우 (추후 DB에 등급 컬럼 추가 가능)
           membership: "VIP Member",
         });
+        return fetch("http://localhost:8000/api/analyze/today", {
+          headers: { Authorization: `Bearer ${token}` },
+        });
       })
-      .catch(() => {
-        localStorage.clear();
-        navigate("/");
-      });
+      .then((res) => res.json())
+      .then((data) => {
+        setAnalysis({
+          ...data,
+          lucky_color: ELEMENT_COLORS[data.lucky_element] || "#a29bfe",
+        });
+      })
+      .catch((err) => console.error(err));
   }, [navigate]);
 
   return (
@@ -93,7 +113,7 @@ const Selection = () => {
           height: "80vh",
         }}
       >
-        {/* 왼쪽 카드: Persona */}
+        {/* Persona Card */}
         <motion.div
           initial={{ x: -100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -101,12 +121,25 @@ const Selection = () => {
         >
           <FlipCard
             title="My Persona"
-            color="#ff7675"
-            description="오늘 당신의 오행 에너지는 '불(Fire)'입니다. 열정적인 태도가 행운을 부릅니다!"
+            color={analysis.lucky_color} // 행운의 색 적용
+            description={
+              <>
+                <div
+                  style={{
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {analysis.my_persona}
+                </div>
+                {analysis.persona_desc}
+              </>
+            }
           />
         </motion.div>
 
-        {/* 오른쪽 카드: Destiny */}
+        {/* Destiny Card */}
         <motion.div
           initial={{ x: 100, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
@@ -114,8 +147,21 @@ const Selection = () => {
         >
           <FlipCard
             title="My Destiny"
-            color="#74b9ff"
-            description="오늘 당신의 귀인은 'ESTJ' 성향을 가진 사람입니다. 주변을 잘 살펴보세요."
+            color="#fab1a0"
+            description={
+              <>
+                <div
+                  style={{
+                    fontSize: "2rem",
+                    fontWeight: "bold",
+                    marginBottom: "10px",
+                  }}
+                >
+                  {analysis.my_destiny}
+                </div>
+                {analysis.destiny_desc}
+              </>
+            }
           />
         </motion.div>
       </div>

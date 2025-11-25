@@ -9,8 +9,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 import sqlite3
 from fastapi.security import OAuth2PasswordBearer
+from datetime import date
 
 from convert_to_db import init_db
+import logic
 
 # ==========================================
 # 인증 의존성 (Token 검증용)
@@ -261,3 +263,68 @@ def delete_account(current_user: dict = Depends(get_current_user)):
     conn.close()
 
     return {"message": "계정이 삭제되었습니다."}
+
+
+@app.get("/api/analyze/today")
+def analyze_today(current_user: dict = Depends(get_current_user)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    # 1. 사용자 생일 데이터 조회
+    birthdate = current_user["birthdate"]  # YYYY-MM-DD
+    cursor.execute("SELECT * FROM saju_table WHERE solar_date = ?", (birthdate,))
+    birth_row = cursor.fetchone()
+
+    # 2. 오늘 날짜 데이터 조회
+    today_str = date.today().isoformat()
+    cursor.execute("SELECT * FROM saju_table WHERE solar_date = ?", (today_str,))
+    today_row = cursor.fetchone()
+    conn.close()
+
+    if not birth_row:
+        raise HTTPException(
+            status_code=404,
+            detail="생년월일 데이터를 DB에서 찾을 수 없습니다. (DB 범위 확인)",
+        )
+    if not today_row:
+        raise HTTPException(
+            status_code=404, detail="오늘 날짜 데이터를 DB에서 찾을 수 없습니다."
+        )
+
+    # 3. DB 데이터를 인덱스 리스트로 변환 (logic.py 사용을 위해)
+    # row['year_ganji'] -> "갑자(甲子)" -> [1, 1]
+    def row_to_saju(row):
+        y = logic.parse_ganji_to_index(row["year_ganji"])
+        m = logic.parse_ganji_to_index(row["month_ganji"])
+        d = logic.parse_ganji_to_index(row["day_ganji"])
+        return [y[0], y[1], m[0], m[1], d[0], d[1]]
+
+    birth_saju = row_to_saju(birth_row)
+    today_saju = row_to_saju(today_row)
+
+    # 4. 분석 로직 실행
+    birth_prof = logic.saju_to_profile(birth_saju)
+    today_prof = logic.saju_to_profile(today_saju)
+    combined = logic.combine_profiles(birth_prof, today_prof)
+
+    axes_base = logic.profile_to_axes(combined)
+    axes = logic.apply_daily_rotation(axes_base, today_saju)
+
+    my_mbti = logic.axes_to_mbti(axes)
+    partner_mbti = logic.get_destiny_partner(axes)
+
+    p_text, d_text = logic.generate_explanation(
+        combined, axes, my_mbti, partner_mbti, today_saju
+    )
+
+    return {
+        "my_persona": my_mbti,
+        "my_destiny": partner_mbti,
+        "persona_desc": p_text,
+        "destiny_desc": d_text,
+        "lucky_element": logic.ELEMENT_KO[
+            max(combined["elements"], key=combined["elements"].get)
+        ][
+            0
+        ],  # 가장 강한 오행
+    }
