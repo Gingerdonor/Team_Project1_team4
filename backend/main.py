@@ -48,9 +48,21 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 # ==========================================
 # 2. 데이터 모델 (Pydantic)
 # ==========================================
-class UserAuth(BaseModel):
+class UserRegister(BaseModel):
     username: str
     password: str
+    nickname: str
+    birthdate: str  # YYYY-MM-DD
+    gender: str     # male / female
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class UserUpdate(BaseModel):
+    nickname: str
+    birthdate: str
+    gender: str
 
 class Token(BaseModel):
     access_token: str
@@ -111,20 +123,23 @@ app.add_middleware(
 
 # 회원가입
 @app.post("/api/register")
-def register(user: UserAuth):
+def register(user: UserRegister):
     conn = get_db_connection()
     cursor = conn.cursor()
     
-    # 이미 존재하는 아이디인지 확인
+    # 중복 확인
     cursor.execute("SELECT * FROM users WHERE username = ?", (user.username,))
     if cursor.fetchone():
         conn.close()
         raise HTTPException(status_code=400, detail="이미 존재하는 사용자명입니다.")
     
-    # 비밀번호 해싱 후 저장
     hashed_pw = get_password_hash(user.password)
-    cursor.execute("INSERT INTO users (username, hashed_password) VALUES (?, ?)", 
-                   (user.username, hashed_pw))
+    
+    # 추가된 정보 저장
+    cursor.execute(
+        "INSERT INTO users (username, hashed_password, nickname, birthdate, gender) VALUES (?, ?, ?, ?, ?)", 
+        (user.username, hashed_pw, user.nickname, user.birthdate, user.gender)
+    )
     conn.commit()
     conn.close()
     
@@ -132,7 +147,7 @@ def register(user: UserAuth):
 
 # 로그인
 @app.post("/api/login", response_model=Token)
-def login(user: UserAuth):
+def login(user: UserLogin):
     conn = get_db_connection()
     cursor = conn.cursor()
     
@@ -168,7 +183,29 @@ def get_saju(target_date: str):
 @app.get("/api/users/me")
 def read_users_me(current_user: dict = Depends(get_current_user)):
     # 보안상 해시된 비밀번호는 제외하고 반환
-    return {"username": current_user["username"]}
+    return {
+        "username": current_user["username"],
+        "nickname": current_user["nickname"],
+        "birthdate": current_user["birthdate"],
+        "gender": current_user["gender"]
+    }
+
+@app.put("/api/users/profile")
+def update_profile(
+    info: UserUpdate,
+    current_user: dict = Depends(get_current_user)
+):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute(
+        "UPDATE users SET nickname = ?, birthdate = ?, gender = ? WHERE username = ?",
+        (info.nickname, info.birthdate, info.gender, current_user['username'])
+    )
+    conn.commit()
+    conn.close()
+    
+    return {"message": "프로필이 업데이트되었습니다."}
 
 # 비밀번호 변경
 @app.put("/api/users/password")

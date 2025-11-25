@@ -5,12 +5,15 @@ import SpaceBackground from "../components/SpaceBackground";
 
 const Login = () => {
   const navigate = useNavigate();
-  
+
   // 상태 관리: 모드(로그인/가입), 입력값
-  const [isLoginMode, setIsLoginMode] = useState(true); 
+  const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [birthdate, setBirthdate] = useState("");
+  const [gender, setGender] = useState("male");
 
   // API 호출 핸들러
   const handleSubmit = async (e) => {
@@ -20,11 +23,15 @@ const Login = () => {
     const endpoint = isLoginMode ? "/api/login" : "/api/register";
     const url = `http://localhost:8000${endpoint}`;
 
+    const payload = isLoginMode
+      ? { username, password }
+      : { username, password, nickname, birthdate, gender }; // 회원가입시 추가 정보 전송
+
     try {
       const response = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -44,7 +51,6 @@ const Login = () => {
         setIsLoginMode(true);
         setPassword("");
       }
-
     } catch (err) {
       setErrorMsg(err.message);
     }
@@ -58,7 +64,13 @@ const Login = () => {
         transition={{ duration: 0.8 }}
         style={{ textAlign: "center", width: "100%", maxWidth: "400px" }}
       >
-        <h1 style={{ fontSize: "3.5rem", marginBottom: "30px", textShadow: "0 0 20px #a29bfe" }}>
+        <h1
+          style={{
+            fontSize: "3.5rem",
+            marginBottom: "30px",
+            textShadow: "0 0 20px #a29bfe",
+          }}
+        >
           My Destina
         </h1>
 
@@ -67,10 +79,14 @@ const Login = () => {
             {isLoginMode ? "LOGIN" : "SIGN UP"}
           </h2>
 
-          <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: "flex", flexDirection: "column", gap: "15px" }}
+          >
+            {/* 공통 필드 */}
             <input
               type="text"
-              placeholder="Username"
+              placeholder="ID"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               style={inputStyle}
@@ -84,8 +100,50 @@ const Login = () => {
               style={inputStyle}
               required
             />
-            
-            {errorMsg && <p style={{ color: "#ff7675", fontSize: "0.9rem" }}>{errorMsg}</p>}
+
+            {/* 회원가입일 때만 보이는 필드들 */}
+            {!isLoginMode && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "15px",
+                }}
+              >
+                <input
+                  type="text"
+                  placeholder="닉네임"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  style={inputStyle}
+                  required
+                />
+
+                <div style={{ display: "flex", gap: "10px" }}>
+                  <input
+                    type="date"
+                    value={birthdate}
+                    onChange={(e) => setBirthdate(e.target.value)}
+                    style={{ ...inputStyle, flex: 1 }}
+                    required
+                  />
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    style={{ ...inputStyle, width: "100px" }}
+                  >
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                  </select>
+                </div>
+              </motion.div>
+            )}
+
+            {errorMsg && (
+              <p style={{ color: "#ff7675", fontSize: "0.9rem" }}>{errorMsg}</p>
+            )}
 
             <motion.button
               whileHover={{ scale: 1.02, backgroundColor: "#6c5ce7" }}
@@ -99,15 +157,22 @@ const Login = () => {
 
           <div style={{ marginTop: "20px", fontSize: "0.9rem", color: "#ccc" }}>
             {isLoginMode ? "계정이 없으신가요? " : "이미 계정이 있으신가요? "}
-            <span 
-              onClick={() => { setIsLoginMode(!isLoginMode); setErrorMsg(""); }}
-              style={{ color: "#74b9ff", cursor: "pointer", fontWeight: "bold", textDecoration: "underline" }}
+            <span
+              onClick={() => {
+                setIsLoginMode(!isLoginMode);
+                setErrorMsg("");
+              }}
+              style={{
+                color: "#74b9ff",
+                cursor: "pointer",
+                fontWeight: "bold",
+                textDecoration: "underline",
+              }}
             >
               {isLoginMode ? "회원가입" : "로그인"}
             </span>
           </div>
         </div>
-
       </motion.div>
     </SpaceBackground>
   );

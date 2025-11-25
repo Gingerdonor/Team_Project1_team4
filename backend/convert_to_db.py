@@ -11,12 +11,14 @@ def init_db():
     conn = sqlite3.connect(db_path)
     cursor = conn.cursor()
 
-    # 2. Users 테이블 생성 (회원가입용) - 없으면 생성
-    # id(username), password(hashed)
+    # 2. Users 테이블 생성
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
-            hashed_password TEXT NOT NULL
+            hashed_password TEXT NOT NULL,
+            nickname TEXT,
+            birthdate TEXT,
+            gender TEXT
         )
     ''')
     print("✅ Users 테이블 확인/생성 완료")
