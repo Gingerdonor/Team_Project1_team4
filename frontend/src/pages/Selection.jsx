@@ -35,14 +35,20 @@ const Selection = () => {
 
     if (!token) {
       alert("로그인이 필요합니다.");
-      navigate("/");
+      navigate("/", { replace: true }); // 뒤로가기 방지하며 이동
       return;
     }
 
     fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (!res.ok) {
+          // 토큰이 만료되었거나 위조된 경우
+          throw new Error("토큰 만료");
+        }
+        return res.json();
+      })
       .then((data) => {
         setUserInfo({
           nickname: data.nickname || data.username,
@@ -52,16 +58,25 @@ const Selection = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
       })
-      .then((res) => res.json())
-      .then((data) => {
-        setAnalysis({
-          ...data,
-          lucky_color: ELEMENT_COLORS[data.lucky_element] || "#a29bfe",
-        });
+      .then((res) => {
+        if (res) return res.json(); // 위에서 에러나면 res가 없을 수 있음
       })
-      .catch((err) => console.error(err));
+      .then((data) => {
+        if (data) {
+          setAnalysis({
+            ...data,
+            lucky_color: ELEMENT_COLORS[data.lucky_element] || "#a29bfe",
+          });
+        }
+      })
+      .catch(() => {
+        // 에러 발생 시(토큰 만료 등) 로그아웃 처리 후 내보내기
+        localStorage.removeItem("token"); // 잘못된 토큰 삭제
+        localStorage.removeItem("username");
+        alert("로그인 세션이 만료되었습니다.");
+        navigate("/", { replace: true });
+      });
   }, [navigate]);
-
   return (
     <SpaceBackground>
       {/* 상단 헤더 (설정 버튼) */}
