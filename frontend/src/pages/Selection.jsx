@@ -88,19 +88,16 @@ const Selection = () => {
         />
       </div>
 
-      {/* 유저 뱃지 (VIP 스타일 적용) */}
-      <div style={{ position: "absolute", top: 20, zIndex: 10 }}>
+      {/* 유저 뱃지 */}
+      <div style={{ marginTop: "80px", marginBottom: "30px", zIndex: 10 }}>
         <motion.div
           initial={{ y: -50, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           style={userBadgeStyle}
         >
-          {/* 닉네임 */}
           <span style={{ fontSize: "1.2rem", fontWeight: "bold" }}>
             {userInfo.nickname}
           </span>
-
-          {/* 구분선 */}
           <div
             style={{
               width: "1px",
@@ -108,8 +105,6 @@ const Selection = () => {
               background: "rgba(255,255,255,0.4)",
             }}
           ></div>
-
-          {/* VIP 배지 */}
           <div style={vipBadgeStyle}>
             <FaCrown size={14} style={{ marginBottom: "2px" }} />
             <span>{userInfo.membership}</span>
@@ -118,19 +113,10 @@ const Selection = () => {
       </div>
 
       {/* 카드 배치 영역 */}
-      <div
-        style={{
-          display: "flex",
-          gap: "50px",
-          flexWrap: "wrap",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "80vh",
-        }}
-      >
+      <div style={cardContainerStyle}>
         {/* Persona Card */}
         <motion.div
-          initial={{ x: -100, opacity: 0 }}
+          initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
@@ -156,7 +142,7 @@ const Selection = () => {
 
         {/* Destiny Card */}
         <motion.div
-          initial={{ x: 100, opacity: 0 }}
+          initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ delay: 0.4 }}
         >
@@ -213,6 +199,17 @@ const vipBadgeStyle = {
   // 아이콘 색상은 그라데이션이 안 먹히므로 따로 지정 (여기서는 텍스트와 어울리게 골드색으로 보이게 꼼수)
   color: "#FFD700",
   textShadow: "0 0 10px rgba(255, 215, 0, 0.3)", // 은은한 금빛 광채
+};
+
+const cardContainerStyle = {
+  display: "flex",
+  flexWrap: "wrap",
+  justifyContent: "center",
+  gap: "40px",
+  width: "100%",
+  maxWidth: "1000px",
+  padding: "40px 20px 100px 20px",
+  height: "auto",
 };
 
 export default Selection;
