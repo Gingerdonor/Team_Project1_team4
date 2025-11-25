@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import SpaceBackground from "../components/SpaceBackground";
 
@@ -10,10 +10,21 @@ const Login = () => {
   const [isLoginMode, setIsLoginMode] = useState(true);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMsg, setErrorMsg] = useState("");
+  // 회원가입용 추가 상태
   const [nickname, setNickname] = useState("");
   const [birthdate, setBirthdate] = useState("");
   const [gender, setGender] = useState("male");
+
+  const [errorMsg, setErrorMsg] = useState("");
+
+  // 페이지 로드 시 로그인 여부 확인 및 리다이렉트
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      // 이미 토큰이 있다면 선택 화면으로 바로 이동
+      navigate("/select", { replace: true });
+    }
+  }, [navigate]);
 
   // API 호출 핸들러
   const handleSubmit = async (e) => {
