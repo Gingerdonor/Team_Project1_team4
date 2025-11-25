@@ -3,6 +3,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 from datetime import date
+import os
+from dotenv import load_dotenv
+
+load_dotenv()  # .env 파일 로드
 
 # 우리가 만든 모듈들 임포트
 from database import get_db, engine
@@ -18,7 +22,7 @@ from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
 
-SECRET_KEY = "YOUR_SECRET_KEY"  # .env로 빼는 것 추천
+SECRET_KEY = os.getenv("SECRET_KEY") or "YOUR_SECRET_KEY"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
