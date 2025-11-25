@@ -14,6 +14,21 @@ from datetime import date
 from convert_to_db import init_db
 import logic
 
+
+def validate_birthdate(date_str: str):
+    """생년월일이 1950~2050 사이인지 검사"""
+    try:
+        year = int(date_str.split("-")[0])  # YYYY-MM-DD에서 연도 추출
+        if not (1950 <= year <= 2050):
+            raise ValueError("범위 초과")
+    except:
+        # 날짜 형식이 이상하거나 범위를 벗어난 경우
+        raise HTTPException(
+            status_code=400,
+            detail="생년월일은 1950년 1월 1일부터 2050년 12월 31일 사이여야 합니다.",
+        )
+
+
 # ==========================================
 # 인증 의존성 (Token 검증용)
 # ==========================================
@@ -140,6 +155,7 @@ app.add_middleware(
 # 회원가입
 @app.post("/api/register")
 def register(user: UserRegister):
+    validate_birthdate(user.birthdate)
     conn = get_db_connection()
     cursor = conn.cursor()
 
@@ -214,6 +230,7 @@ def read_users_me(current_user: dict = Depends(get_current_user)):
 
 @app.put("/api/users/profile")
 def update_profile(info: UserUpdate, current_user: dict = Depends(get_current_user)):
+    validate_birthdate(info.birthdate)
     conn = get_db_connection()
     cursor = conn.cursor()
 

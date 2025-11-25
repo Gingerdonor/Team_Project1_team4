@@ -139,6 +139,8 @@ const Login = () => {
                     onChange={(e) => setBirthdate(e.target.value)}
                     style={{ ...inputStyle, flex: 1 }}
                     required
+                    min="1950-01-01"
+                    max="2050-12-31"
                   />
                   <select
                     value={gender}
