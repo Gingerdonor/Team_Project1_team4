@@ -8,7 +8,33 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 import sqlite3
+from fastapi.security import OAuth2PasswordBearer
+
 from convert_to_db import init_db
+
+# ==========================================
+# 인증 의존성 (Token 검증용)
+# ==========================================
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise HTTPException(status_code=401, detail="자격 증명 실패")
+    except JWTError:
+        raise HTTPException(status_code=401, detail="토큰 만료 또는 오류")
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE username = ?", (username,))
+    user = cursor.fetchone()
+    conn.close()
+    
+    if user is None:
+        raise HTTPException(status_code=401, detail="사용자를 찾을 수 없음")
+    return dict(user)
 
 # ==========================================
 # 1. 보안 설정 (실제 배포시엔 .env로 빼야 함)
@@ -29,6 +55,10 @@ class UserAuth(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+class PasswordChange(BaseModel):
+    old_password: str
+    new_password: str
 
 # ==========================================
 # 3. 유틸리티 함수 (해싱, 토큰 생성)
@@ -133,3 +163,44 @@ def get_saju(target_date: str):
     conn.close()
     if row: return dict(row)
     else: return {"error": "데이터 없음"}
+
+# 내 정보 가져오기
+@app.get("/api/users/me")
+def read_users_me(current_user: dict = Depends(get_current_user)):
+    # 보안상 해시된 비밀번호는 제외하고 반환
+    return {"username": current_user["username"]}
+
+# 비밀번호 변경
+@app.put("/api/users/password")
+def change_password(
+    pw_data: PasswordChange, 
+    current_user: dict = Depends(get_current_user)
+):
+    # 기존 비밀번호 확인
+    if not verify_password(pw_data.old_password, current_user['hashed_password']):
+        raise HTTPException(status_code=400, detail="현재 비밀번호가 일치하지 않습니다.")
+    
+    # 새 비밀번호 해싱 및 업데이트
+    new_hashed_pw = get_password_hash(pw_data.new_password)
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute(
+        "UPDATE users SET hashed_password = ? WHERE username = ?", 
+        (new_hashed_pw, current_user['username'])
+    )
+    conn.commit()
+    conn.close()
+    
+    return {"message": "비밀번호가 성공적으로 변경되었습니다."}
+
+# 회원 탈퇴
+@app.delete("/api/users/me")
+def delete_account(current_user: dict = Depends(get_current_user)):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM users WHERE username = ?", (current_user['username'],))
+    conn.commit()
+    conn.close()
+    
+    return {"message": "계정이 삭제되었습니다."}

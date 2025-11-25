@@ -3,13 +3,16 @@ import { motion } from "framer-motion";
 import SpaceBackground from "../components/SpaceBackground";
 import FlipCard from "../components/FlipCard";
 import { FaCog } from "react-icons/fa"; // 설정 아이콘
+import { useNavigate } from "react-router-dom";
 
 const Selection = () => {
+  const navigate = useNavigate();
+
   return (
     <SpaceBackground>
       {/* 상단 헤더 */}
       <div style={{ position: "absolute", top: 20, right: 20 }}>
-        <FaCog size={30} style={{ cursor: "pointer", opacity: 0.8 }} />
+        <FaCog size={30} style={{ cursor: "pointer", opacity: 0.8 }} onClick={() => navigate("/settings")} />
       </div>
       
       <div style={{ position: "absolute", top: 20 }}>
