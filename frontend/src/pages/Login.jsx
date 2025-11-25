@@ -162,6 +162,11 @@ const Login = () => {
                 setIsLoginMode(!isLoginMode);
                 setErrorMsg("");
               }}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") setIsLoginMode(!isLoginMode);
+              }}
               style={{
                 color: "#74b9ff",
                 cursor: "pointer",

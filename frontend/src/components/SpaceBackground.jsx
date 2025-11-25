@@ -38,7 +38,7 @@ const SpaceBackground = ({ children }) => {
           }}
         />
       ))}
-      
+
       {/* 실제 컨텐츠가 들어갈 곳 */}
       <div className="content-layer">{children}</div>
     </div>

@@ -1,19 +1,12 @@
 // src/pages/Settings.jsx
-import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FaArrowLeft,
-  FaUser,
-  FaLock,
-  FaSignOutAlt,
-  FaTrash,
-} from "react-icons/fa";
+import { FaArrowLeft, FaUser, FaLock, FaTrash } from "react-icons/fa";
 import SpaceBackground from "../components/SpaceBackground";
 
 const Settings = () => {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
+  // const [username, setUsername] = useState("");
 
   // 비밀번호 변경 상태
   const [oldPassword, setOldPassword] = useState("");
@@ -37,7 +30,7 @@ const Settings = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        setUsername(data.username); // ID는 수정 불가
+        // setUsername(data.username); // ID는 수정 불가
         setNickname(data.nickname || "");
         setBirthdate(data.birthdate || "");
         setGender(data.gender || "male");
@@ -147,23 +140,31 @@ const Settings = () => {
             onSubmit={handleUpdateProfile}
             style={{ display: "flex", flexDirection: "column", gap: "10px" }}
           >
-            <label style={labelStyle}>닉네임</label>
+            <label htmlFor="nickname" style={labelStyle}>
+              닉네임
+            </label>
             <input
+              id="nickname"
               type="text"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
               style={inputStyle}
             />
 
-            <label style={labelStyle}>생년월일 / 성별</label>
+            <label htmlFor="birthdate" style={labelStyle}>
+              생년월일 / 성별
+            </label>
             <div style={{ display: "flex", gap: "10px" }}>
               <input
+                id="birthdate"
                 type="date"
                 value={birthdate}
                 onChange={(e) => setBirthdate(e.target.value)}
                 style={{ ...inputStyle, flex: 1 }}
               />
+
               <select
+                id="gender"
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
                 style={{ ...inputStyle, width: "100px" }}
@@ -225,7 +226,11 @@ const Settings = () => {
           >
             계정을 삭제하면 모든 데이터가 사라지며 복구할 수 없습니다.
           </p>
-          <button onClick={handleDeleteAccount} style={dangerButtonStyle}>
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            style={dangerButtonStyle}
+          >
             회원 탈퇴
           </button>
         </div>
@@ -267,16 +272,6 @@ const subTitleStyle = {
   gap: "10px",
 };
 
-const avatarStyle = {
-  width: "50px",
-  height: "50px",
-  borderRadius: "50%",
-  background: "linear-gradient(45deg, #6c5ce7, #a29bfe)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-};
-
 const inputStyle = {
   padding: "12px",
   borderRadius: "8px",
@@ -294,21 +289,6 @@ const actionButtonStyle = {
   color: "white",
   fontWeight: "bold",
   cursor: "pointer",
-};
-
-const logoutButtonStyle = {
-  width: "100%",
-  padding: "10px",
-  marginTop: "10px",
-  borderRadius: "8px",
-  border: "1px solid rgba(255, 255, 255, 0.3)",
-  background: "transparent",
-  color: "white",
-  cursor: "pointer",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  gap: "8px",
 };
 
 const dangerButtonStyle = {
