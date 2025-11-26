@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, status, Request
+from fastapi import FastAPI, HTTPException, Depends, status, Request, Path, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -77,7 +77,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0. 1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -307,12 +307,82 @@ def analyze_today(
 
 
 # --- 캘린더 관련 API ---
+# 주의: 더 구체적인 경로를 먼저 정의해야 함!
 
 
-@app.get("/api/calendar/{year}/{month}")
+@app.get("/api/calendar/history")
+def get_analysis_history(
+    limit: int = Query(default=30, ge=1, le=100),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 결과 히스토리 조회 (최근 N개)"""
+    results = (
+        db.query(models.AnalysisResult)
+        .filter(models.AnalysisResult.username == current_user.username)
+        .order_by(models.AnalysisResult.analysis_date.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "id": r.id,
+            "analysis_date": r.analysis_date,
+            "my_persona": r.my_persona,
+            "my_destiny": r.my_destiny,
+            "lucky_element": r.lucky_element,
+            "created_at": r.created_at.isoformat(),
+        }
+        for r in results
+    ]
+
+
+@app.get("/api/calendar/detail")
+def get_calendar_date(
+    date_str: str = Query(..., description="조회할 날짜 (YYYY-MM-DD 형식)"),
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """특정 날짜의 분석 결과 상세 조회 (쿼리 파라미터 방식)"""
+    # 날짜 형식 검증
+    try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="날짜 형식이 올바르지 않습니다. YYYY-MM-DD 형식으로 입력하세요.",
+        )
+
+    result = (
+        db.query(models.AnalysisResult)
+        .filter(
+            models.AnalysisResult.username == current_user.username,
+            models.AnalysisResult.analysis_date == date_str,
+        )
+        .first()
+    )
+
+    if not result:
+        raise HTTPException(status_code=404, detail="해당 날짜의 분석 결과가 없습니다.")
+
+    return {
+        "id": result.id,
+        "analysis_date": result.analysis_date,
+        "my_persona": result.my_persona,
+        "my_destiny": result.my_destiny,
+        "lucky_element": result.lucky_element,
+        "persona_description": result.persona_description,
+        "destiny_description": result.destiny_description,
+        "axes_data": json.loads(result.axes_data) if result.axes_data else None,
+        "created_at": result.created_at.isoformat(),
+    }
+
+
+@app.get("/api/calendar/month/{year}/{month}")
 def get_calendar_month(
-    year: int,
-    month: int,
+    year: int = Path(..., ge=1950, le=2100),
+    month: int = Path(..., ge=1, le=12),
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -344,63 +414,3 @@ def get_calendar_month(
         }
 
     return {"year": year, "month": month, "data": calendar_data}
-
-
-@app.get("/api/calendar/date/{date_str}")
-def get_calendar_date(
-    date_str: str,
-    current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """특정 날짜의 분석 결과 상세 조회"""
-    result = (
-        db.query(models.AnalysisResult)
-        .filter(
-            models.AnalysisResult.username == current_user.username,
-            models.AnalysisResult.analysis_date == date_str,
-        )
-        .first()
-    )
-
-    if not result:
-        raise HTTPException(status_code=404, detail="해당 날짜의 분석 결과가 없습니다.")
-
-    return {
-        "id": result.id,
-        "analysis_date": result.analysis_date,
-        "my_persona": result.my_persona,
-        "my_destiny": result.my_destiny,
-        "lucky_element": result.lucky_element,
-        "persona_description": result.persona_description,
-        "destiny_description": result.destiny_description,
-        "axes_data": json.loads(result.axes_data) if result.axes_data else None,
-        "created_at": result.created_at.isoformat(),
-    }
-
-
-@app.get("/api/calendar/history")
-def get_analysis_history(
-    limit: int = 30,
-    current_user: models.User = Depends(get_current_user),
-    db: Session = Depends(get_db),
-):
-    """분석 결과 히스토리 조회 (최근 N개)"""
-    results = (
-        db.query(models.AnalysisResult)
-        .filter(models.AnalysisResult.username == current_user.username)
-        .order_by(models.AnalysisResult.analysis_date.desc())
-        .limit(limit)
-        .all()
-    )
-
-    return [
-        {
-            "id": r.id,
-            "analysis_date": r.analysis_date,
-            "my_persona": r.my_persona,
-            "my_destiny": r.my_destiny,
-            "lucky_element": r.lucky_element,
-            "created_at": r.created_at.isoformat(),
-        }
-        for r in results
-    ]

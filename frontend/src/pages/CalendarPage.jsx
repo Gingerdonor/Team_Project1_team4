@@ -41,7 +41,7 @@ const CalendarPage = () => {
   const fetchCalendarData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/calendar/${year}/${month}`, {
+      const response = await fetch(`/api/calendar/month/${year}/${month}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) throw new Error("데이터 로드 실패");
@@ -64,7 +64,7 @@ const CalendarPage = () => {
 
   const fetchDateResult = async (dateStr) => {
     try {
-      const response = await fetch(`/api/calendar/date/${dateStr}`, {
+      const response = await fetch(`/api/calendar/detail?date_str=${dateStr}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!response.ok) return null;

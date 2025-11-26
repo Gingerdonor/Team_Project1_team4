@@ -190,6 +190,3 @@
   border-color: #ff6b6b;
   box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
 }
-
-/* 기존 settings-btn 단독 스타일 제거 (중복 방지) */
-/* .settings-btn { ...  } 기존 스타일이 있다면 제거하거나 위의 스타일로 대체 */
