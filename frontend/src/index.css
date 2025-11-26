@@ -10,10 +10,13 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: "Noto Sans KR", sans-serif;
-  background-color: #050505; /* 아주 어두운 배경 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+    "Noto Sans KR", sans-serif;
+  background-color: #050505;
   color: white;
-  overflow-x: hidden; /* 가로 스크롤 방지 */
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 제목용 폰트 */
@@ -26,4 +29,32 @@ h2,
 button {
   cursor: pointer;
   font-family: "Orbitron", sans-serif;
+}
+
+/* 스크롤바 전체 스타일 적용 */
+/* Webkit 브라우저 (Chrome, Safari, Edge 등) */
+::-webkit-scrollbar {
+  width: 8px; /* 세로 스크롤바 너비 */
+  height: 8px; /* 가로 스크롤바 높이 */
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2); /* 스크롤바 트랙 배경 */
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(161, 140, 209, 0.5); /* 스크롤바 핸들 (테마색 반영) */
+  border-radius: 4px;
+  backdrop-filter: blur(4px); /* 유리 효과 추가 */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(161, 140, 209, 0.8); /* 호버 시 색상 강조 */
+}
+
+/* Firefox 브라우저 */
+* {
+  scrollbar-width: thin; /* 얇은 스크롤바 */
+  scrollbar-color: rgba(161, 140, 209, 0.5) rgba(0, 0, 0, 0.2); /* 핸들색 트랙색 */
 }

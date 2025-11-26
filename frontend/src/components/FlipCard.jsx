@@ -32,8 +32,8 @@ const MbtiGauge = ({ typeStr, description }) => {
       const percent = total === 0 ? 50 : (lVal / total) * 100;
       return {
         percent,
-        lText: `${lVal}`,
-        rText: `${rVal}`,
+        lText: `${lVal.toFixed(2)}`,
+        rText: `${rVal.toFixed(2)}`,
       };
     }
 
