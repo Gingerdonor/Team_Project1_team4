@@ -1,43 +1,35 @@
 import { motion } from "framer-motion";
-import { useState, useRef, useMemo } from "react";
+import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import "./FlipCard.css";
 
-// 텍스트에서 수치 추출하는 헬퍼 함수
-const extractScores = (text) => {
-  const scores = {};
-  // 예: [E 6.42 / I 6.16] 형태 찾기
-  const regex = /\[([A-Z])\s*([\d.]+)\s*\/\s*([A-Z])\s*([\d.]+)\]/g;
-  let match = regex.exec(text);
-  while (match !== null) {
-    scores[match[1]] = parseFloat(match[2]);
-    scores[match[3]] = parseFloat(match[4]);
-    match = regex.exec(text);
-  }
-  return scores;
-};
-
-const MbtiGauge = ({ typeStr, description }) => {
-  // description이 변경될 때만 점수 다시 계산
-  const scores = useMemo(() => extractScores(description), [description]);
-
-  // 데이터가 없을 경우 기본값(단순 글자 포함 여부) 사용을 위한 헬퍼
+// 게이지 바 컴포넌트
+const MbtiGauge = ({ typeStr, axes }) => {
   const getRatio = (left, right) => {
-    const lVal = scores[left];
-    const rVal = scores[right];
+    // axes 데이터가 있으면 사용하여 퍼센트 계산
+    if (axes) {
+      // "EI", "SN" 같은 키를 찾음
+      const axisKey = Object.keys(axes).find(
+        (key) => key.includes(left) && key.includes(right)
+      );
 
-    // 1. 수치 데이터가 있는 경우
-    if (lVal !== undefined && rVal !== undefined) {
-      const total = lVal + rVal;
-      const percent = total === 0 ? 50 : (lVal / total) * 100;
-      return {
-        percent,
-        lText: `${lVal.toFixed(2)}`,
-        rText: `${rVal.toFixed(2)}`,
-      };
+      if (axisKey && axes[axisKey]) {
+        const lVal = axes[axisKey][left];
+        const rVal = axes[axisKey][right];
+        const total = lVal + rVal;
+
+        // 0으로 나누기 방지
+        const percent = total === 0 ? 50 : (lVal / total) * 100;
+
+        return {
+          percent,
+          lText: lVal.toFixed(2),
+          rText: rVal.toFixed(2),
+        };
+      }
     }
 
-    // 2. 수치 데이터가 없는 경우 (typeStr 기준 75% vs 25%)
+    // 데이터가 없으면 글자 포함 여부로 75% 처리 (기본값)
     const isLeft = typeStr.includes(left);
     return {
       percent: isLeft ? 75 : 25,
@@ -60,7 +52,6 @@ const MbtiGauge = ({ typeStr, description }) => {
 
         return (
           <div key={row.left} className="gauge-row">
-            {/* 왼쪽 라벨 */}
             <div
               className={`gauge-label-container left ${
                 percent > 50 ? "active" : ""
@@ -70,7 +61,6 @@ const MbtiGauge = ({ typeStr, description }) => {
               {lText && <span className="label-val">{lText}</span>}
             </div>
 
-            {/* 게이지 바 */}
             <div className="gauge-track">
               <motion.div
                 className="gauge-fill"
@@ -80,7 +70,6 @@ const MbtiGauge = ({ typeStr, description }) => {
               />
             </div>
 
-            {/* 오른쪽 라벨 */}
             <div
               className={`gauge-label-container right ${
                 percent < 50 ? "active" : ""
@@ -96,7 +85,7 @@ const MbtiGauge = ({ typeStr, description }) => {
   );
 };
 
-const FlipCard = ({ title, subtitle, color, description }) => {
+const FlipCard = ({ title, subtitle, color, description, axes }) => {
   const [rotation, setRotation] = useState(0);
   const cardBackRef = useRef(null);
 
@@ -142,6 +131,7 @@ const FlipCard = ({ title, subtitle, color, description }) => {
       link.download = `${title}_analysis.png`;
       link.click();
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error(err);
       alert("저장 중 오류가 발생했습니다.");
     }
@@ -158,7 +148,7 @@ const FlipCard = ({ title, subtitle, color, description }) => {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        // ignore share cancellation
+        // ignore
       }
     } else {
       try {
@@ -167,7 +157,7 @@ const FlipCard = ({ title, subtitle, color, description }) => {
         );
         alert("클립보드에 복사되었습니다!");
       } catch (err) {
-        // ignore clipboard error
+        // ignore
       }
     }
   };
@@ -186,7 +176,7 @@ const FlipCard = ({ title, subtitle, color, description }) => {
         animate={{ rotateY: rotation }}
         transition={{ duration: 0.6, type: "spring", stiffness: 50 }}
       >
-        {/* 앞면 */}
+        {/* 앞면: 타이틀 + 게이지(수치 포함) */}
         <div className="card-face card-front" style={{ borderColor: color }}>
           <div className="front-header">
             <h2
@@ -198,13 +188,13 @@ const FlipCard = ({ title, subtitle, color, description }) => {
             <span className="mbti-subtitle">{subtitle}</span>
           </div>
 
-          {/* 게이지 바 컴포넌트 (description 전달) */}
-          <MbtiGauge typeStr={title} description={description} />
+          {/* axes 데이터를 직접 전달하여 게이지 표시 */}
+          <MbtiGauge typeStr={title} axes={axes} />
 
           <p className="click-hint">Click to Detail</p>
         </div>
 
-        {/* 뒷면 */}
+        {/* 뒷면: 텍스트 설명 (수치 없음) */}
         <div
           className="card-face card-back"
           style={{ borderColor: color }}

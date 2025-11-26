@@ -70,6 +70,7 @@ const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
           subtitle={state.data.subtitle}
           color={state.data.color}
           description={state.data.description}
+          axes={state.data.axes}
         />
       </motion.div>
     )}
@@ -77,7 +78,6 @@ const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
 );
 
 const Selection = () => {
-  // 상태 관리
   const [personaState, setPersonaState] = useState({
     status: "idle",
     data: null,
@@ -93,6 +93,7 @@ const Selection = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        // eslint-disable-next-line no-alert
         alert("로그인이 필요합니다.");
         window.location.href = "/login";
         return null;
@@ -108,53 +109,55 @@ const Selection = () => {
 
       if (!response.ok) throw new Error("데이터 실패");
       const data = await response.json();
-      analysisDataRef.current = data; // 데이터 캐싱
+      analysisDataRef.current = data;
       return data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
       return null;
     }
   };
 
-  // 공통 선택 핸들러
   const handleSelect = async (type) => {
-    // 1. 해당 슬롯 로딩 상태로 변경
     if (type === "persona")
       setPersonaState((prev) => ({ ...prev, status: "loading" }));
     else setDestinaState((prev) => ({ ...prev, status: "loading" }));
 
-    // 2. API 호출 (또는 캐시된 데이터 가져오기)
     const data = await fetchAnalysisData();
 
-    // 3. 최소 로딩 시간(1.5초) 보장 후 결과 표시 (UX 효과)
     setTimeout(() => {
       if (!data) {
-        // 에러 발생 시 idle로 복귀
         if (type === "persona") setPersonaState({ status: "idle", data: null });
         else setDestinaState({ status: "idle", data: null });
         return;
       }
 
       if (type === "persona") {
-        const mbti = data.my_persona;
+        const pData = data.persona_data || {};
+        const mbti = pData.mbti || data.my_persona;
+
         setPersonaState({
           status: "success",
           data: {
             title: mbti,
             subtitle: MBTI_NICKNAMES[mbti] || "유형",
             color: "#a18cd1",
-            description: data.persona_desc,
+            description: pData.description || data.persona_desc,
+            axes: pData.axes, // 수치 데이터 전달
           },
         });
       } else {
-        const mbti = data.my_destiny;
+        const dData = data.destiny_data || {};
+        const mbti = dData.mbti || data.my_destiny;
+
         setDestinaState({
           status: "success",
           data: {
             title: mbti,
             subtitle: MBTI_NICKNAMES[mbti] || "유형",
             color: "#fad0c4",
-            description: data.destiny_desc,
+            description: dData.description || data.destiny_desc,
+            axes: dData.axes, // 수치 데이터 전달
           },
         });
       }

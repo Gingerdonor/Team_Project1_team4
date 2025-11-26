@@ -134,7 +134,6 @@ def saju_to_profile(saju, sky_weight=1.2, earth_weight=1.0):
     return {"elements": elem_scores, "yin": yin, "yang": yang}
 
 
-# birth_weight를 0.4로 상향 조정 (생일 영향력 확대... 0.1로 설정하면 생일이 바뀌어도 동일한 결과가 나옴)
 def combine_profiles(birth_profile, today_profile, birth_weight=0.4):
     w_birth = birth_weight
     w_today = 1.0 - birth_weight
@@ -249,69 +248,45 @@ def generate_explanation(combined, axes, my_mbti, partner_mbti, today_saju):
     lines_persona.append("")
 
     # [Persona] 상세 설명
-    E, I = axes["EI"]["E"], axes["EI"]["I"]
-    S, N = axes["SN"]["S"], axes["SN"]["N"]
-    T, F = axes["TF"]["T"], axes["TF"]["F"]
-    P, J = axes["PJ"]["P"], axes["PJ"]["J"]
-
-    # (1) EI
     if my_mbti[0] == "E":
         lines_persona.append(
-            " - E(외향): 양(陽)·화(火)·금(金) 에너지에 더해, 오늘 일진의 흐름이 '밖으로 드러내는 쪽'을 한 번 더 밀어줘 "
-            "사람과 부딪히고 표현하는 태도가 잘 맞습니다. [E %.2f / I %.2f]" % (E, I)
+            " - E(외향): 양(陽)·화(火)·금(金) 에너지에 더해, 오늘 일진의 흐름이 '밖으로 드러내는 쪽'을 한 번 더 밀어줘 사람과 부딪히고 표현하는 태도가 잘 맞습니다."
         )
     else:
         lines_persona.append(
-            " - I(내향): 음(陰)·수(水)·목(木) 에너지에 오늘 일진이 더해져, "
-            "혼자 정리하고 깊게 몰입하는 쪽으로 에너지가 모입니다. [E %.2f / I %.2f]"
-            % (E, I)
+            " - I(내향): 음(陰)·수(水)·목(木) 에너지에 오늘 일진이 더해져, 혼자 정리하고 깊게 몰입하는 쪽으로 에너지가 모입니다."
         )
 
-    # (2) SN
     if my_mbti[1] == "S":
         lines_persona.append(
-            " - S(감각): 토(土)·금(金) 기운과 오늘 일진이 '현실·디테일' 쪽을 강조해, "
-            "지금 눈앞의 일과 구체적인 정보에 집중할수록 잘 풀리는 날입니다. [S %.2f / N %.2f]"
-            % (S, N)
+            " - S(감각): 토(土)·금(金) 기운과 오늘 일진이 '현실·디테일' 쪽을 강조해, 지금 눈앞의 일과 구체적인 정보에 집중할수록 잘 풀리는 날입니다."
         )
     else:
         lines_persona.append(
-            " - N(직관): 목(木)·화(火) 에너지 위로 오늘 일진이 아이디어·확장성을 키워줘, "
-            "가능성과 그림을 크게 그려보는 태도가 유리합니다. [S %.2f / N %.2f]"
-            % (S, N)
+            " - N(직관): 목(木)·화(火) 에너지 위로 오늘 일진이 아이디어·확장성을 키워줘, 가능성과 그림을 크게 그려보는 태도가 유리합니다."
         )
 
-    # (3) TF
     if my_mbti[2] == "T":
         lines_persona.append(
-            " - T(사고): 금(金)과 양(陽) 기운에 오늘 일진이 더해져, "
-            "감정보다는 '논리·효율·결과' 기준으로 결정을 내리기 좋은 날입니다. [T %.2f / F %.2f]"
-            % (T, F)
+            " - T(사고): 금(金)과 양(陽) 기운에 오늘 일진이 더해져, 감정보다는 '논리·효율·결과' 기준으로 결정을 내리기 좋은 날입니다."
         )
     else:
         lines_persona.append(
-            " - F(감정): 수(水)·목(木)·음(陰) 에너지에 오늘 일진이 보탬이 되어, "
-            "사람의 마음·관계·분위기를 읽고 움직일수록 운의 흐름을 부드럽게 탈 수 있습니다. [T %.2f / F %.2f]"
-            % (T, F)
+            " - F(감정): 수(水)·목(木)·음(陰) 에너지에 오늘 일진이 보탬이 되어, 사람의 마음·관계·분위기를 읽고 움직일수록 운의 흐름을 부드럽게 탈 수 있습니다."
         )
 
-    # (4) PJ
     if my_mbti[3] == "J":
         lines_persona.append(
-            " - J(판단): 토(土)·금(金) 비중과 오늘 일진이 '정리·마무리' 성향을 강화해, "
-            "계획을 세우고 스케줄을 잡고 일을 끝까지 밀어붙이기 좋은 날입니다. [P %.2f / J %.2f]"
-            % (P, J)
+            " - J(판단): 토(土)·금(金) 비중과 오늘 일진이 '정리·마무리' 성향을 강화해, 계획을 세우고 스케줄을 잡고 일을 끝까지 밀어붙이기 좋은 날입니다."
         )
     else:
         lines_persona.append(
-            " - P(인식): 화(火)·수(水)·목(木) 에너지 위로 오늘 일진이 유연함을 더해, "
-            "일단 열어두고 흘러가며 기회를 보는 태도가 잘 맞습니다. [P %.2f / J %.2f]"
-            % (P, J)
+            " - P(인식): 화(火)·수(水)·목(木) 에너지 위로 오늘 일진이 유연함을 더해, 일단 열어두고 흘러가며 기회를 보는 태도가 잘 맞습니다."
         )
 
     # [Destiny] 상세 설명
     lines_destiny.append("▶ 오늘 나에게 잘 맞는 운명의 사람 MBTI 해석")
-    lines_destiny.append(" - 오늘 나의 태도 MBTI    : %s" % my_mbti)
+    lines_destiny.append(" - 오늘 나의 태도 MBTI : %s" % my_mbti)
     lines_destiny.append(" - 오늘 잘 맞는 상대 MBTI : %s" % partner_mbti)
     lines_destiny.append(
         " - 오늘의 오행/음양 에너지와 일진 기준으로 내가 많이 쏠린 축은 '보완형(반대 성향)',"
@@ -323,36 +298,29 @@ def generate_explanation(combined, axes, my_mbti, partner_mbti, today_saju):
         " - 그래서 매일 일진이 바뀔 때마다, 나와 가장 잘 맞는 상대의 MBTI 조합도 함께 달라집니다."
     )
 
-    # 상대 추천 근거 및 수치 생성
-    # 로직: 나의 쏠림이 심하면(ratio > 1.1) -> 반대 성향(보완) 추천 -> 수치는 반대로 뒤집어서 표현
-    #       나의 쏠림이 덜하면(ratio <= 1.1) -> 같은 성향(동질) 추천 -> 수치는 내 것 그대로 표현
-    axis_info = [
-        ("EI", "E", "I"),
-        ("SN", "S", "N"),
-        ("TF", "T", "F"),
-        ("PJ", "P", "J"),
-    ]
+    return "\n".join(lines_persona), "\n".join(lines_destiny)
+
+
+def get_compatibility_details(my_axes):
+    """
+    나의 axes 점수를 기반으로, 파트너의 axes 점수를 역산/생성합니다.
+    - 보완(ratio > 1.1)인 경우: 점수를 뒤집음 (예: E 8.0 / I 2.0 -> Partner E 2.0 / I 8.0)
+    - 동질(ratio <= 1.1)인 경우: 점수를 비슷하게 유지
+    """
+    partner_axes = {}
+
+    axis_info = [("EI", "E", "I"), ("SN", "S", "N"), ("TF", "T", "F"), ("PJ", "P", "J")]
 
     for axis_key, k1, k2 in axis_info:
-        v1 = axes[axis_key][k1]
-        v2 = axes[axis_key][k2]
+        v1 = my_axes[axis_key][k1]
+        v2 = my_axes[axis_key][k2]
         ratio = max(v1, v2) / max(min(v1, v2), 0.001)
 
         if ratio > 1.1:
-            # 보완 관계 (수치 스왑)
-            p_v1, p_v2 = v2, v1
-            relation = "보완"
-            desc = (
-                # "서로 반대되는 에너지가 강해, 나에게 부족한 부분을 채워줄 수 있습니다."
-            )
+            # 보완 관계: 점수 스왑
+            partner_axes[axis_key] = {k1: v2, k2: v1}
         else:
-            # 동질 관계 (수치 유지)
-            p_v1, p_v2 = v1, v2
-            relation = "동질"
-            desc = (
-                # "에너지 흐름이 비슷해, 편안하게 공감하고 소통할 수 있습니다."
-            )
+            # 동질 관계: 점수 유지
+            partner_axes[axis_key] = {k1: v1, k2: v2}
 
-        lines_destiny.append(f"[{k1} {p_v1:.2f} / {k2} {p_v2:.2f}]")
-
-    return "\n".join(lines_persona), "\n".join(lines_destiny)
+    return partner_axes

@@ -224,11 +224,8 @@ def analyze_today(
     birth_saju = row_to_saju(birth_row)
     today_saju = row_to_saju(today_row)
 
-    # 분석 실행
     birth_prof = logic.saju_to_profile(birth_saju)
     today_prof = logic.saju_to_profile(today_saju)
-
-    # ⭐ 생일 비중 40%로 조정
     combined = logic.combine_profiles(birth_prof, today_prof, birth_weight=0.4)
 
     axes_base = logic.profile_to_axes(combined)
@@ -243,10 +240,16 @@ def analyze_today(
 
     lucky_element_key = max(combined["elements"], key=combined["elements"].get)
 
+    partner_axes = logic.get_compatibility_details(axes)
+
     return {
         "my_persona": my_mbti,
         "my_destiny": partner_mbti,
-        "persona_desc": p_text,
-        "destiny_desc": d_text,
         "lucky_element": logic.ELEMENT_KO[lucky_element_key][0],
+        "persona_data": {"mbti": my_mbti, "description": p_text, "axes": axes},
+        "destiny_data": {
+            "mbti": partner_mbti,
+            "description": d_text,
+            "axes": partner_axes,
+        },
     }
