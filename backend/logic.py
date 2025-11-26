@@ -246,17 +246,13 @@ def generate_explanation(combined, axes, my_mbti, partner_mbti, today_saju):
     lines_persona.append(
         " - 오늘 일간/일지(일진)의 흐름까지 반영하여, 평소 성향 위에 '오늘만의 색깔'을 더해 MBTI를 조합했습니다."
     )
-    lines_persona.append("")  # 줄바꿈용
+    lines_persona.append("")
 
-    # [Persona] 각 축별 상세 설명 (점수 포함)
-    E = axes["EI"]["E"]
-    I = axes["EI"]["I"]
-    S = axes["SN"]["S"]
-    N = axes["SN"]["N"]
-    T = axes["TF"]["T"]
-    F = axes["TF"]["F"]
-    P = axes["PJ"]["P"]
-    J = axes["PJ"]["J"]
+    # [Persona] 상세 설명
+    E, I = axes["EI"]["E"], axes["EI"]["I"]
+    S, N = axes["SN"]["S"], axes["SN"]["N"]
+    T, F = axes["TF"]["T"], axes["TF"]["F"]
+    P, J = axes["PJ"]["P"], axes["PJ"]["J"]
 
     # (1) EI
     if my_mbti[0] == "E":
@@ -327,5 +323,36 @@ def generate_explanation(combined, axes, my_mbti, partner_mbti, today_saju):
         " - 그래서 매일 일진이 바뀔 때마다, 나와 가장 잘 맞는 상대의 MBTI 조합도 함께 달라집니다."
     )
 
-    # 줄바꿈 문자로 합쳐서 반환
+    # 상대 추천 근거 및 수치 생성
+    # 로직: 나의 쏠림이 심하면(ratio > 1.1) -> 반대 성향(보완) 추천 -> 수치는 반대로 뒤집어서 표현
+    #       나의 쏠림이 덜하면(ratio <= 1.1) -> 같은 성향(동질) 추천 -> 수치는 내 것 그대로 표현
+    axis_info = [
+        ("EI", "E", "I"),
+        ("SN", "S", "N"),
+        ("TF", "T", "F"),
+        ("PJ", "P", "J"),
+    ]
+
+    for axis_key, k1, k2 in axis_info:
+        v1 = axes[axis_key][k1]
+        v2 = axes[axis_key][k2]
+        ratio = max(v1, v2) / max(min(v1, v2), 0.001)
+
+        if ratio > 1.1:
+            # 보완 관계 (수치 스왑)
+            p_v1, p_v2 = v2, v1
+            relation = "보완"
+            desc = (
+                # "서로 반대되는 에너지가 강해, 나에게 부족한 부분을 채워줄 수 있습니다."
+            )
+        else:
+            # 동질 관계 (수치 유지)
+            p_v1, p_v2 = v1, v2
+            relation = "동질"
+            desc = (
+                # "에너지 흐름이 비슷해, 편안하게 공감하고 소통할 수 있습니다."
+            )
+
+        lines_destiny.append(f"[{k1} {p_v1:.2f} / {k2} {p_v2:.2f}]")
+
     return "\n".join(lines_persona), "\n".join(lines_destiny)

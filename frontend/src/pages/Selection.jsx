@@ -158,16 +158,6 @@ const Selection = () => {
             animate={{ opacity: 1, scale: 1 }}
           >
             <FlipCard {...state.data} />
-            <button
-              className="retry-btn"
-              onClick={() =>
-                type === "persona"
-                  ? setPersonaState({ status: "idle", data: null })
-                  : setDestinaState({ status: "idle", data: null })
-              }
-            >
-              다시 하기
-            </button>
           </motion.div>
         )}
       </div>

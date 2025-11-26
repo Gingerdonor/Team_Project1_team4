@@ -1,12 +1,10 @@
 /* src/components/FlipCard.css */
+
 .card-container {
-  width: 280px;
-  max-width: 85vw;
-  height: 500px;
-  max-height: 60vh;
   perspective: 1000px;
+  width: 280px;
+  height: 520px; /* 게이지와 숫자를 위한 공간 확보를 위해 높이 약간 증가 */
   cursor: pointer;
-  margin: 10px;
 }
 
 .card-inner {
@@ -21,78 +19,173 @@
   width: 100%;
   height: 100%;
   backface-visibility: hidden;
-  border-radius: 20px; /* 라운드 약간 수정 (캡처 시 깔끔하게) */
-
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
-
+  border-radius: 20px;
+  background: rgba(20, 20, 20, 0.85);
+  backdrop-filter: blur(12px);
+  border: 2px solid;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
   display: flex;
   flex-direction: column;
-  justify-content: space-between; /* 위아래 분산 배치 */
   align-items: center;
+  justify-content: space-between;
+  padding: 30px 20px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* --- 앞면 헤더 --- */
+.front-header {
   text-align: center;
-  padding: 20px;
-  box-sizing: border-box; /* 패딩 포함 크기 계산 */
+  margin-bottom: 20px;
 }
 
-.card-back {
-  transform: rotateY(180deg);
-  background: rgba(0, 0, 0, 0.85); /* 가독성을 위해 배경색 약간 진하게 */
+.mbti-title {
+  font-family: "Orbitron", sans-serif;
+  font-size: 3.5rem;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 2px;
 }
 
-/* 내용 영역이 중앙에 오도록 */
-.card-content {
-  flex: 1;
+.mbti-subtitle {
+  font-size: 1rem;
+  opacity: 0.8;
+  margin-top: 5px;
+  display: block;
+  font-weight: 300;
+}
+
+/* --- 게이지 바 스타일 --- */
+.mbti-gauges {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  gap: 14px;
+}
+
+.gauge-row {
+  display: flex;
   align-items: center;
-  width: 100%;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: "Orbitron", sans-serif;
+  font-size: 0.8rem;
+}
+
+/* 라벨 컨테이너 (문자 + 수치) */
+.gauge-label-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 50px; /* 고정 너비로 정렬 맞춤 */
+  opacity: 0.3;
+  transition: opacity 0.3s;
+}
+
+.gauge-label-container.left {
+  justify-content: flex-end; /* 왼쪽 그룹은 우측 정렬 */
+}
+
+.gauge-label-container.right {
+  justify-content: flex-start; /* 오른쪽 그룹은 좌측 정렬 */
+}
+
+/* 활성화된 쪽 강조 */
+.gauge-label-container.active {
+  opacity: 1;
+  color: white;
+  text-shadow: 0 0 5px white;
+}
+
+.label-char {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.label-val {
+  font-size: 0.7rem;
+  opacity: 0.8;
+  font-family: "Noto Sans KR", sans-serif; /* 숫자는 가독성 좋게 */
+}
+
+.gauge-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+}
+
+.gauge-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a18cd1, #fbc2eb);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(161, 140, 209, 0.6);
 }
 
 .click-hint {
-  margin-top: 20px;
   font-size: 0.8rem;
-  opacity: 0.6;
+  opacity: 0.5;
+  margin-top: auto;
+  animation: pulse 2s infinite;
 }
 
-.card-back p {
-  white-space: pre-wrap;
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* --- 뒷면 --- */
+.card-back {
+  transform: rotateY(180deg);
+  justify-content: flex-start;
+}
+
+.card-content {
+  flex: 1;
+  overflow-y: auto;
+  text-align: center;
+}
+
+.card-content h3 {
+  font-family: "Orbitron", sans-serif;
+  margin-bottom: 15px;
+  font-size: 1.5rem;
+}
+
+.description-text {
+  font-size: 0.9rem;
   line-height: 1.6;
-  text-align: left;
-  font-size: 0.95rem;
-  margin-top: 10px;
-  width: 100%;
+  opacity: 0.9;
+  word-break: keep-all;
+  white-space: pre-wrap; /* 줄바꿈 반영 */
 }
 
-/* 새로 추가된 버튼 스타일 */
 .card-actions {
   display: flex;
   gap: 10px;
-  margin-top: 15px;
   width: 100%;
-  justify-content: center;
+  margin-top: 15px;
 }
 
 .action-btn {
-  background: rgba(255, 255, 255, 0.1);
+  flex: 1;
+  padding: 10px;
   border: 1px solid rgba(255, 255, 255, 0.3);
+  background: rgba(0, 0, 0, 0.3);
   color: white;
-  padding: 8px 16px;
-  border-radius: 20px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  backdrop-filter: blur(5px);
+  transition: all 0.2s;
 }
 
 .action-btn:hover {
-  background: rgba(255, 255, 255, 0.25);
-  transform: translateY(-2px);
-}
-
-.action-btn:active {
-  transform: translateY(0);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: white;
 }
