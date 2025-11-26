@@ -3,8 +3,9 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
-from datetime import date
+from datetime import date, datetime
 import os
+import json
 from dotenv import load_dotenv
 
 load_dotenv()  # .env 파일 로드
@@ -22,6 +23,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 from datetime import datetime, timedelta
 from fastapi.security import OAuth2PasswordBearer
+from typing import List, Set
 
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
@@ -31,6 +33,10 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/login")
+
+# 토큰 블랙리스트 (로그아웃된 토큰 저장)
+# 프로덕션에서는 Redis 등 사용 권장
+token_blacklist: Set[str] = set()
 
 
 # --- Utility Functions ---
@@ -71,7 +77,7 @@ app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=["http://localhost:5173", "http://127.0.0. 1:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -82,6 +88,10 @@ app.add_middleware(
 async def get_current_user(
     token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)
 ):
+    # 블랙리스트 확인
+    if token in token_blacklist:
+        raise HTTPException(status_code=401, detail="로그아웃된 토큰입니다.")
+
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
@@ -138,6 +148,13 @@ def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
 
     access_token = create_access_token(data={"sub": db_user.username})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@app.post("/api/logout")
+def logout(token: str = Depends(oauth2_scheme)):
+    """로그아웃 - 토큰을 블랙리스트에 추가"""
+    token_blacklist.add(token)
+    return {"message": "로그아웃 성공"}
 
 
 @app.get("/api/users/me")
@@ -242,6 +259,40 @@ def analyze_today(
 
     partner_axes = logic.get_compatibility_details(axes)
 
+    # 분석 결과를 DB에 저장
+    existing_result = (
+        db.query(models.AnalysisResult)
+        .filter(
+            models.AnalysisResult.username == current_user.username,
+            models.AnalysisResult.analysis_date == today_str,
+        )
+        .first()
+    )
+
+    if existing_result:
+        # 기존 결과 업데이트
+        existing_result.my_persona = my_mbti
+        existing_result.my_destiny = partner_mbti
+        existing_result.lucky_element = logic.ELEMENT_KO[lucky_element_key][0]
+        existing_result.persona_description = p_text
+        existing_result.destiny_description = d_text
+        existing_result.axes_data = json.dumps(axes)
+    else:
+        # 새 결과 저장
+        new_result = models.AnalysisResult(
+            username=current_user.username,
+            analysis_date=today_str,
+            my_persona=my_mbti,
+            my_destiny=partner_mbti,
+            lucky_element=logic.ELEMENT_KO[lucky_element_key][0],
+            persona_description=p_text,
+            destiny_description=d_text,
+            axes_data=json.dumps(axes),
+        )
+        db.add(new_result)
+
+    db.commit()
+
     return {
         "my_persona": my_mbti,
         "my_destiny": partner_mbti,
@@ -253,3 +304,103 @@ def analyze_today(
             "axes": partner_axes,
         },
     }
+
+
+# --- 캘린더 관련 API ---
+
+
+@app.get("/api/calendar/{year}/{month}")
+def get_calendar_month(
+    year: int,
+    month: int,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """특정 월의 분석 결과 목록 조회 (캘린더용)"""
+    # 해당 월의 시작일과 종료일 계산
+    start_date = f"{year:04d}-{month:02d}-01"
+    if month == 12:
+        end_date = f"{year + 1:04d}-01-01"
+    else:
+        end_date = f"{year:04d}-{month + 1:02d}-01"
+
+    results = (
+        db.query(models.AnalysisResult)
+        .filter(
+            models.AnalysisResult.username == current_user.username,
+            models.AnalysisResult.analysis_date >= start_date,
+            models.AnalysisResult.analysis_date < end_date,
+        )
+        .all()
+    )
+
+    # 날짜별로 정리
+    calendar_data = {}
+    for result in results:
+        calendar_data[result.analysis_date] = {
+            "has_analysis": True,
+            "my_persona": result.my_persona,
+            "lucky_element": result.lucky_element,
+        }
+
+    return {"year": year, "month": month, "data": calendar_data}
+
+
+@app.get("/api/calendar/date/{date_str}")
+def get_calendar_date(
+    date_str: str,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """특정 날짜의 분석 결과 상세 조회"""
+    result = (
+        db.query(models.AnalysisResult)
+        .filter(
+            models.AnalysisResult.username == current_user.username,
+            models.AnalysisResult.analysis_date == date_str,
+        )
+        .first()
+    )
+
+    if not result:
+        raise HTTPException(status_code=404, detail="해당 날짜의 분석 결과가 없습니다.")
+
+    return {
+        "id": result.id,
+        "analysis_date": result.analysis_date,
+        "my_persona": result.my_persona,
+        "my_destiny": result.my_destiny,
+        "lucky_element": result.lucky_element,
+        "persona_description": result.persona_description,
+        "destiny_description": result.destiny_description,
+        "axes_data": json.loads(result.axes_data) if result.axes_data else None,
+        "created_at": result.created_at.isoformat(),
+    }
+
+
+@app.get("/api/calendar/history")
+def get_analysis_history(
+    limit: int = 30,
+    current_user: models.User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """분석 결과 히스토리 조회 (최근 N개)"""
+    results = (
+        db.query(models.AnalysisResult)
+        .filter(models.AnalysisResult.username == current_user.username)
+        .order_by(models.AnalysisResult.analysis_date.desc())
+        .limit(limit)
+        .all()
+    )
+
+    return [
+        {
+            "id": r.id,
+            "analysis_date": r.analysis_date,
+            "my_persona": r.my_persona,
+            "my_destiny": r.my_destiny,
+            "lucky_element": r.lucky_element,
+            "created_at": r.created_at.isoformat(),
+        }
+        for r in results
+    ]

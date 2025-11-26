@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaCrown } from "react-icons/fa";
+import { FaCog, FaCrown, FaCalendarAlt, FaSignOutAlt } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
 import "./Selection.css";
@@ -95,7 +95,7 @@ const Selection = () => {
       return;
     }
 
-    fetch("http://127.0.0.1:8000/api/users/me", {
+    fetch("/api/users/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((res) => {
@@ -134,7 +134,7 @@ const Selection = () => {
         window.location.href = "/login";
         return null;
       }
-      const response = await fetch("http://127.0.0.1:8000/api/analyze/today", {
+      const response = await fetch("/api/analyze/today", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -192,6 +192,24 @@ const Selection = () => {
     }, 1500);
   };
 
+  // 로그아웃 핸들러
+  const handleLogout = async () => {
+    if (!window.confirm("정말 로그아웃 하시겠습니까?")) return;
+
+    const token = localStorage.getItem("token");
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      console.error("로그아웃 API 호출 실패:", error);
+    } finally {
+      localStorage.clear();
+      navigate("/");
+    }
+  };
+
   return (
     <SpaceBackground>
       <div className="selection-page-content">
@@ -203,7 +221,7 @@ const Selection = () => {
             className="glass-badge"
           >
             <span className="user-nickname">{userInfo.nickname}</span>
-            <div className="badge-divider"></div>
+            <div className="badge-divider" />
             <div className="vip-badge-content">
               <FaCrown
                 size={14}
@@ -214,14 +232,38 @@ const Selection = () => {
           </motion.div>
         </div>
 
-        {/* 설정 버튼 */}
-        <button
-          className="settings-btn"
-          onClick={() => navigate("/settings")}
-          aria-label="설정 페이지로 이동"
-        >
-          <FaCog size={28} />
-        </button>
+        {/* 상단 네비게이션 버튼들 */}
+        <div className="nav-buttons">
+          {/* 캘린더 버튼 */}
+          <button
+            type="button"
+            className="nav-btn calendar-btn"
+            onClick={() => navigate("/calendar")}
+            aria-label="캘린더 페이지로 이동"
+          >
+            <FaCalendarAlt size={24} />
+          </button>
+
+          {/* 설정 버튼 */}
+          <button
+            type="button"
+            className="nav-btn settings-btn"
+            onClick={() => navigate("/settings")}
+            aria-label="설정 페이지로 이동"
+          >
+            <FaCog size={24} />
+          </button>
+
+          {/* 로그아웃 버튼 */}
+          <button
+            type="button"
+            className="nav-btn logout-btn"
+            onClick={handleLogout}
+            aria-label="로그아웃"
+          >
+            <FaSignOutAlt size={24} />
+          </button>
+        </div>
 
         <h1 className="page-title">오늘의 운명 확인하기</h1>
 

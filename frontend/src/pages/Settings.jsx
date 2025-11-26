@@ -1,16 +1,22 @@
 // src/pages/Settings.jsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { FaArrowLeft, FaUser, FaLock, FaTrash } from "react-icons/fa";
+import {
+  FaArrowLeft,
+  FaUser,
+  FaLock,
+  FaTrash,
+  FaSignOutAlt,
+} from "react-icons/fa";
 import SpaceBackground from "../components/SpaceBackground";
 
 const Settings = () => {
   const navigate = useNavigate();
-  // const [username, setUsername] = useState("");
 
   // 비밀번호 변경 상태
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const token = localStorage.getItem("token");
 
@@ -30,7 +36,6 @@ const Settings = () => {
     })
       .then((res) => res.json())
       .then((data) => {
-        // setUsername(data.username); // ID는 수정 불가
         setNickname(data.nickname || "");
         setBirthdate(data.birthdate || "");
         setGender(data.gender || "male");
@@ -112,10 +117,23 @@ const Settings = () => {
     }
   };
 
-  // 로그아웃
-  const handleLogout = () => {
-    localStorage.clear();
-    navigate("/");
+  // 로그아웃 (서버 API 호출 포함)
+  const handleLogout = async () => {
+    if (!confirm("정말 로그아웃 하시겠습니까?")) return;
+
+    setIsLoggingOut(true);
+    try {
+      await fetch("/api/logout", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    } catch (error) {
+      console.error("로그아웃 API 호출 실패:", error);
+    } finally {
+      localStorage.clear();
+      setIsLoggingOut(false);
+      navigate("/");
+    }
   };
 
   return (
@@ -213,7 +231,27 @@ const Settings = () => {
           </form>
         </div>
 
-        {/* 3. 위험 구역 (탈퇴) */}
+        {/* 3. 로그아웃 섹션 */}
+        <div style={sectionStyle}>
+          <h3 style={subTitleStyle}>
+            <FaSignOutAlt /> 로그아웃
+          </h3>
+          <p
+            style={{ fontSize: "0.8rem", color: "#ccc", marginBottom: "15px" }}
+          >
+            현재 기기에서 로그아웃합니다.
+          </p>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            style={logoutButtonStyle}
+          >
+            {isLoggingOut ? "로그아웃 중..." : "로그아웃"}
+          </button>
+        </div>
+
+        {/* 4. 위험 구역 (탈퇴) */}
         <div
           style={{
             ...sectionStyle,
@@ -291,6 +329,18 @@ const actionButtonStyle = {
   color: "white",
   fontWeight: "bold",
   cursor: "pointer",
+};
+
+const logoutButtonStyle = {
+  width: "100%",
+  padding: "12px",
+  borderRadius: "8px",
+  border: "none",
+  background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.3s ease",
 };
 
 const dangerButtonStyle = {
