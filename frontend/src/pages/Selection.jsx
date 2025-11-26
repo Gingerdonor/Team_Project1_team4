@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import FlipCard from "../components/FlipCard";
+import SpaceBackground from "../components/SpaceBackground";
 import "./Selection.css";
 
 // MBTI 별명 매핑
@@ -33,20 +34,21 @@ const Selection = () => {
     status: "idle",
     data: null,
   });
-
-  // API 데이터를 저장할 Ref (불필요한 중복 호출 방지)
   const analysisDataRef = useRef(null);
 
-  // 데이터 가져오기 (API 호출)
   const fetchAnalysisData = async () => {
-    // 이미 데이터가 있다면 재사용
     if (analysisDataRef.current) return analysisDataRef.current;
-
     try {
-      const token = localStorage.getItem("token"); // 로그인 토큰 확인
+      // 임시 테스트용 데이터 (API 연결 전 확인하고 싶다면 주석 해제)
+      /* return { 
+            my_persona: "ESFP", persona_desc: "...", 
+            my_destiny: "INTJ", destiny_desc: "..." 
+        }; */
+
+      const token = localStorage.getItem("token");
       if (!token) {
         alert("로그인이 필요합니다.");
-        window.location.href = "/login"; // 로그인 페이지로 리다이렉트 (필요 시 수정)
+        window.location.href = "/login";
         return null;
       }
 
@@ -58,16 +60,12 @@ const Selection = () => {
         },
       });
 
-      if (!response.ok) {
-        throw new Error("데이터를 불러오는데 실패했습니다.");
-      }
-
+      if (!response.ok) throw new Error("데이터 실패");
       const data = await response.json();
       analysisDataRef.current = data; // 데이터 캐싱
       return data;
     } catch (error) {
       console.error(error);
-      alert("분석 정보를 가져오는 중 오류가 발생했습니다.");
       return null;
     }
   };
@@ -96,7 +94,8 @@ const Selection = () => {
         setPersonaState({
           status: "success",
           data: {
-            title: `${mbti} (${MBTI_NICKNAMES[mbti] || "유형"})`, // 예: ISFP (성인군자형)
+            title: mbti,
+            subtitle: MBTI_NICKNAMES[mbti] || "유형",
             color: "#a18cd1",
             description: data.persona_desc,
           },
@@ -106,7 +105,8 @@ const Selection = () => {
         setDestinaState({
           status: "success",
           data: {
-            title: `${mbti} (${MBTI_NICKNAMES[mbti] || "유형"})`,
+            title: mbti,
+            subtitle: MBTI_NICKNAMES[mbti] || "유형",
             color: "#fad0c4",
             description: data.destiny_desc,
           },
@@ -175,27 +175,29 @@ const Selection = () => {
   };
 
   return (
-    <div className="selection-page">
-      <h1 className="page-title">오늘의 운명 확인하기</h1>
-      <div className="cards-wrapper">
-        <CardSlot
-          type="persona"
-          state={personaState}
-          onSelect={handleSelect}
-          label="My Persona"
-          icon="🔮"
-          color="#a18cd1"
-        />
-        <CardSlot
-          type="destina"
-          state={destinaState}
-          onSelect={handleSelect}
-          label="My Destina"
-          icon="🌟"
-          color="#fad0c4"
-        />
+    <SpaceBackground>
+      <div className="selection-page-content">
+        <h1 className="page-title">오늘의 운명 확인하기</h1>
+        <div className="cards-wrapper">
+          <CardSlot
+            type="persona"
+            state={personaState}
+            onSelect={handleSelect}
+            label="My Persona"
+            icon="🔮"
+            color="#a18cd1"
+          />
+          <CardSlot
+            type="destina"
+            state={destinaState}
+            onSelect={handleSelect}
+            label="My Destina"
+            icon="🌟"
+            color="#fad0c4"
+          />
+        </div>
       </div>
-    </div>
+    </SpaceBackground>
   );
 };
 
