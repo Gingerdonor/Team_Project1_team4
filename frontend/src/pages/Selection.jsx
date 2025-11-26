@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { FaCog, FaCrown } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
 import "./Selection.css";
@@ -78,6 +80,41 @@ const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
 );
 
 const Selection = () => {
+  const navigate = useNavigate();
+
+  // 1. 유저 정보 로딩
+  const [userInfo, setUserInfo] = useState({
+    nickname: "Loading...",
+    membership: "Standard",
+  });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/");
+      return;
+    }
+
+    fetch("http://127.0.0.1:8000/api/users/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("토큰 만료");
+        return res.json();
+      })
+      .then((data) => {
+        setUserInfo({
+          nickname: data.nickname || data.username,
+          membership: "VIP Member", // VIP 강제 적용
+        });
+      })
+      .catch(() => {
+        localStorage.clear();
+        navigate("/");
+      });
+  }, [navigate]);
+
+  // 2. 분석 데이터 로딩
   const [personaState, setPersonaState] = useState({
     status: "idle",
     data: null,
@@ -93,12 +130,10 @@ const Selection = () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
-        // eslint-disable-next-line no-alert
         alert("로그인이 필요합니다.");
         window.location.href = "/login";
         return null;
       }
-
       const response = await fetch("http://127.0.0.1:8000/api/analyze/today", {
         method: "GET",
         headers: {
@@ -106,13 +141,11 @@ const Selection = () => {
           "Content-Type": "application/json",
         },
       });
-
       if (!response.ok) throw new Error("데이터 실패");
       const data = await response.json();
       analysisDataRef.current = data;
       return data;
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error(error);
       return null;
     }
@@ -131,33 +164,28 @@ const Selection = () => {
         else setDestinaState({ status: "idle", data: null });
         return;
       }
-
       if (type === "persona") {
         const pData = data.persona_data || {};
-        const mbti = pData.mbti || data.my_persona;
-
         setPersonaState({
           status: "success",
           data: {
-            title: mbti,
-            subtitle: MBTI_NICKNAMES[mbti] || "유형",
+            title: pData.mbti || data.my_persona,
+            subtitle: MBTI_NICKNAMES[pData.mbti || data.my_persona] || "유형",
             color: "#a18cd1",
-            description: pData.description || data.persona_desc,
-            axes: pData.axes, // 수치 데이터 전달
+            description: pData.description,
+            axes: pData.axes,
           },
         });
       } else {
         const dData = data.destiny_data || {};
-        const mbti = dData.mbti || data.my_destiny;
-
         setDestinaState({
           status: "success",
           data: {
-            title: mbti,
-            subtitle: MBTI_NICKNAMES[mbti] || "유형",
+            title: dData.mbti || data.my_destiny,
+            subtitle: MBTI_NICKNAMES[dData.mbti || data.my_destiny] || "유형",
             color: "#fad0c4",
-            description: dData.description || data.destiny_desc,
-            axes: dData.axes, // 수치 데이터 전달
+            description: dData.description,
+            axes: dData.axes,
           },
         });
       }
@@ -167,7 +195,36 @@ const Selection = () => {
   return (
     <SpaceBackground>
       <div className="selection-page-content">
+        {/* 유저 프로필 (VIP 배지) */}
+        <div className="user-profile-container">
+          <motion.div
+            initial={{ y: -50, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            className="glass-badge"
+          >
+            <span className="user-nickname">{userInfo.nickname}</span>
+            <div className="badge-divider"></div>
+            <div className="vip-badge-content">
+              <FaCrown
+                size={14}
+                style={{ marginBottom: "2px", color: "#FFD700" }}
+              />
+              <span className="vip-text">{userInfo.membership}</span>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* 설정 버튼 */}
+        <button
+          className="settings-btn"
+          onClick={() => navigate("/settings")}
+          aria-label="설정 페이지로 이동"
+        >
+          <FaCog size={28} />
+        </button>
+
         <h1 className="page-title">오늘의 운명 확인하기</h1>
+
         <div className="cards-wrapper">
           <CardSlot
             type="persona"
