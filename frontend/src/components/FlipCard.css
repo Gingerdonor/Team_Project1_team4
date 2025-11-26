@@ -189,3 +189,102 @@
   background: rgba(255, 255, 255, 0.1);
   border-color: white;
 }
+
+/* --- 저장/공유 옵션 모달 --- */
+.save-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0 85) !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.save-modal-content {
+  background-color: #1a1a2e !important;
+  background-image: linear-gradient(
+    135deg,
+    #1a1a2e 0%,
+    #16213e 100%
+  ) !important;
+  border-radius: 20px;
+  padding: 25px;
+  min-width: 280px;
+  max-width: 350px;
+  border: 1px solid rgba(255, 255, 255, 0 2);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.save-modal-title {
+  text-align: center;
+  color: #ffffff !important;
+  margin: 0 0 8px 0;
+  font-size: 1 2rem;
+  font-weight: bold;
+}
+
+.save-modal-desc {
+  text-align: center;
+  color: #a0a0a0 !important;
+  margin: 0 0 20px 0;
+  font-size: 0.9rem;
+}
+
+.save-modal-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.save-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 15px 20px;
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px;
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.save-option-btn:hover {
+  background-color: rgba(255, 255, 255, 0.18) !important;
+  border-color: rgba(255, 255, 255, 0.4) !important;
+  transform: translateX(5px);
+}
+
+.option-icon {
+  font-size: 1.5rem;
+}
+
+.option-label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #ffffff !important;
+}
+
+.save-modal-cancel {
+  width: 100%;
+  padding: 12px;
+  background-color: transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: 10px;
+  color: #a0a0a0 !important;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+.save-modal-cancel:hover {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  color: #ffffff !important;
+}

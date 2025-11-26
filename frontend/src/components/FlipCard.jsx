@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import "./FlipCard.css";
@@ -85,8 +85,65 @@ const MbtiGauge = ({ typeStr, axes }) => {
   );
 };
 
+// 저장/공유 옵션 모달
+const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
+  if (!isOpen) return null;
+
+  const options = [
+    { id: "front", label: "앞면만", icon: "🎴" },
+    { id: "back", label: "뒷면만", icon: "📄" },
+    { id: "both", label: "앞면 + 뒷면", icon: "🃏" },
+  ];
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        className="save-modal-overlay"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+      >
+        <motion.div
+          className="save-modal-content"
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.8, opacity: 0 }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h4 className="save-modal-title">
+            {actionType === "save" ? "💾 저장 옵션" : "🔗 공유 옵션"}
+          </h4>
+          <p className="save-modal-desc">
+            어떤 면을 {actionType === "save" ? "저장" : "공유"}할까요?
+          </p>
+          <div className="save-modal-options">
+            {options.map((option) => (
+              <button
+                key={option.id}
+                className="save-option-btn"
+                onClick={() => onSelect(option.id)}
+              >
+                <span className="option-icon">{option.icon}</span>
+                <span className="option-label">{option.label}</span>
+              </button>
+            ))}
+          </div>
+          <button className="save-modal-cancel" onClick={onClose}>
+            취소
+          </button>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+};
+
 const FlipCard = ({ title, subtitle, color, description, axes }) => {
   const [rotation, setRotation] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [actionType, setActionType] = useState(null); // "save" or "share"
+
+  const cardFrontRef = useRef(null);
   const cardBackRef = useRef(null);
 
   const flipCard = () => {
@@ -97,63 +154,171 @@ const FlipCard = ({ title, subtitle, color, description, axes }) => {
     if (e.key === "Enter" || e.key === " ") flipCard();
   };
 
-  const handleSaveImage = async (e) => {
-    e.stopPropagation();
-    if (!cardBackRef.current) return;
+  // 요소를 캡처하는 공통 함수
+  const captureElement = async (element, removeActions = true) => {
+    const clone = element.cloneNode(true);
 
-    try {
-      const element = cardBackRef.current;
-      const clone = element.cloneNode(true);
+    Object.assign(clone.style, {
+      position: "fixed",
+      top: "-10000px",
+      left: "-10000px",
+      transform: "none",
+      zIndex: -1,
+      width: `${element.offsetWidth}px`,
+      height: `${element.offsetHeight}px`,
+      borderRadius: "20px",
+      backfaceVisibility: "visible",
+    });
 
-      Object.assign(clone.style, {
-        position: "fixed",
-        top: "-10000px",
-        left: "-10000px",
-        transform: "none",
-        zIndex: -1,
-        width: `${element.offsetWidth}px`,
-        height: `${element.offsetHeight}px`,
-        borderRadius: "20px",
-      });
-
+    if (removeActions) {
       const actions = clone.querySelector(".card-actions");
       if (actions) actions.remove();
+    }
 
-      document.body.appendChild(clone);
-      const canvas = await html2canvas(clone, {
-        backgroundColor: null,
-        scale: 2,
-      });
-      document.body.removeChild(clone);
+    document.body.appendChild(clone);
+    const canvas = await html2canvas(clone, {
+      backgroundColor: null,
+      scale: 2,
+    });
+    document.body.removeChild(clone);
 
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `${title}_analysis.png`;
-      link.click();
+    return canvas;
+  };
+
+  // 두 캔버스를 합치는 함수
+  const combineCanvases = (canvas1, canvas2, gap = 20) => {
+    const combinedCanvas = document.createElement("canvas");
+    const ctx = combinedCanvas.getContext("2d");
+
+    combinedCanvas.width = canvas1.width + canvas2.width + gap;
+    combinedCanvas.height = Math.max(canvas1.height, canvas2.height);
+
+    // 배경 (투명 또는 어두운 색)
+    ctx.fillStyle = "rgba(20, 20, 30, 0.9)";
+    ctx.fillRect(0, 0, combinedCanvas.width, combinedCanvas.height);
+
+    // 첫 번째 카드 (앞면)
+    ctx.drawImage(canvas1, 0, 0);
+    // 두 번째 카드 (뒷면)
+    ctx.drawImage(canvas2, canvas1.width + gap, 0);
+
+    return combinedCanvas;
+  };
+
+  const handleSaveClick = (e) => {
+    e.stopPropagation();
+    setActionType("save");
+    setShowModal(true);
+  };
+
+  const handleShareClick = (e) => {
+    e.stopPropagation();
+    setActionType("share");
+    setShowModal(true);
+  };
+
+  const handleOptionSelect = async (option) => {
+    setShowModal(false);
+
+    if (actionType === "save") {
+      await handleSaveImage(option);
+    } else {
+      await handleShare(option);
+    }
+  };
+
+  const handleSaveImage = async (option) => {
+    try {
+      let canvas;
+
+      if (option === "front") {
+        if (!cardFrontRef.current) return;
+        canvas = await captureElement(cardFrontRef.current, false);
+      } else if (option === "back") {
+        if (!cardBackRef.current) return;
+        canvas = await captureElement(cardBackRef.current, true);
+      } else if (option === "both") {
+        if (!cardFrontRef.current || !cardBackRef.current) return;
+        const frontCanvas = await captureElement(cardFrontRef.current, false);
+        const backCanvas = await captureElement(cardBackRef.current, true);
+        canvas = combineCanvases(frontCanvas, backCanvas, 40);
+      }
+
+      if (canvas) {
+        const link = document.createElement("a");
+        link.href = canvas.toDataURL("image/png");
+        const suffix = option === "both" ? "combined" : option;
+        link.download = `${title}_${suffix}.png`;
+        link.click();
+      }
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error(err);
       alert("저장 중 오류가 발생했습니다.");
     }
   };
 
-  const handleShare = async (e) => {
-    e.stopPropagation();
+  const handleShare = async (option) => {
+    let shareText = "";
+
+    if (option === "front") {
+      shareText = `🔮 ${title} (${subtitle})\n\n오늘의 MBTI 분석 결과입니다!`;
+    } else if (option === "back") {
+      shareText = `🔮 ${title} 분석 결과\n\n${description}`;
+    } else if (option === "both") {
+      shareText = `🔮 ${title} (${subtitle})\n\n📖 상세 분석:\n${description}`;
+    }
+
     const shareData = {
       title: `${title} 분석 결과`,
-      text: description,
+      text: shareText,
       url: window.location.href,
     };
+
     if (navigator.share) {
+      // 이미지 공유 시도 (Web Share API Level 2)
       try {
+        let canvas;
+
+        if (option === "front" && cardFrontRef.current) {
+          canvas = await captureElement(cardFrontRef.current, false);
+        } else if (option === "back" && cardBackRef.current) {
+          canvas = await captureElement(cardBackRef.current, true);
+        } else if (
+          option === "both" &&
+          cardFrontRef.current &&
+          cardBackRef.current
+        ) {
+          const frontCanvas = await captureElement(cardFrontRef.current, false);
+          const backCanvas = await captureElement(cardBackRef.current, true);
+          canvas = combineCanvases(frontCanvas, backCanvas, 40);
+        }
+
+        if (canvas) {
+          const blob = await new Promise((resolve) =>
+            canvas.toBlob(resolve, "image/png")
+          );
+          const file = new File([blob], `${title}_analysis.png`, {
+            type: "image/png",
+          });
+
+          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              ...shareData,
+              files: [file],
+            });
+            return;
+          }
+        }
+
+        // 이미지 공유 불가 시 텍스트만 공유
         await navigator.share(shareData);
       } catch (err) {
-        // ignore
+        // 사용자가 공유 취소한 경우 무시
       }
     } else {
+      // 클립보드에 복사
       try {
         await navigator.clipboard.writeText(
-          `${title}: ${description}\n${window.location.href}`
+          `${shareText}\n\n${window.location.href}`
         );
         alert("클립보드에 복사되었습니다!");
       } catch (err) {
@@ -163,67 +328,80 @@ const FlipCard = ({ title, subtitle, color, description, axes }) => {
   };
 
   return (
-    <div
-      className="card-container"
-      onClick={flipCard}
-      role="button"
-      tabIndex={0}
-      onKeyDown={handleKeyDown}
-    >
-      <motion.div
-        className="card-inner"
-        initial={false}
-        animate={{ rotateY: rotation }}
-        transition={{ duration: 0.6, type: "spring", stiffness: 50 }}
+    <>
+      <div
+        className="card-container"
+        onClick={flipCard}
+        role="button"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
       >
-        {/* 앞면: 타이틀 + 게이지(수치 포함) */}
-        <div className="card-face card-front" style={{ borderColor: color }}>
-          <div className="front-header">
-            <h2
-              className="mbti-title"
-              style={{ color, textShadow: `0 0 15px ${color}` }}
-            >
-              {title}
-            </h2>
-            <span className="mbti-subtitle">{subtitle}</span>
-          </div>
-
-          {/* axes 데이터를 직접 전달하여 게이지 표시 */}
-          <MbtiGauge typeStr={title} axes={axes} />
-
-          <p className="click-hint">Click to Detail</p>
-        </div>
-
-        {/* 뒷면: 텍스트 설명 (수치 없음) */}
-        <div
-          className="card-face card-back"
-          style={{ borderColor: color }}
-          ref={cardBackRef}
+        <motion.div
+          className="card-inner"
+          initial={false}
+          animate={{ rotateY: rotation }}
+          transition={{ duration: 0.6, type: "spring", stiffness: 50 }}
         >
-          <div className="card-content">
-            <h3 style={{ color }}>운명 분석</h3>
-            <p className="description-text">{description}</p>
+          {/* 앞면: 타이틀 + 게이지 */}
+          <div
+            className="card-face card-front"
+            style={{ borderColor: color }}
+            ref={cardFrontRef}
+          >
+            <div className="front-header">
+              <h2
+                className="mbti-title"
+                style={{ color, textShadow: `0 0 15px ${color}` }}
+              >
+                {title}
+              </h2>
+              <span className="mbti-subtitle">{subtitle}</span>
+            </div>
+
+            <MbtiGauge typeStr={title} axes={axes} />
+
+            <p className="click-hint">Click to Detail</p>
           </div>
 
-          <div className="card-actions">
-            <button
-              type="button"
-              onClick={handleSaveImage}
-              className="action-btn save-btn"
-            >
-              💾 저장
-            </button>
-            <button
-              type="button"
-              onClick={handleShare}
-              className="action-btn share-btn"
-            >
-              🔗 공유
-            </button>
+          {/* 뒷면: 텍스트 설명 */}
+          <div
+            className="card-face card-back"
+            style={{ borderColor: color }}
+            ref={cardBackRef}
+          >
+            <div className="card-content">
+              <h3 style={{ color }}>운명 분석</h3>
+              <p className="description-text">{description}</p>
+            </div>
+
+            <div className="card-actions">
+              <button
+                type="button"
+                onClick={handleSaveClick}
+                className="action-btn save-btn"
+              >
+                💾 저장
+              </button>
+              <button
+                type="button"
+                onClick={handleShareClick}
+                className="action-btn share-btn"
+              >
+                🔗 공유
+              </button>
+            </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+
+      {/* 저장/공유 옵션 모달 */}
+      <SaveShareModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        onSelect={handleOptionSelect}
+        actionType={actionType}
+      />
+    </>
   );
 };
 
