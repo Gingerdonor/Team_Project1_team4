@@ -414,3 +414,205 @@ def get_calendar_month(
         }
 
     return {"year": year, "month": month, "data": calendar_data}
+
+
+# --- 통계 관련 API ---
+
+
+@app.get("/api/stats/monthly")
+def get_monthly_stats(
+    year: int = Query(default=None, ge=1950, le=2100),
+    month: int = Query(default=None, ge=1, le=12),
+    db: Session = Depends(get_db),
+):
+    """전체 유저 월간 통계 조회 (인증 불필요 - 공개 통계)"""
+    from collections import Counter
+
+    # 기본값: 현재 년월
+    if year is None:
+        year = date.today().year
+    if month is None:
+        month = date.today().month
+
+    # 해당 월의 시작일과 종료일 계산
+    start_date = f"{year:04d}-{month:02d}-01"
+    if month == 12:
+        end_date = f"{year + 1:04d}-01-01"
+    else:
+        end_date = f"{year:04d}-{month + 1:02d}-01"
+
+    # 해당 월의 모든 분석 결과 조회
+    results = (
+        db.query(models.AnalysisResult)
+        .filter(
+            models.AnalysisResult.analysis_date >= start_date,
+            models.AnalysisResult.analysis_date < end_date,
+        )
+        .all()
+    )
+
+    if not results:
+        return {
+            "year": year,
+            "month": month,
+            "total_analyses": 0,
+            "unique_users": 0,
+            "persona_stats": {},
+            "destiny_stats": {},
+            "axes_stats": {
+                "E_I": {"E": 0, "I": 0, "E_percent": 0, "I_percent": 0},
+                "S_N": {"S": 0, "N": 0, "S_percent": 0, "N_percent": 0},
+                "T_F": {"T": 0, "F": 0, "T_percent": 0, "F_percent": 0},
+                "J_P": {"J": 0, "P": 0, "J_percent": 0, "P_percent": 0},
+            },
+            "top_persona": None,
+            "top_destiny": None,
+            "element_stats": {},
+        }
+
+    total_analyses = len(results)
+    unique_users = len(set(r.username for r in results))
+
+    # MBTI 통계
+    persona_counter = Counter(r.my_persona for r in results if r.my_persona)
+    destiny_counter = Counter(r.my_destiny for r in results if r.my_destiny)
+
+    # 상위 MBTI
+    top_persona = persona_counter.most_common(1)[0] if persona_counter else None
+    top_destiny = destiny_counter.most_common(1)[0] if destiny_counter else None
+
+    # MBTI 축별 통계 계산
+    axes_stats = {
+        "E_I": {"E": 0, "I": 0},
+        "S_N": {"S": 0, "N": 0},
+        "T_F": {"T": 0, "F": 0},
+        "J_P": {"J": 0, "P": 0},
+    }
+
+    for result in results:
+        if result.my_persona and len(result.my_persona) == 4:
+            mbti = result.my_persona
+            axes_stats["E_I"][mbti[0]] = axes_stats["E_I"].get(mbti[0], 0) + 1
+            axes_stats["S_N"][mbti[1]] = axes_stats["S_N"].get(mbti[1], 0) + 1
+            axes_stats["T_F"][mbti[2]] = axes_stats["T_F"].get(mbti[2], 0) + 1
+            axes_stats["J_P"][mbti[3]] = axes_stats["J_P"].get(mbti[3], 0) + 1
+
+    # 퍼센트 계산
+    for axis_key in axes_stats:
+        axis_data = axes_stats[axis_key]
+        total = sum(axis_data.values())
+        if total > 0:
+            for char in axis_data:
+                axis_data[f"{char}_percent"] = round((axis_data[char] / total) * 100, 1)
+        else:
+            for char in list(axis_data.keys()):
+                axis_data[f"{char}_percent"] = 0
+
+    # 행운의 원소 통계
+    element_counter = Counter(r.lucky_element for r in results if r.lucky_element)
+    element_total = sum(element_counter.values())
+    element_stats = {
+        elem: {
+            "count": count,
+            "percent": (
+                round((count / element_total) * 100, 1) if element_total > 0 else 0
+            ),
+        }
+        for elem, count in element_counter.most_common()
+    }
+
+    # MBTI별 비율 계산
+    def counter_to_stats(counter, total):
+        return {
+            mbti: {
+                "count": count,
+                "percent": round((count / total) * 100, 1) if total > 0 else 0,
+            }
+            for mbti, count in counter.most_common()
+        }
+
+    return {
+        "year": year,
+        "month": month,
+        "total_analyses": total_analyses,
+        "unique_users": unique_users,
+        "persona_stats": counter_to_stats(persona_counter, total_analyses),
+        "destiny_stats": counter_to_stats(destiny_counter, total_analyses),
+        "axes_stats": axes_stats,
+        "top_persona": (
+            {"mbti": top_persona[0], "count": top_persona[1]} if top_persona else None
+        ),
+        "top_destiny": (
+            {"mbti": top_destiny[0], "count": top_destiny[1]} if top_destiny else None
+        ),
+        "element_stats": element_stats,
+    }
+
+
+@app.get("/api/stats/all-time")
+def get_all_time_stats(db: Session = Depends(get_db)):
+    """전체 기간 통계 조회"""
+    from collections import Counter
+
+    results = db.query(models.AnalysisResult).all()
+
+    if not results:
+        return {
+            "total_analyses": 0,
+            "unique_users": 0,
+            "persona_stats": {},
+            "destiny_stats": {},
+            "axes_stats": {},
+            "element_stats": {},
+        }
+
+    total_analyses = len(results)
+    unique_users = len(set(r.username for r in results))
+
+    persona_counter = Counter(r.my_persona for r in results if r.my_persona)
+    destiny_counter = Counter(r.my_destiny for r in results if r.my_destiny)
+    element_counter = Counter(r.lucky_element for r in results if r.lucky_element)
+
+    # 축별 통계
+    axes_stats = {
+        "E_I": {"E": 0, "I": 0},
+        "S_N": {"S": 0, "N": 0},
+        "T_F": {"T": 0, "F": 0},
+        "J_P": {"J": 0, "P": 0},
+    }
+
+    for result in results:
+        if result.my_persona and len(result.my_persona) == 4:
+            mbti = result.my_persona
+            axes_stats["E_I"][mbti[0]] = axes_stats["E_I"].get(mbti[0], 0) + 1
+            axes_stats["S_N"][mbti[1]] = axes_stats["S_N"].get(mbti[1], 0) + 1
+            axes_stats["T_F"][mbti[2]] = axes_stats["T_F"].get(mbti[2], 0) + 1
+            axes_stats["J_P"][mbti[3]] = axes_stats["J_P"].get(mbti[3], 0) + 1
+
+    for axis_key in axes_stats:
+        axis_data = axes_stats[axis_key]
+        total = sum(axis_data.values())
+        if total > 0:
+            for char in list(axis_data.keys()):
+                if not char.endswith("_percent"):
+                    axis_data[f"{char}_percent"] = round(
+                        (axis_data[char] / total) * 100, 1
+                    )
+
+    def counter_to_stats(counter, total):
+        return {
+            item: {
+                "count": count,
+                "percent": round((count / total) * 100, 1) if total > 0 else 0,
+            }
+            for item, count in counter.most_common()
+        }
+
+    return {
+        "total_analyses": total_analyses,
+        "unique_users": unique_users,
+        "persona_stats": counter_to_stats(persona_counter, total_analyses),
+        "destiny_stats": counter_to_stats(destiny_counter, total_analyses),
+        "axes_stats": axes_stats,
+        "element_stats": counter_to_stats(element_counter, total_analyses),
+    }

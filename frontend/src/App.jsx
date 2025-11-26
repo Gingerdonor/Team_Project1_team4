@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Selection from "./pages/Selection";
 import Settings from "./pages/Settings";
 import CalendarPage from "./pages/CalendarPage";
+import StatsPage from "./pages/StatsPage";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
         <Route path="/select" element={<Selection />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/calendar" element={<CalendarPage />} />
+        <Route path="/stats" element={<StatsPage />} />
       </Routes>
     </BrowserRouter>
   );

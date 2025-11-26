@@ -190,3 +190,10 @@
   border-color: #ff6b6b;
   box-shadow: 0 0 20px rgba(255, 107, 107, 0.3);
 }
+
+/* 통계 버튼 */
+.nav-btn.stats-btn:hover {
+  color: #00d9ff;
+  border-color: #00d9ff;
+  box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+}

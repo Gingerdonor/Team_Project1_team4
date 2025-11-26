@@ -1,7 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
-import { FaCog, FaCrown, FaCalendarAlt, FaSignOutAlt } from "react-icons/fa";
+import {
+  FaCog,
+  FaCrown,
+  FaCalendarAlt,
+  FaSignOutAlt,
+  FaChartBar,
+} from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
 import "./Selection.css";
@@ -234,6 +240,16 @@ const Selection = () => {
 
         {/* 상단 네비게이션 버튼들 */}
         <div className="nav-buttons">
+          {/* 통계 버튼 */}
+          <button
+            type="button"
+            className="nav-btn stats-btn"
+            onClick={() => navigate("/stats")}
+            aria-label="통계 페이지로 이동"
+          >
+            <FaChartBar size={24} />
+          </button>
+
           {/* 캘린더 버튼 */}
           <button
             type="button"
