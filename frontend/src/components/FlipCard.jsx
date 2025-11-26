@@ -7,11 +7,12 @@ import "./FlipCard.css";
 const extractScores = (text) => {
   const scores = {};
   // 예: [E 6.42 / I 6.16] 형태 찾기
-  const regex = /\[([A-Z])\s*([\d\.]+)\s*\/\s*([A-Z])\s*([\d\.]+)\]/g;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
+  const regex = /\[([A-Z])\s*([\d.]+)\s*\/\s*([A-Z])\s*([\d.]+)\]/g;
+  let match = regex.exec(text);
+  while (match !== null) {
     scores[match[1]] = parseFloat(match[2]);
     scores[match[3]] = parseFloat(match[4]);
+    match = regex.exec(text);
   }
   return scores;
 };
@@ -47,7 +48,7 @@ const MbtiGauge = ({ typeStr, description }) => {
 
   const rows = [
     { left: "E", right: "I" },
-    { left: "N", right: "S" }, // 보통 N/S 순서로 배치 (혹은 S/N)
+    { left: "N", right: "S" },
     { left: "F", right: "T" },
     { left: "P", right: "J" },
   ];
@@ -156,14 +157,18 @@ const FlipCard = ({ title, subtitle, color, description }) => {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {}
+      } catch (err) {
+        // ignore share cancellation
+      }
     } else {
       try {
         await navigator.clipboard.writeText(
           `${title}: ${description}\n${window.location.href}`
         );
         alert("클립보드에 복사되었습니다!");
-      } catch (err) {}
+      } catch (err) {
+        // ignore clipboard error
+      }
     }
   };
 
@@ -211,10 +216,18 @@ const FlipCard = ({ title, subtitle, color, description }) => {
           </div>
 
           <div className="card-actions">
-            <button onClick={handleSaveImage} className="action-btn save-btn">
+            <button
+              type="button"
+              onClick={handleSaveImage}
+              className="action-btn save-btn"
+            >
               💾 저장
             </button>
-            <button onClick={handleShare} className="action-btn share-btn">
+            <button
+              type="button"
+              onClick={handleShare}
+              className="action-btn share-btn"
+            >
               🔗 공유
             </button>
           </div>

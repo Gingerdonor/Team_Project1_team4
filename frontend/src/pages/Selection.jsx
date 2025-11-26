@@ -24,6 +24,58 @@ const MBTI_NICKNAMES = {
   ENTJ: "지도자형",
 };
 
+const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
+  <div className="card-slot">
+    {/* 1. 대기 상태 */}
+    {state.status === "idle" && (
+      <motion.button
+        type="button"
+        className="slot-button"
+        style={{ borderColor: color }}
+        whileHover={{ scale: 1.02, boxShadow: `0 0 20px ${color}40` }}
+        whileTap={{ scale: 0.98 }}
+        onClick={() => onSelect(type)}
+      >
+        <span className="slot-icon">{icon}</span>
+        <h3 className="slot-title">{label}</h3>
+        <p className="slot-desc">클릭하여 분석하기</p>
+      </motion.button>
+    )}
+
+    {/* 2. 로딩 상태 */}
+    {state.status === "loading" && (
+      <motion.div
+        className="slot-loading"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+      >
+        <motion.div
+          className="spinner"
+          style={{ borderTopColor: color }}
+          animate={{ rotate: 360 }}
+          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+        />
+        <p>운명을 읽는 중...</p>
+      </motion.div>
+    )}
+
+    {/* 3. 결과 완료 (FlipCard) */}
+    {state.status === "success" && state.data && (
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+      >
+        <FlipCard
+          title={state.data.title}
+          subtitle={state.data.subtitle}
+          color={state.data.color}
+          description={state.data.description}
+        />
+      </motion.div>
+    )}
+  </div>
+);
+
 const Selection = () => {
   // 상태 관리
   const [personaState, setPersonaState] = useState({
@@ -39,12 +91,6 @@ const Selection = () => {
   const fetchAnalysisData = async () => {
     if (analysisDataRef.current) return analysisDataRef.current;
     try {
-      // 임시 테스트용 데이터 (API 연결 전 확인하고 싶다면 주석 해제)
-      /* return { 
-            my_persona: "ESFP", persona_desc: "...", 
-            my_destiny: "INTJ", destiny_desc: "..." 
-        }; */
-
       const token = localStorage.getItem("token");
       if (!token) {
         alert("로그인이 필요합니다.");
@@ -113,55 +159,6 @@ const Selection = () => {
         });
       }
     }, 1500);
-  };
-
-  // 카드 슬롯 컴포넌트
-  const CardSlot = ({ type, state, onSelect, label, icon, color }) => {
-    return (
-      <div className="card-slot">
-        {/* 1. 대기 상태 */}
-        {state.status === "idle" && (
-          <motion.button
-            className="slot-button"
-            style={{ borderColor: color }}
-            whileHover={{ scale: 1.02, boxShadow: `0 0 20px ${color}40` }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => onSelect(type)}
-          >
-            <span className="slot-icon">{icon}</span>
-            <h3 className="slot-title">{label}</h3>
-            <p className="slot-desc">클릭하여 분석하기</p>
-          </motion.button>
-        )}
-
-        {/* 2. 로딩 상태 */}
-        {state.status === "loading" && (
-          <motion.div
-            className="slot-loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <motion.div
-              className="spinner"
-              style={{ borderTopColor: color }}
-              animate={{ rotate: 360 }}
-              transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-            />
-            <p>운명을 읽는 중...</p>
-          </motion.div>
-        )}
-
-        {/* 3. 결과 완료 (FlipCard) */}
-        {state.status === "success" && state.data && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <FlipCard {...state.data} />
-          </motion.div>
-        )}
-      </div>
-    );
   };
 
   return (
