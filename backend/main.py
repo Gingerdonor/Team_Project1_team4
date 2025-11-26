@@ -482,7 +482,7 @@ def get_monthly_stats(
     top_destiny = destiny_counter.most_common(1)[0] if destiny_counter else None
 
     # MBTI 축별 통계 계산
-    axes_stats = {
+    axes_counts = {
         "E_I": {"E": 0, "I": 0},
         "S_N": {"S": 0, "N": 0},
         "T_F": {"T": 0, "F": 0},
@@ -492,21 +492,24 @@ def get_monthly_stats(
     for result in results:
         if result.my_persona and len(result.my_persona) == 4:
             mbti = result.my_persona
-            axes_stats["E_I"][mbti[0]] = axes_stats["E_I"].get(mbti[0], 0) + 1
-            axes_stats["S_N"][mbti[1]] = axes_stats["S_N"].get(mbti[1], 0) + 1
-            axes_stats["T_F"][mbti[2]] = axes_stats["T_F"].get(mbti[2], 0) + 1
-            axes_stats["J_P"][mbti[3]] = axes_stats["J_P"].get(mbti[3], 0) + 1
+            axes_counts["E_I"][mbti[0]] = axes_counts["E_I"].get(mbti[0], 0) + 1
+            axes_counts["S_N"][mbti[1]] = axes_counts["S_N"].get(mbti[1], 0) + 1
+            axes_counts["T_F"][mbti[2]] = axes_counts["T_F"].get(mbti[2], 0) + 1
+            axes_counts["J_P"][mbti[3]] = axes_counts["J_P"].get(mbti[3], 0) + 1
 
-    # 퍼센트 계산
-    for axis_key in axes_stats:
-        axis_data = axes_stats[axis_key]
+    # 퍼센트 계산 - 새 딕셔너리 생성
+    axes_stats = {}
+    for axis_key, axis_data in axes_counts.items():
         total = sum(axis_data.values())
-        if total > 0:
-            for char in axis_data:
-                axis_data[f"{char}_percent"] = round((axis_data[char] / total) * 100, 1)
-        else:
-            for char in list(axis_data.keys()):
-                axis_data[f"{char}_percent"] = 0
+        axes_stats[axis_key] = {}
+        for char, count in axis_data.items():
+            axes_stats[axis_key][char] = count
+            if total > 0:
+                axes_stats[axis_key][f"{char}_percent"] = round(
+                    (count / total) * 100, 1
+                )
+            else:
+                axes_stats[axis_key][f"{char}_percent"] = 0
 
     # 행운의 원소 통계
     element_counter = Counter(r.lucky_element for r in results if r.lucky_element)
@@ -562,7 +565,12 @@ def get_all_time_stats(db: Session = Depends(get_db)):
             "unique_users": 0,
             "persona_stats": {},
             "destiny_stats": {},
-            "axes_stats": {},
+            "axes_stats": {
+                "E_I": {"E": 0, "I": 0, "E_percent": 0, "I_percent": 0},
+                "S_N": {"S": 0, "N": 0, "S_percent": 0, "N_percent": 0},
+                "T_F": {"T": 0, "F": 0, "T_percent": 0, "F_percent": 0},
+                "J_P": {"J": 0, "P": 0, "J_percent": 0, "P_percent": 0},
+            },
             "element_stats": {},
         }
 
@@ -574,7 +582,7 @@ def get_all_time_stats(db: Session = Depends(get_db)):
     element_counter = Counter(r.lucky_element for r in results if r.lucky_element)
 
     # 축별 통계
-    axes_stats = {
+    axes_counts = {
         "E_I": {"E": 0, "I": 0},
         "S_N": {"S": 0, "N": 0},
         "T_F": {"T": 0, "F": 0},
@@ -584,20 +592,24 @@ def get_all_time_stats(db: Session = Depends(get_db)):
     for result in results:
         if result.my_persona and len(result.my_persona) == 4:
             mbti = result.my_persona
-            axes_stats["E_I"][mbti[0]] = axes_stats["E_I"].get(mbti[0], 0) + 1
-            axes_stats["S_N"][mbti[1]] = axes_stats["S_N"].get(mbti[1], 0) + 1
-            axes_stats["T_F"][mbti[2]] = axes_stats["T_F"].get(mbti[2], 0) + 1
-            axes_stats["J_P"][mbti[3]] = axes_stats["J_P"].get(mbti[3], 0) + 1
+            axes_counts["E_I"][mbti[0]] = axes_counts["E_I"].get(mbti[0], 0) + 1
+            axes_counts["S_N"][mbti[1]] = axes_counts["S_N"].get(mbti[1], 0) + 1
+            axes_counts["T_F"][mbti[2]] = axes_counts["T_F"].get(mbti[2], 0) + 1
+            axes_counts["J_P"][mbti[3]] = axes_counts["J_P"].get(mbti[3], 0) + 1
 
-    for axis_key in axes_stats:
-        axis_data = axes_stats[axis_key]
+    # 퍼센트 계산 - 새 딕셔너리 생성
+    axes_stats = {}
+    for axis_key, axis_data in axes_counts.items():
         total = sum(axis_data.values())
-        if total > 0:
-            for char in list(axis_data.keys()):
-                if not char.endswith("_percent"):
-                    axis_data[f"{char}_percent"] = round(
-                        (axis_data[char] / total) * 100, 1
-                    )
+        axes_stats[axis_key] = {}
+        for char, count in axis_data.items():
+            axes_stats[axis_key][char] = count
+            if total > 0:
+                axes_stats[axis_key][f"{char}_percent"] = round(
+                    (count / total) * 100, 1
+                )
+            else:
+                axes_stats[axis_key][f"{char}_percent"] = 0
 
     def counter_to_stats(counter, total):
         return {
