@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, status, Request, Path, Query
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 from datetime import date, datetime
@@ -137,13 +138,16 @@ def register(user: schemas.UserRegister, db: Session = Depends(get_db)):
 
 
 @app.post("/api/login", response_model=schemas.Token)
-def login(user: schemas.UserLogin, db: Session = Depends(get_db)):
-    # 사용자 조회 (ORM)
+def login(
+    form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
+):
+    # 사용자 조회 (form_data.username 사용)
     db_user = (
-        db.query(models.User).filter(models.User.username == user.username).first()
+        db.query(models.User).filter(models.User.username == form_data.username).first()
     )
 
-    if not db_user or not verify_password(user.password, db_user.hashed_password):
+    # 비밀번호 검증 (form_data.password 사용)
+    if not db_user or not verify_password(form_data.password, db_user.hashed_password):
         raise HTTPException(status_code=401, detail="아이디 또는 비밀번호 오류")
 
     access_token = create_access_token(data={"sub": db_user.username})

@@ -35,7 +35,18 @@ api.interceptors.response.use(
 // 인증 관련 API
 export const authAPI = {
   register: (userData) => api.post("/register", userData),
-  login: (credentials) => api.post("/login", credentials),
+  login: (credentials) => {
+    const formData = new URLSearchParams();
+    formData.append("username", credentials.username);
+    formData.append("password", credentials.password);
+
+    return api.post("/login", formData, {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    });
+  },
+
   logout: () => api.post("/logout"),
   getMe: () => api.get("/users/me"),
 };
