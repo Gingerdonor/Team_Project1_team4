@@ -31,19 +31,34 @@ const Login = () => {
     e.preventDefault(); // 새로고침 방지
     setErrorMsg("");
 
-    const endpoint = isLoginMode ? "/api/login" : "/api/register";
-    const url = endpoint;
-
-    const payload = isLoginMode
-      ? { username, password }
-      : { username, password, nickname, birthdate, gender }; // 회원가입시 추가 정보 전송
-
     try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let response;
+
+      if (isLoginMode) {
+        // 로그인: Form Data 형식으로 전송 (OAuth2PasswordRequestForm 호환)
+        const formData = new URLSearchParams();
+        formData.append("username", username);
+        formData.append("password", password);
+
+        response = await fetch("/api/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: formData,
+        });
+      } else {
+        // 회원가입: 기존 JSON 형식 유지
+        response = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username,
+            password,
+            nickname,
+            birthdate,
+            gender,
+          }),
+        });
+      }
 
       const data = await response.json();
 
