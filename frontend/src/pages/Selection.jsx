@@ -126,7 +126,7 @@ const Selection = () => {
     status: "idle",
     data: null,
   });
-  const [destinaState, setDestinaState] = useState({
+  const [destinyState, setDestinyState] = useState({
     status: "idle",
     data: null,
   });
@@ -161,14 +161,14 @@ const Selection = () => {
   const handleSelect = async (type) => {
     if (type === "persona")
       setPersonaState((prev) => ({ ...prev, status: "loading" }));
-    else setDestinaState((prev) => ({ ...prev, status: "loading" }));
+    else setDestinyState((prev) => ({ ...prev, status: "loading" }));
 
     const data = await fetchAnalysisData();
 
     setTimeout(() => {
       if (!data) {
         if (type === "persona") setPersonaState({ status: "idle", data: null });
-        else setDestinaState({ status: "idle", data: null });
+        else setDestinyState({ status: "idle", data: null });
         return;
       }
       if (type === "persona") {
@@ -186,7 +186,7 @@ const Selection = () => {
         });
       } else {
         const dData = data.destiny_data || {};
-        setDestinaState({
+        setDestinyState({
           status: "success",
           data: {
             title: dData.mbti || data.my_destiny,
@@ -296,10 +296,10 @@ const Selection = () => {
             color="#a18cd1"
           />
           <CardSlot
-            type="destina"
-            state={destinaState}
+            type="destiny"
+            state={destinyState}
             onSelect={handleSelect}
-            label="My Destina"
+            label="My Destiny"
             icon="🌟"
             color="#fad0c4"
           />

@@ -214,7 +214,7 @@ const StatsContent = ({ stats, axesConfig }) => {
         )}
         {Object.keys(stats.destiny_stats || {}).length > 0 && (
           <MBTIRankingCard
-            title="My Destina TOP 5"
+            title="My Destiny TOP 5"
             data={stats.destiny_stats}
             icon="🌟"
           />
