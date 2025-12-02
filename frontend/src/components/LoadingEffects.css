@@ -1,0 +1,452 @@
+/* 로딩 래퍼 */
+.loading-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 30px;
+}
+
+.loading-effect {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-text {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-align: center;
+}
+
+/* ===== 1. Cosmic Explosion ===== */
+.cosmic-explosion .explosion-core {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  filter: blur(5px);
+  z-index: 5;
+}
+
+.cosmic-explosion .explosion-particle {
+  position: absolute;
+  border-radius: 50%;
+  z-index: 3;
+}
+
+.cosmic-explosion .explosion-ring {
+  position: absolute;
+  width: 50px;
+  height: 50px;
+  border: 3px solid;
+  border-radius: 50%;
+}
+
+/* ===== 2. Fireworks ===== */
+.fireworks {
+  overflow: visible;
+}
+
+.firework-group {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+}
+
+.firework-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.firework-center {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  filter: blur(2px);
+}
+
+/* ===== 3. Energy Burst ===== */
+.energy-burst .energy-core {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+.energy-burst .energy-beam {
+  position: absolute;
+  width: 150px;
+  height: 4px;
+  transform-origin: left center;
+  left: 50%;
+}
+
+.energy-burst .electric-spark {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  box-shadow: 0 0 10px currentColor;
+}
+
+/* ===== 4. Black Hole ===== */
+.black-hole .event-horizon {
+  width: 160px;
+  height: 160px;
+  position: relative;
+}
+
+.black-hole .accretion-disk {
+  width: 100%;
+  height: 100%;
+  border: 3px solid;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.black-hole .absorbed-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+.black-hole .singularity {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  background: #000;
+  border-radius: 50%;
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  z-index: 10;
+}
+
+/* ===== 5. Phoenix ===== */
+.phoenix .phoenix-wing {
+  position: absolute;
+  width: 60px;
+  height: 100px;
+  border-radius: 50% 50% 0 50%;
+  filter: blur(3px);
+  opacity: 0.8;
+}
+
+.phoenix .phoenix-wing.left {
+  left: 20px;
+  transform-origin: bottom right;
+}
+
+.phoenix .phoenix-wing.right {
+  right: 20px;
+  border-radius: 50% 50% 50% 0;
+  transform-origin: bottom left;
+}
+
+.phoenix .fire-particle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  bottom: 50%;
+}
+
+.phoenix .phoenix-core {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+/* ===== 6. Lightning Storm ===== */
+.lightning-storm {
+  overflow: hidden;
+  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+}
+
+.lightning-storm .storm-clouds {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  height: 50px;
+}
+
+.lightning-storm .cloud {
+  position: absolute;
+  width: 60px;
+  height: 30px;
+  background: rgba(100, 100, 120, 0.8);
+  border-radius: 20px;
+}
+
+.lightning-storm .cloud::before,
+.lightning-storm .cloud::after {
+  content: "";
+  position: absolute;
+  background: rgba(100, 100, 120, 0.8);
+  border-radius: 50%;
+}
+
+.lightning-storm .cloud::before {
+  width: 25px;
+  height: 25px;
+  top: -10px;
+  left: 10px;
+}
+
+.lightning-storm .cloud::after {
+  width: 35px;
+  height: 35px;
+  top: -15px;
+  right: 10px;
+}
+
+.lightning-storm .lightning-bolt {
+  position: absolute;
+  width: 40px;
+  height: 80px;
+  top: 40px;
+}
+
+.lightning-storm .lightning-flash {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  border-radius: 20px;
+}
+
+/* ===== 7. Supernova ===== */
+.supernova .supernova-core {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  z-index: 5;
+  box-shadow: 0 0 30px currentColor;
+}
+
+.supernova .supernova-wave {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid;
+  border-radius: 50%;
+}
+
+.supernova .star-debris {
+  position: absolute;
+  border-radius: 50%;
+}
+
+/* ===== 8. Portal ===== */
+.portal .portal-ring {
+  position: absolute;
+  border: 3px solid;
+  border-radius: 50%;
+  border-style: dashed;
+}
+
+.portal .portal-vortex {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  opacity: 0.6;
+}
+
+.portal .portal-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.portal .portal-center {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  z-index: 5;
+}
+
+/* ===== 9. Lava ===== */
+.lava {
+  overflow: hidden;
+  border-radius: 20px;
+  background: linear-gradient(180deg, #1a1a2e 0%, #2d1810 100%);
+}
+
+.lava .lava-bubble {
+  position: absolute;
+  border-radius: 50%;
+  bottom: 20%;
+}
+
+.lava .lava-splash {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  bottom: 30%;
+}
+
+.lava .lava-surface {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 40%;
+  border-radius: 50% 50% 0 0;
+}
+
+/* ===== 10. Galaxy Collision ===== */
+.galaxy-collision .galaxy-1,
+.galaxy-collision .galaxy-2 {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+}
+
+.galaxy-collision .galaxy-core {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 20px currentColor;
+}
+
+.galaxy-collision .galaxy-spiral {
+  width: 100%;
+  height: 100%;
+  border: 2px solid;
+  border-radius: 50%;
+  opacity: 0.5;
+}
+
+.galaxy-collision .collision-star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+}
+
+/* ===== 효과 선택 모달 ===== */
+.effect-selector-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.effect-selector-modal {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  width: 90%;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.effect-selector-title {
+  text-align: center;
+  color: white;
+  margin-bottom: 25px;
+  font-size: 1.3rem;
+}
+
+.effect-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.effect-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s;
+  color: white;
+}
+
+.effect-option:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-3px);
+}
+
+.effect-option.selected {
+  border-color: #a18cd1;
+  background: rgba(161, 140, 209, 0.2);
+}
+
+.effect-icon {
+  font-size: 1.8rem;
+}
+
+.effect-name {
+  font-size: 0.7rem;
+  text-align: center;
+}
+
+.effect-selector-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.effect-btn {
+  padding: 12px 30px;
+  border-radius: 25px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: all 0.3s;
+}
+
+.effect-btn.primary {
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  color: white;
+}
+
+.effect-btn.secondary {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.effect-btn:hover {
+  transform: scale(1.05);
+}
+
+@media (max-width: 600px) {
+  .effect-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 400px) {
+  .effect-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

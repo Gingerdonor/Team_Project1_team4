@@ -8,9 +8,12 @@ import {
   FaSignOutAlt,
   FaChartBar,
   FaArrowLeft,
+  FaStar,
 } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
+import LoadingEffect, { LOADING_EFFECTS } from "../components/LoadingEffects";
+import EffectSelector from "../components/EffectSelector";
 import "./Selection.css";
 
 // MBTI 별명 매핑
@@ -42,15 +45,17 @@ const Selection = () => {
     membership: "Standard",
   });
 
-  // 현재 보기 상태: "selection" | "persona" | "destiny"
+  // 현재 보기 상태
   const [currentView, setCurrentView] = useState("selection");
-
-  // 로딩 상태
   const [isLoading, setIsLoading] = useState(false);
-
-  // 분석 결과 데이터
   const [analysisData, setAnalysisData] = useState(null);
   const analysisDataRef = useRef(null);
+
+  // 로딩 효과 설정
+  const [loadingEffect, setLoadingEffect] = useState(() => {
+    return localStorage.getItem("loadingEffect") || "cosmic";
+  });
+  const [showEffectSelector, setShowEffectSelector] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -77,6 +82,12 @@ const Selection = () => {
         navigate("/");
       });
   }, [navigate]);
+
+  // 로딩 효과 저장
+  const handleEffectSelect = (effectId) => {
+    setLoadingEffect(effectId);
+    localStorage.setItem("loadingEffect", effectId);
+  };
 
   // 분석 데이터 가져오기
   const fetchAnalysisData = async () => {
@@ -117,13 +128,13 @@ const Selection = () => {
 
     const data = await fetchAnalysisData();
 
-    // 로딩 효과 (최소 1.5초)
+    // 로딩 효과 최소 2초
     setTimeout(() => {
       setIsLoading(false);
       if (!data) {
         setCurrentView("selection");
       }
-    }, 1500);
+    }, 2000);
   };
 
   // 뒤로가기
@@ -149,7 +160,7 @@ const Selection = () => {
     }
   };
 
-  // 현재 표시할 카드 데이터 가져오기
+  // 카드 데이터 가져오기
   const getCardData = (type) => {
     if (!analysisData) return null;
 
@@ -178,6 +189,8 @@ const Selection = () => {
     }
   };
 
+  const currentColor = currentView === "persona" ? "#a18cd1" : "#fad0c4";
+
   return (
     <SpaceBackground>
       <div className="selection-page-content">
@@ -202,6 +215,15 @@ const Selection = () => {
 
         {/* 상단 네비게이션 */}
         <div className="nav-buttons">
+          {/* 로딩 효과 선택 버튼 */}
+          <button
+            type="button"
+            className="nav-btn effect-btn"
+            onClick={() => setShowEffectSelector(true)}
+            title="로딩 효과 변경"
+          >
+            <span className="nav-emoji">✨</span>
+          </button>
           <button
             type="button"
             className="nav-btn stats-btn"
@@ -233,7 +255,7 @@ const Selection = () => {
         </div>
 
         <AnimatePresence mode="wait">
-          {/* ===== 메인 선택 화면 ===== */}
+          {/* 메인 선택 화면 */}
           {currentView === "selection" && (
             <motion.div
               key="selection"
@@ -276,10 +298,22 @@ const Selection = () => {
                   </div>
                 </motion.button>
               </div>
+
+              {/* 현재 효과 표시 */}
+              <motion.p
+                className="current-effect-hint"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                현재 로딩 효과:{" "}
+                {LOADING_EFFECTS.find((e) => e.id === loadingEffect)?.icon}{" "}
+                {LOADING_EFFECTS.find((e) => e.id === loadingEffect)?.name}
+              </motion.p>
             </motion.div>
           )}
 
-          {/* ===== 결과 화면 (Persona / Destiny) ===== */}
+          {/* 결과 화면 */}
           {(currentView === "persona" || currentView === "destiny") && (
             <motion.div
               key={currentView}
@@ -306,32 +340,18 @@ const Selection = () => {
               </h1>
 
               <div className="result-card-container">
-                {/* 로딩 상태 */}
+                {/* 로딩 효과 */}
                 {isLoading && (
                   <motion.div
-                    className="loading-container"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
                   >
-                    <motion.div
-                      className="loading-orb"
-                      style={{
-                        background:
-                          currentView === "persona"
-                            ? "linear-gradient(135deg, #a18cd1, #fbc2eb)"
-                            : "linear-gradient(135deg, #fad0c4, #ffd1ff)",
-                      }}
-                      animate={{
-                        scale: [1, 1.2, 1],
-                        opacity: [0.5, 1, 0.5],
-                      }}
-                      transition={{
-                        duration: 1.5,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
+                    <LoadingEffect
+                      effectId={loadingEffect}
+                      color={currentColor}
+                      text="운명을 읽는 중..."
                     />
-                    <p className="loading-text">운명을 읽는 중...</p>
                   </motion.div>
                 )}
 
@@ -350,6 +370,14 @@ const Selection = () => {
           )}
         </AnimatePresence>
       </div>
+
+      {/* 효과 선택 모달 */}
+      <EffectSelector
+        isOpen={showEffectSelector}
+        currentEffect={loadingEffect}
+        onSelect={handleEffectSelect}
+        onClose={() => setShowEffectSelector(false)}
+      />
     </SpaceBackground>
   );
 };

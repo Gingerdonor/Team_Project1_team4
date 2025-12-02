@@ -347,3 +347,21 @@
     margin-bottom: 20px;
   }
 }
+
+/* 이모지 아이콘 스타일 */
+.nav-emoji {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+
+/* 어드민 버튼 */
+.nav-btn.admin-btn:hover {
+  border-color: #ff9f43;
+  box-shadow: 0 0 20px rgba(255, 159, 67, 0.4);
+}
+
+/* 효과 선택 버튼 */
+.nav-btn.effect-btn:hover {
+  border-color: #ff6ec7;
+  box-shadow: 0 0 20px rgba(255, 110, 199, 0.4);
+}
