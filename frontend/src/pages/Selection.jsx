@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
   FaCog,
@@ -7,6 +7,7 @@ import {
   FaCalendarAlt,
   FaSignOutAlt,
   FaChartBar,
+  FaArrowLeft,
 } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
@@ -32,68 +33,24 @@ const MBTI_NICKNAMES = {
   ENTJ: "지도자형",
 };
 
-const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
-  <div className="card-slot">
-    {/* 1. 대기 상태 */}
-    {state.status === "idle" && (
-      <motion.button
-        type="button"
-        className="slot-button"
-        style={{ borderColor: color }}
-        whileHover={{ scale: 1.02, boxShadow: `0 0 20px ${color}40` }}
-        whileTap={{ scale: 0.98 }}
-        onClick={() => onSelect(type)}
-      >
-        <span className="slot-icon">{icon}</span>
-        <h3 className="slot-title">{label}</h3>
-        <p className="slot-desc">클릭하여 분석하기</p>
-      </motion.button>
-    )}
-
-    {/* 2. 로딩 상태 */}
-    {state.status === "loading" && (
-      <motion.div
-        className="slot-loading"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-      >
-        <motion.div
-          className="spinner"
-          style={{ borderTopColor: color }}
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-        />
-        <p>운명을 읽는 중...</p>
-      </motion.div>
-    )}
-
-    {/* 3. 결과 완료 (FlipCard) */}
-    {state.status === "success" && state.data && (
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-      >
-        <FlipCard
-          title={state.data.title}
-          subtitle={state.data.subtitle}
-          color={state.data.color}
-          description={state.data.description}
-          axes={state.data.axes}
-          celebrity={state.data.celebrity}
-        />
-      </motion.div>
-    )}
-  </div>
-);
-
 const Selection = () => {
   const navigate = useNavigate();
 
-  // 1. 유저 정보 로딩
+  // 유저 정보
   const [userInfo, setUserInfo] = useState({
     nickname: "Loading...",
     membership: "Standard",
   });
+
+  // 현재 보기 상태: "selection" | "persona" | "destiny"
+  const [currentView, setCurrentView] = useState("selection");
+
+  // 로딩 상태
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 분석 결과 데이터
+  const [analysisData, setAnalysisData] = useState(null);
+  const analysisDataRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -112,7 +69,7 @@ const Selection = () => {
       .then((data) => {
         setUserInfo({
           nickname: data.nickname || data.username,
-          membership: "VIP Member", // VIP 강제 적용
+          membership: "VIP Member",
         });
       })
       .catch(() => {
@@ -121,26 +78,18 @@ const Selection = () => {
       });
   }, [navigate]);
 
-  // 2. 분석 데이터 로딩
-  const [personaState, setPersonaState] = useState({
-    status: "idle",
-    data: null,
-  });
-  const [destinyState, setDestinyState] = useState({
-    status: "idle",
-    data: null,
-  });
-  const analysisDataRef = useRef(null);
-
+  // 분석 데이터 가져오기
   const fetchAnalysisData = async () => {
     if (analysisDataRef.current) return analysisDataRef.current;
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
         alert("로그인이 필요합니다.");
-        window.location.href = "/login";
+        navigate("/");
         return null;
       }
+
       const response = await fetch("/api/analyze/today", {
         method: "GET",
         headers: {
@@ -148,9 +97,12 @@ const Selection = () => {
           "Content-Type": "application/json",
         },
       });
+
       if (!response.ok) throw new Error("데이터 실패");
+
       const data = await response.json();
       analysisDataRef.current = data;
+      setAnalysisData(data);
       return data;
     } catch (error) {
       console.error(error);
@@ -158,50 +110,28 @@ const Selection = () => {
     }
   };
 
+  // 버튼 클릭 핸들러
   const handleSelect = async (type) => {
-    if (type === "persona")
-      setPersonaState((prev) => ({ ...prev, status: "loading" }));
-    else setDestinyState((prev) => ({ ...prev, status: "loading" }));
+    setCurrentView(type);
+    setIsLoading(true);
 
     const data = await fetchAnalysisData();
 
+    // 로딩 효과 (최소 1.5초)
     setTimeout(() => {
+      setIsLoading(false);
       if (!data) {
-        if (type === "persona") setPersonaState({ status: "idle", data: null });
-        else setDestinyState({ status: "idle", data: null });
-        return;
-      }
-      if (type === "persona") {
-        const pData = data.persona_data || {};
-        setPersonaState({
-          status: "success",
-          data: {
-            title: pData.mbti || data.my_persona,
-            subtitle: MBTI_NICKNAMES[pData.mbti || data.my_persona] || "유형",
-            color: "#a18cd1",
-            description: pData.description,
-            axes: pData.axes,
-            celebrity: pData.celebrity || null,
-          },
-        });
-      } else {
-        const dData = data.destiny_data || {};
-        setDestinyState({
-          status: "success",
-          data: {
-            title: dData.mbti || data.my_destiny,
-            subtitle: MBTI_NICKNAMES[dData.mbti || data.my_destiny] || "유형",
-            color: "#fad0c4",
-            description: dData.description,
-            axes: dData.axes,
-            celebrity: dData.celebrity || null,
-          },
-        });
+        setCurrentView("selection");
       }
     }, 1500);
   };
 
-  // 로그아웃 핸들러
+  // 뒤로가기
+  const handleBack = () => {
+    setCurrentView("selection");
+  };
+
+  // 로그아웃
   const handleLogout = async () => {
     if (!window.confirm("정말 로그아웃 하시겠습니까?")) return;
 
@@ -219,10 +149,39 @@ const Selection = () => {
     }
   };
 
+  // 현재 표시할 카드 데이터 가져오기
+  const getCardData = (type) => {
+    if (!analysisData) return null;
+
+    if (type === "persona") {
+      const pData = analysisData.persona_data || {};
+      return {
+        title: pData.mbti || analysisData.my_persona,
+        subtitle:
+          MBTI_NICKNAMES[pData.mbti || analysisData.my_persona] || "유형",
+        color: "#a18cd1",
+        description: pData.description,
+        axes: pData.axes,
+        celebrity: pData.celebrity || null,
+      };
+    } else {
+      const dData = analysisData.destiny_data || {};
+      return {
+        title: dData.mbti || analysisData.my_destiny,
+        subtitle:
+          MBTI_NICKNAMES[dData.mbti || analysisData.my_destiny] || "유형",
+        color: "#fad0c4",
+        description: dData.description,
+        axes: dData.axes,
+        celebrity: dData.celebrity || null,
+      };
+    }
+  };
+
   return (
     <SpaceBackground>
       <div className="selection-page-content">
-        {/* 유저 프로필 (VIP 배지) */}
+        {/* 유저 프로필 */}
         <div className="user-profile-container">
           <motion.div
             initial={{ y: -50, opacity: 0 }}
@@ -241,69 +200,155 @@ const Selection = () => {
           </motion.div>
         </div>
 
-        {/* 상단 네비게이션 버튼들 */}
+        {/* 상단 네비게이션 */}
         <div className="nav-buttons">
-          {/* 통계 버튼 */}
           <button
             type="button"
             className="nav-btn stats-btn"
             onClick={() => navigate("/stats")}
-            aria-label="통계 페이지로 이동"
           >
             <FaChartBar size={24} />
           </button>
-
-          {/* 캘린더 버튼 */}
           <button
             type="button"
             className="nav-btn calendar-btn"
             onClick={() => navigate("/calendar")}
-            aria-label="캘린더 페이지로 이동"
           >
             <FaCalendarAlt size={24} />
           </button>
-
-          {/* 설정 버튼 */}
           <button
             type="button"
             className="nav-btn settings-btn"
             onClick={() => navigate("/settings")}
-            aria-label="설정 페이지로 이동"
           >
             <FaCog size={24} />
           </button>
-
-          {/* 로그아웃 버튼 */}
           <button
             type="button"
             className="nav-btn logout-btn"
             onClick={handleLogout}
-            aria-label="로그아웃"
           >
             <FaSignOutAlt size={24} />
           </button>
         </div>
 
-        <h1 className="page-title">오늘의 운명 확인하기</h1>
+        <AnimatePresence mode="wait">
+          {/* ===== 메인 선택 화면 ===== */}
+          {currentView === "selection" && (
+            <motion.div
+              key="selection"
+              className="selection-main"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h1 className="page-title">오늘의 운명 확인하기</h1>
 
-        <div className="cards-wrapper">
-          <CardSlot
-            type="persona"
-            state={personaState}
-            onSelect={handleSelect}
-            label="My Persona"
-            icon="🔮"
-            color="#a18cd1"
-          />
-          <CardSlot
-            type="destiny"
-            state={destinyState}
-            onSelect={handleSelect}
-            label="My Destiny"
-            icon="🌟"
-            color="#fad0c4"
-          />
-        </div>
+              <div className="orb-buttons-wrapper">
+                {/* Persona 버튼 */}
+                <motion.button
+                  type="button"
+                  className="orb-button persona-orb"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleSelect("persona")}
+                >
+                  <div className="orb-glow persona-glow" />
+                  <div className="orb-content">
+                    <span className="orb-icon">🔮</span>
+                    <span className="orb-label">My Persona</span>
+                  </div>
+                </motion.button>
+
+                {/* Destiny 버튼 */}
+                <motion.button
+                  type="button"
+                  className="orb-button destiny-orb"
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleSelect("destiny")}
+                >
+                  <div className="orb-glow destiny-glow" />
+                  <div className="orb-content">
+                    <span className="orb-icon">🌟</span>
+                    <span className="orb-label">My Destiny</span>
+                  </div>
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+
+          {/* ===== 결과 화면 (Persona / Destiny) ===== */}
+          {(currentView === "persona" || currentView === "destiny") && (
+            <motion.div
+              key={currentView}
+              className="result-view"
+              initial={{ opacity: 0, x: 100 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -100 }}
+              transition={{ duration: 0.4 }}
+            >
+              {/* 뒤로가기 버튼 */}
+              <motion.button
+                type="button"
+                className="back-button"
+                onClick={handleBack}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+              >
+                <FaArrowLeft size={20} />
+                <span>돌아가기</span>
+              </motion.button>
+
+              <h1 className="result-title">
+                {currentView === "persona" ? "🔮 My Persona" : "🌟 My Destiny"}
+              </h1>
+
+              <div className="result-card-container">
+                {/* 로딩 상태 */}
+                {isLoading && (
+                  <motion.div
+                    className="loading-container"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                  >
+                    <motion.div
+                      className="loading-orb"
+                      style={{
+                        background:
+                          currentView === "persona"
+                            ? "linear-gradient(135deg, #a18cd1, #fbc2eb)"
+                            : "linear-gradient(135deg, #fad0c4, #ffd1ff)",
+                      }}
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{
+                        duration: 1.5,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                      }}
+                    />
+                    <p className="loading-text">운명을 읽는 중...</p>
+                  </motion.div>
+                )}
+
+                {/* FlipCard 결과 */}
+                {!isLoading && analysisData && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <FlipCard {...getCardData(currentView)} />
+                  </motion.div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </SpaceBackground>
   );
