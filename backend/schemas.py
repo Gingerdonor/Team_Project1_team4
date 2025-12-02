@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -133,3 +133,75 @@ class CelebrityResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# --- 응답 스키마 추가 ---
+
+
+class MessageResponse(BaseModel):
+    """기본 메시지 응답"""
+
+    message: str
+
+
+class CelebrityData(BaseModel):
+    """유명인 데이터"""
+
+    name: str
+    tags: List[str]
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class PersonaData(BaseModel):
+    """페르소나 분석 데이터"""
+
+    mbti: str
+    description: str
+    axes: Dict[str, Dict[str, float]]
+    celebrity: Optional[CelebrityData] = None
+
+
+class DestinyData(BaseModel):
+    """운명 분석 데이터"""
+
+    mbti: str
+    description: str
+    axes: Dict[str, Dict[str, float]]
+    celebrity: Optional[CelebrityData] = None
+
+
+class AnalysisTodayResponse(BaseModel):
+    """오늘의 분석 응답"""
+
+    my_persona: str
+    my_destiny: str
+    lucky_element: str
+    persona_data: PersonaData
+    destiny_data: DestinyData
+
+
+class HealthResponse(BaseModel):
+    """헬스체크 응답"""
+
+    status: str
+    debug: bool
+
+
+class PaginatedResponse(BaseModel):
+    """페이지네이션 응답 기본"""
+
+    total: int
+    page: int
+    per_page: int
+    total_pages: int
+
+
+class AdminDashboardResponse(BaseModel):
+    """관리자 대시보드 응답"""
+
+    total_users: int
+    total_analyses: int
+    total_celebrities: int
+    celebrity_by_mbti: Dict[str, int]
+    recent_analyses: List[Dict[str, Any]]

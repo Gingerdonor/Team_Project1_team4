@@ -10,12 +10,11 @@ MBTI 유명인 테이블 초기화 스크립트 (태그 기반)
 - 국적: 한국, 미국, 일본 등
 """
 
-import dotenv
-
-dotenv.load_dotenv()
-
 import json
 from sqlalchemy import inspect
+
+# config가 먼저 로드되도록
+from core.config import settings
 from database import engine, SessionLocal
 from models import Base, MbtiCelebrity
 
@@ -711,7 +710,7 @@ def init_mbti_celebrities():
     """
 
     # 테이블 삭제 (테스트)
-    MbtiCelebrity.__table__.drop(bind=engine, checkfirst=True)
+    # MbtiCelebrity.__table__.drop(bind=engine, checkfirst=True)
 
     # 1. 테이블 생성 (없는 경우에만)
     if not table_exists("mbti_celebrities"):
