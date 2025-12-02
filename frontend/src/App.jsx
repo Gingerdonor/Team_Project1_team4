@@ -5,6 +5,7 @@ import Selection from "./pages/Selection";
 import Settings from "./pages/Settings";
 import CalendarPage from "./pages/CalendarPage";
 import StatsPage from "./pages/StatsPage";
+import AdminPage from "./pages/AdminPage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/settings" element={<Settings />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/stats" element={<StatsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
       </Routes>
     </BrowserRouter>
   );

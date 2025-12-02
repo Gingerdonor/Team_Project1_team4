@@ -68,3 +68,68 @@ class CalendarDayResponse(BaseModel):
     has_analysis: bool
     my_persona: Optional[str] = None
     lucky_element: Optional[str] = None
+
+
+# --- Admin 관련 스키마 ---
+
+
+class AnalysisResultUpdate(BaseModel):
+    """분석 결과 수정용 스키마"""
+
+    my_persona: Optional[str] = None
+    my_destiny: Optional[str] = None
+    lucky_element: Optional[str] = None
+    persona_description: Optional[str] = None
+    destiny_description: Optional[str] = None
+
+
+class AnalysisResultResponse(BaseModel):
+    """분석 결과 응답 스키마"""
+
+    id: int
+    username: str
+    analysis_date: str
+    my_persona: Optional[str]
+    my_destiny: Optional[str]
+    lucky_element: Optional[str]
+    persona_description: Optional[str]
+    destiny_description: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class CelebrityCreate(BaseModel):
+    """유명인 생성용 스키마"""
+
+    mbti: str
+    name: str
+    tags: List[str]
+    description: Optional[str] = ""
+    image_url: Optional[str] = ""
+
+
+class CelebrityUpdate(BaseModel):
+    """유명인 수정용 스키마"""
+
+    mbti: Optional[str] = None
+    name: Optional[str] = None
+    tags: Optional[List[str]] = None
+    description: Optional[str] = None
+    image_url: Optional[str] = None
+
+
+class CelebrityResponse(BaseModel):
+    """유명인 응답 스키마"""
+
+    id: int
+    mbti: str
+    name: str
+    tags: List[str]
+    description: Optional[str]
+    image_url: Optional[str]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
