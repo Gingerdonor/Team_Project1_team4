@@ -208,9 +208,11 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
       transform: "none",
       zIndex: -1,
       width: `${element.offsetWidth}px`,
-      height: `${element.offsetHeight}px`,
+      height: "auto",
+      minHeight: `${element.offsetHeight}px`,
       borderRadius: "20px",
       backfaceVisibility: "visible",
+      overflow: "visible",
     });
 
     if (removeActions) {
