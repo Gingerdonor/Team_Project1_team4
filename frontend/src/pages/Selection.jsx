@@ -79,6 +79,7 @@ const CardSlot = ({ type, state, onSelect, label, icon, color }) => (
           color={state.data.color}
           description={state.data.description}
           axes={state.data.axes}
+          celebrity={state.data.celebrity}
         />
       </motion.div>
     )}
@@ -180,6 +181,7 @@ const Selection = () => {
             color: "#a18cd1",
             description: pData.description,
             axes: pData.axes,
+            celebrity: pData.celebrity || null,
           },
         });
       } else {
@@ -192,6 +194,7 @@ const Selection = () => {
             color: "#fad0c4",
             description: dData.description,
             axes: dData.axes,
+            celebrity: dData.celebrity || null,
           },
         });
       }

@@ -138,7 +138,7 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
   );
 };
 
-const FlipCard = ({ title, subtitle, color, description, axes }) => {
+const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
   const [rotation, setRotation] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [actionType, setActionType] = useState(null); // "save" or "share"
@@ -372,6 +372,30 @@ const FlipCard = ({ title, subtitle, color, description, axes }) => {
             <div className="card-content">
               <h3 style={{ color }}>운명 분석</h3>
               <p className="description-text">{description}</p>
+
+              {celebrity && (
+                <div className="celebrity-section">
+                  <div className="celebrity-label">
+                    ✨ 당신과 같은 MBTI 유명인
+                  </div>
+                  <div className="celebrity-name">{celebrity.name}</div>
+                  {celebrity.description && (
+                    <div className="celebrity-desc">
+                      {celebrity.description}
+                    </div>
+                  )}
+                  {/* 태그 표시 */}
+                  {celebrity.tags && celebrity.tags.length > 0 && (
+                    <div className="celebrity-tags">
+                      {celebrity.tags.slice(0, 4).map((tag, index) => (
+                        <span key={index} className="celebrity-tag">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="card-actions">

@@ -7,6 +7,8 @@ from contextlib import asynccontextmanager
 from datetime import date, datetime
 import os
 import json
+import random
+from typing import List, Optional
 from dotenv import load_dotenv
 
 load_dotenv()  # .env 파일 로드
@@ -17,6 +19,7 @@ import models
 import logic
 import schemas
 from init_db import init_db
+from models import MbtiCelebrity
 
 # 보안 관련 (기존 코드 유지)
 from pydantic import BaseModel
@@ -65,6 +68,77 @@ def validate_birthdate(date_str: str):
         raise HTTPException(
             status_code=400, detail="생년월일은 1950~2050년 사이여야 합니다."
         )
+
+
+def get_random_celebrity(
+    db: Session,
+    mbti: str,
+    include_tags: Optional[List[str]] = None,
+    exclude_tags: Optional[List[str]] = None,
+):
+    """
+    MBTI에 해당하는 유명인 중 태그 조건에 맞는 1명을 랜덤으로 반환
+
+    Args:
+        db: 데이터베이스 세션
+        mbti: MBTI 유형 (예: "INTJ")
+        include_tags: 포함해야 할 태그 리스트 (예: ["남자", "만화캐릭터"])
+        exclude_tags: 제외해야 할 태그 리스트 (예: ["실제인물"])
+
+    Returns:
+        MbtiCelebrity 객체 또는 None
+    """
+    # 해당 MBTI의 모든 유명인 조회
+    celebrities = (
+        db.query(MbtiCelebrity).filter(MbtiCelebrity.mbti == mbti.upper()).all()
+    )
+
+    if not celebrities:
+        return None
+
+    # 태그 필터링
+    filtered = []
+    for celeb in celebrities:
+        try:
+            celeb_tags = json.loads(celeb.tags)
+        except (json.JSONDecodeError, TypeError):
+            celeb_tags = []
+
+        # include_tags가 있으면 모든 태그가 포함되어야 함
+        if include_tags:
+            if not all(tag in celeb_tags for tag in include_tags):
+                continue
+
+        # exclude_tags가 있으면 해당 태그가 없어야 함
+        if exclude_tags:
+            if any(tag in celeb_tags for tag in exclude_tags):
+                continue
+
+        filtered.append(celeb)
+
+    if not filtered:
+        # 필터 조건에 맞는 결과가 없으면 전체에서 랜덤 선택
+        return random.choice(celebrities)
+
+    return random.choice(filtered)
+
+
+def celebrity_to_dict(celebrity: MbtiCelebrity) -> dict:
+    """MbtiCelebrity 객체를 딕셔너리로 변환"""
+    if not celebrity:
+        return None
+
+    try:
+        tags = json.loads(celebrity.tags)
+    except (json.JSONDecodeError, TypeError):
+        tags = []
+
+    return {
+        "name": celebrity.name,
+        "tags": tags,
+        "description": celebrity.description,
+        "image_url": celebrity.image_url,
+    }
 
 
 # --- App Setup ---
@@ -263,6 +337,9 @@ def analyze_today(
 
     partner_axes = logic.get_compatibility_details(axes)
 
+    my_celebrity = get_random_celebrity(db, my_mbti)
+    partner_celebrity = get_random_celebrity(db, partner_mbti)
+
     # 분석 결과를 DB에 저장
     existing_result = (
         db.query(models.AnalysisResult)
@@ -301,11 +378,17 @@ def analyze_today(
         "my_persona": my_mbti,
         "my_destiny": partner_mbti,
         "lucky_element": logic.ELEMENT_KO[lucky_element_key][0],
-        "persona_data": {"mbti": my_mbti, "description": p_text, "axes": axes},
+        "persona_data": {
+            "mbti": my_mbti,
+            "description": p_text,
+            "axes": axes,
+            "celebrity": celebrity_to_dict(my_celebrity),
+        },
         "destiny_data": {
             "mbti": partner_mbti,
             "description": d_text,
             "axes": partner_axes,
+            "celebrity": celebrity_to_dict(partner_celebrity),
         },
     }
 
@@ -632,3 +715,40 @@ def get_all_time_stats(db: Session = Depends(get_db)):
         "axes_stats": axes_stats,
         "element_stats": counter_to_stats(element_counter, total_analyses),
     }
+
+
+@app.get("/api/celebrity/{mbti}")
+def get_celebrity_by_mbti(
+    mbti: str,
+    include_tags: str = Query(
+        default=None, description="포함할 태그 (콤마 구분, 예: 남자,만화캐릭터)"
+    ),
+    exclude_tags: str = Query(
+        default=None, description="제외할 태그 (콤마 구분, 예: 실제인물)"
+    ),
+    db: Session = Depends(get_db),
+):
+    """특정 MBTI에 해당하는 유명인 조회 (태그 필터링 지원)"""
+    mbti = mbti.upper()
+
+    if len(mbti) != 4 or not all(c in "EISNTFJP" for c in mbti):
+        raise HTTPException(status_code=400, detail="유효하지 않은 MBTI 유형입니다.")
+
+    # 콤마로 구분된 태그를 리스트로 변환
+    include_list = (
+        [t.strip() for t in include_tags.split(",")] if include_tags else None
+    )
+    exclude_list = (
+        [t.strip() for t in exclude_tags.split(",")] if exclude_tags else None
+    )
+
+    celebrity = get_random_celebrity(db, mbti, include_list, exclude_list)
+
+    if not celebrity:
+        return {
+            "mbti": mbti,
+            "celebrity": None,
+            "message": "해당 조건의 유명인이 없습니다.",
+        }
+
+    return {"mbti": mbti, "celebrity": celebrity_to_dict(celebrity)}

@@ -46,3 +46,17 @@ class AnalysisResult(Base):
 
     # User와의 관계
     user = relationship("User", back_populates="analysis_results")
+
+
+class MbtiCelebrity(Base):
+    """MBTI별 유명인 매핑 테이블 (태그 기반)"""
+
+    __tablename__ = "mbti_celebrities"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    mbti = Column(String(4), nullable=False, index=True)  # MBTI 유형 (예: INTJ)
+    name = Column(String(100), nullable=False)  # 유명인 이름
+    tags = Column(String(500), nullable=False)  # 태그 (JSON 배열 문자열 또는 콤마 구분)
+    description = Column(Text)  # 설명
+    image_url = Column(String(500))  # 이미지 URL (선택)
+    created_at = Column(DateTime, default=datetime.utcnow)
