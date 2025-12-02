@@ -3,6 +3,9 @@ import { useState, useRef } from "react";
 import html2canvas from "html2canvas";
 import "./FlipCard.css";
 
+// 기본 프로필 이미지 (이미지가 없을 때 사용)
+const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/personas/svg? seed=";
+
 // 게이지 바 컴포넌트
 const MbtiGauge = ({ typeStr, axes }) => {
   const getRatio = (left, right) => {
@@ -138,6 +141,46 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
   );
 };
 
+// ⭐ 유명인 프로필 컴포넌트 (앞면용)
+const CelebrityProfile = ({ celebrity, color }) => {
+  const [imgError, setImgError] = useState(false);
+
+  if (!celebrity) return null;
+
+  // 이미지 URL 결정 (image_url이 없거나 에러 시 DiceBear 아바타 사용)
+  const imageUrl =
+    celebrity.image_url && !imgError
+      ? celebrity.image_url
+      : `${DEFAULT_AVATAR}${encodeURIComponent(celebrity.name)}`;
+
+  return (
+    <motion.div
+      className="celebrity-profile"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+    >
+      <div className="celebrity-avatar-wrapper" style={{ borderColor: color }}>
+        <img
+          src={imageUrl}
+          alt={celebrity.name}
+          className="celebrity-avatar"
+          onError={() => setImgError(true)}
+        />
+      </div>
+      <div className="celebrity-info">
+        <span className="celebrity-match-label">같은 MBTI 유명인</span>
+        <span className="celebrity-profile-name">{celebrity.name}</span>
+        {celebrity.description && (
+          <span className="celebrity-profile-desc">
+            {celebrity.description}
+          </span>
+        )}
+      </div>
+    </motion.div>
+  );
+};
+
 const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
   const [rotation, setRotation] = useState(0);
   const [showModal, setShowModal] = useState(false);
@@ -179,6 +222,7 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
     const canvas = await html2canvas(clone, {
       backgroundColor: null,
       scale: 2,
+      useCORS: true, // 외부 이미지 허용
     });
     document.body.removeChild(clone);
 
@@ -260,11 +304,17 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
     let shareText = "";
 
     if (option === "front") {
-      shareText = `🔮 ${title} (${subtitle})\n\n오늘의 MBTI 분석 결과입니다!`;
+      shareText = `🔮 ${title} (${subtitle})\n\n오늘의 MBTI 분석 결과입니다! `;
+      if (celebrity) {
+        shareText += `\n✨ 같은 MBTI 유명인: ${celebrity.name}`;
+      }
     } else if (option === "back") {
       shareText = `🔮 ${title} 분석 결과\n\n${description}`;
     } else if (option === "both") {
       shareText = `🔮 ${title} (${subtitle})\n\n📖 상세 분석:\n${description}`;
+      if (celebrity) {
+        shareText += `\n\n✨ 같은 MBTI 유명인: ${celebrity.name}`;
+      }
     }
 
     const shareData = {
@@ -342,12 +392,13 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
           animate={{ rotateY: rotation }}
           transition={{ duration: 0.6, type: "spring", stiffness: 50 }}
         >
-          {/* 앞면: 타이틀 + 게이지 */}
+          {/* ===== 앞면 ===== */}
           <div
             className="card-face card-front"
             style={{ borderColor: color }}
             ref={cardFrontRef}
           >
+            {/* MBTI 타이틀 */}
             <div className="front-header">
               <h2
                 className="mbti-title"
@@ -358,12 +409,16 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
               <span className="mbti-subtitle">{subtitle}</span>
             </div>
 
+            {/* ⭐ 유명인 프로필 (앞면에 추가) */}
+            <CelebrityProfile celebrity={celebrity} color={color} />
+
+            {/* MBTI 게이지 */}
             <MbtiGauge typeStr={title} axes={axes} />
 
             <p className="click-hint">Click to Detail</p>
           </div>
 
-          {/* 뒷면: 텍스트 설명 */}
+          {/* ===== 뒷면 ===== */}
           <div
             className="card-face card-back"
             style={{ borderColor: color }}
@@ -373,6 +428,7 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
               <h3 style={{ color }}>운명 분석</h3>
               <p className="description-text">{description}</p>
 
+              {/* 유명인 상세 정보 (뒷면) */}
               {celebrity && (
                 <div className="celebrity-section">
                   <div className="celebrity-label">
@@ -384,7 +440,6 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
                       {celebrity.description}
                     </div>
                   )}
-                  {/* 태그 표시 */}
                   {celebrity.tags && celebrity.tags.length > 0 && (
                     <div className="celebrity-tags">
                       {celebrity.tags.slice(0, 4).map((tag, index) => (

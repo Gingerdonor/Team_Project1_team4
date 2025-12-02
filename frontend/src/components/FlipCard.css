@@ -2,8 +2,8 @@
 
 .card-container {
   perspective: 1000px;
-  width: 280px;
-  height: 520px; /* 게이지와 숫자를 위한 공간 확보를 위해 높이 약간 증가 */
+  width: 300px;
+  height: 580px; /* 유명인 프로필 추가로 높이 증가 */
   cursor: pointer;
 }
 
@@ -28,7 +28,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-between;
-  padding: 30px 20px;
+  padding: 25px 20px;
   box-sizing: border-box;
   overflow: hidden;
 }
@@ -36,23 +36,87 @@
 /* --- 앞면 헤더 --- */
 .front-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
 }
 
 .mbti-title {
   font-family: "Orbitron", sans-serif;
-  font-size: 3.5rem;
+  font-size: 3rem;
   font-weight: 700;
   margin: 0;
   letter-spacing: 2px;
 }
 
 .mbti-subtitle {
-  font-size: 1rem;
+  font-size: 0.95rem;
   opacity: 0.8;
   margin-top: 5px;
   display: block;
   font-weight: 300;
+}
+
+/* ⭐ 유명인 프로필 (앞면) */
+.celebrity-profile {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 15px;
+  width: 100%;
+}
+
+.celebrity-avatar-wrapper {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid;
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.celebrity-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.celebrity-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.celebrity-match-label {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.celebrity-profile-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.celebrity-profile-desc {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* --- 게이지 바 스타일 --- */
@@ -60,7 +124,7 @@
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .gauge-row {
@@ -72,25 +136,23 @@
   font-size: 0.8rem;
 }
 
-/* 라벨 컨테이너 (문자 + 수치) */
 .gauge-label-container {
   display: flex;
   align-items: center;
   gap: 4px;
-  width: 50px; /* 고정 너비로 정렬 맞춤 */
+  width: 50px;
   opacity: 0.3;
   transition: opacity 0.3s;
 }
 
 .gauge-label-container.left {
-  justify-content: flex-end; /* 왼쪽 그룹은 우측 정렬 */
+  justify-content: flex-end;
 }
 
 .gauge-label-container.right {
-  justify-content: flex-start; /* 오른쪽 그룹은 좌측 정렬 */
+  justify-content: flex-start;
 }
 
-/* 활성화된 쪽 강조 */
 .gauge-label-container.active {
   opacity: 1;
   color: white;
@@ -105,7 +167,7 @@
 .label-val {
   font-size: 0.7rem;
   opacity: 0.8;
-  font-family: "Noto Sans KR", sans-serif; /* 숫자는 가독성 좋게 */
+  font-family: "Noto Sans KR", sans-serif;
 }
 
 .gauge-track {
@@ -151,20 +213,22 @@
   flex: 1;
   overflow-y: auto;
   text-align: center;
+  width: 100%;
 }
 
 .card-content h3 {
   font-family: "Orbitron", sans-serif;
   margin-bottom: 15px;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
 }
 
 .description-text {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   line-height: 1.6;
   opacity: 0.9;
   word-break: keep-all;
-  white-space: pre-wrap; /* 줄바꿈 반영 */
+  white-space: pre-wrap;
+  text-align: left;
 }
 
 .card-actions {
@@ -197,7 +261,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0 85) !important;
+  background-color: rgba(0, 0, 0, 0.85) !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -215,7 +279,7 @@
   padding: 25px;
   min-width: 280px;
   max-width: 350px;
-  border: 1px solid rgba(255, 255, 255, 0 2);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
 }
 
@@ -223,7 +287,7 @@
   text-align: center;
   color: #ffffff !important;
   margin: 0 0 8px 0;
-  font-size: 1 2rem;
+  font-size: 1.2rem;
   font-weight: bold;
 }
 
@@ -289,7 +353,7 @@
   color: #ffffff !important;
 }
 
-/* 유명인 매칭 섹션 스타일 */
+/* 유명인 상세 섹션 (뒷면) */
 .celebrity-section {
   margin-top: 20px;
   padding: 15px;
@@ -320,7 +384,7 @@
 .celebrity-desc {
   font-size: 0.8rem;
   color: #a0a0a0;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
 }
 
 .celebrity-tags {
@@ -337,4 +401,25 @@
   background: rgba(255, 255, 255, 0.15);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* 반응형 */
+@media (max-width: 480px) {
+  .card-container {
+    width: 280px;
+    height: 550px;
+  }
+
+  .mbti-title {
+    font-size: 2.5rem;
+  }
+
+  .celebrity-avatar-wrapper {
+    width: 50px;
+    height: 50px;
+  }
+
+  .celebrity-profile-name {
+    font-size: 1rem;
+  }
 }
