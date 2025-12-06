@@ -257,7 +257,7 @@ const AdminPage = () => {
         </nav>
         <button
           className="nav-item home-btn"
-          onClick={() => navigate("/selection")}
+          onClick={() => navigate("/")}
         >
           <FaHome /> 홈으로
         </button>
