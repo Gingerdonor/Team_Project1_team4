@@ -713,8 +713,58 @@ export const GalaxyCollision = ({ color }) => {
   );
 };
 
+// ===== 11. 대형 카드 회전 (Spinning Card) =====
+export const SpinningCard = ({ color }) => {
+  return (
+    <div className="loading-effect spinning-card-wrapper">
+      <motion.div
+        className="spinning-card-body"
+        style={{
+          borderColor: color,
+          boxShadow: `0 0 30px ${color}44`,
+        }}
+        animate={{ 
+          rotateY: 360,
+        }}
+        transition={{
+          duration: 2, // 회전 속도 (초)
+          repeat: Infinity,
+          ease: "linear",
+        }}
+      >
+        {/* 카드의 뒷면 무늬 (FlipCard와 유사한 느낌으로 연출) */}
+        <div 
+          className="spinning-card-pattern"
+          style={{
+            background: `repeating-linear-gradient(
+              45deg,
+              ${color}11,
+              ${color}11 10px,
+              ${color}22 10px,
+              ${color}22 20px
+            )`
+          }}
+        >
+          <div className="spinning-card-center-symbol">
+            🔮
+          </div>
+        </div>
+      </motion.div>
+      
+      {/* 주변을 감싸는 신비로운 빛 */}
+      <motion.div 
+        className="spinning-card-glow"
+        style={{ background: color }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ duration: 2, repeat: Infinity }}
+      />
+    </div>
+  );
+};
+
 // ===== 로딩 효과 목록 =====
 export const LOADING_EFFECTS = [
+  { id: "card_spin", name: "운명의 카드", icon: "🃏", component: SpinningCard },
   {
     id: "explosion",
     name: "우주 폭발",
@@ -739,7 +789,7 @@ export const LOADING_EFFECTS = [
 
 // ===== 메인 로딩 컴포넌트 =====
 const LoadingEffect = ({
-  effectId = "explosion",
+  effectId = "card_spin",
   color = "#a18cd1",
   text = "운명을 읽는 중...",
 }) => {

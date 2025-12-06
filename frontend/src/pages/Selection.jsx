@@ -53,7 +53,7 @@ const Selection = () => {
 
   // 로딩 효과 설정
   const [loadingEffect, setLoadingEffect] = useState(() => {
-    return localStorage.getItem("loadingEffect") || "cosmic";
+    return localStorage.getItem("loadingEffect") || "card_spin";
   });
   const [showEffectSelector, setShowEffectSelector] = useState(false);
 
@@ -339,32 +339,45 @@ const Selection = () => {
                 {currentView === "persona" ? "🔮 My Persona" : "🌟 My Destiny"}
               </h1>
 
-              <div className="result-card-container">
-                {/* 로딩 효과 */}
-                {isLoading && (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                  >
-                    <LoadingEffect
-                      effectId={loadingEffect}
-                      color={currentColor}
-                      text="운명을 읽는 중..."
-                    />
-                  </motion.div>
-                )}
+              <div
+                className="result-card-container"
+                style={{ position: "relative" }}
+              >
+                <AnimatePresence mode="wait">
+                  {/* 1. 로딩 중일 때: 회전하는 카드 표시 */}
+                  {isLoading && (
+                    <motion.div
+                      key="loading-card"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
+                      transition={{ duration: 0.5 }}
+                      style={{ position: "absolute" }} // 위치 고정으로 겹침 방지
+                    >
+                      <LoadingEffect
+                        effectId={loadingEffect}
+                        color={currentColor}
+                        text="운명의 카드를 찾는 중..." // 텍스트 변경
+                      />
+                    </motion.div>
+                  )}
 
-                {/* FlipCard 결과 */}
-                {!isLoading && analysisData && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
-                  >
-                    <FlipCard {...getCardData(currentView)} />
-                  </motion.div>
-                )}
+                  {/* 2. 로딩 완료 시: 결과 카드(FlipCard) 등장 */}
+                  {!isLoading && analysisData && (
+                    <motion.div
+                      key="result-card"
+                      initial={{ opacity: 0, rotateY: 90 }} // 카드가 옆에서 돌아오는 느낌
+                      animate={{ opacity: 1, rotateY: 0 }}
+                      transition={{
+                        duration: 0.8,
+                        type: "spring",
+                        bounce: 0.3,
+                      }}
+                    >
+                      <FlipCard {...getCardData(currentView)} />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             </motion.div>
           )}
