@@ -1,10 +1,13 @@
 /* 로딩 래퍼 */
 .loading-wrapper {
+  position: relative; /* 자식요소 절대위치 기준점 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 30px;
+  gap: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .loading-effect {
@@ -17,350 +20,255 @@
 }
 
 .loading-text {
+  position: absolute;
+  bottom: -40px; /* 카드 아래쪽으로 배치 (필요시 조절) */
   font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.9);
   text-align: center;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  pointer-events: none;
 }
 
-/* ===== 1. Cosmic Explosion ===== */
-.cosmic-explosion .explosion-core {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  filter: blur(5px);
-  z-index: 5;
-}
-
-.cosmic-explosion .explosion-particle {
-  position: absolute;
-  border-radius: 50%;
-  z-index: 3;
-}
-
-.cosmic-explosion .explosion-ring {
-  position: absolute;
-  width: 50px;
-  height: 50px;
-  border: 3px solid;
-  border-radius: 50%;
-}
-
-/* ===== 2. Fireworks ===== */
-.fireworks {
-  overflow: visible;
-}
-
-.firework-group {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-}
-
-.firework-spark {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.firework-center {
-  position: absolute;
-  width: 15px;
-  height: 15px;
-  border-radius: 50%;
-  filter: blur(2px);
-}
-
-/* ===== 3. Energy Burst ===== */
-.energy-burst .energy-core {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  z-index: 5;
-}
-
-.energy-burst .energy-beam {
-  position: absolute;
-  width: 150px;
-  height: 4px;
-  transform-origin: left center;
-  left: 50%;
-}
-
-.energy-burst .electric-spark {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-  box-shadow: 0 0 10px currentColor;
-}
-
-/* ===== 4. Black Hole ===== */
-.black-hole .event-horizon {
-  width: 160px;
-  height: 160px;
+/* ===== Cosmic Explosion ===== */
+.explosion-container {
   position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.black-hole .accretion-disk {
+.explosion-flash {
+  position: absolute;
   width: 100%;
   height: 100%;
-  border: 3px solid;
   border-radius: 50%;
-  opacity: 0.5;
-}
-
-.black-hole .absorbed-particle {
-  position: absolute;
-  width: 4px;
-  height: 4px;
-  border-radius: 50%;
-}
-
-.black-hole .singularity {
-  position: absolute;
-  width: 30px;
-  height: 30px;
-  background: #000;
-  border-radius: 50%;
-  box-shadow: 0 0 30px rgba(0, 0, 0, 0.8);
+  background: radial-gradient(circle, #fff 0%, transparent 70%);
+  mix-blend-mode: screen;
   z-index: 10;
 }
 
-/* ===== 5. Phoenix ===== */
-.phoenix .phoenix-wing {
+.explosion-shockwave {
   position: absolute;
-  width: 60px;
-  height: 100px;
-  border-radius: 50% 50% 0 50%;
-  filter: blur(3px);
-  opacity: 0.8;
+  border-radius: 50%;
+  border: 4px solid;
+  box-shadow: 0 0 20px currentColor;
+  opacity: 0;
 }
 
-.phoenix .phoenix-wing.left {
-  left: 20px;
-  transform-origin: bottom right;
+/* ===== Black Hole ===== */
+.blackhole-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  filter: contrast(1.2);
 }
 
-.phoenix .phoenix-wing.right {
-  right: 20px;
-  border-radius: 50% 50% 50% 0;
-  transform-origin: bottom left;
-}
-
-.phoenix .fire-particle {
+.accretion-disk {
   position: absolute;
-  width: 8px;
-  height: 8px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
-  bottom: 50%;
+  /* 소용돌이치는 빛의 질감 */
+  background: conic-gradient(
+    from 0deg,
+    transparent 0%,
+    currentColor 20%,
+    rgba(255, 255, 255, 0.8) 50%,
+    currentColor 80%,
+    transparent 100%
+  );
+  filter: blur(8px);
+  mask-image: radial-gradient(circle, transparent 40%, black 60%);
+  -webkit-mask-image: radial-gradient(circle, transparent 40%, black 60%);
 }
 
-.phoenix .phoenix-core {
-  width: 50px;
-  height: 50px;
+.event-horizon-core {
+  position: absolute;
+  width: 70px;
+  height: 70px;
+  background: #000;
   border-radius: 50%;
+  box-shadow: 0 0 10px #fff, inset 0 0 20px #000; /* 내부 깊이감 */
   z-index: 5;
 }
 
-/* ===== 6. Lightning Storm ===== */
-.lightning-storm {
-  overflow: hidden;
-  background: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 20px;
-}
-
-.lightning-storm .storm-clouds {
+.photon-ring {
   position: absolute;
-  top: 10px;
-  width: 100%;
-  height: 50px;
-}
-
-.lightning-storm .cloud {
-  position: absolute;
-  width: 60px;
-  height: 30px;
-  background: rgba(100, 100, 120, 0.8);
-  border-radius: 20px;
-}
-
-.lightning-storm .cloud::before,
-.lightning-storm .cloud::after {
-  content: "";
-  position: absolute;
-  background: rgba(100, 100, 120, 0.8);
+  width: 74px;
+  height: 74px;
   border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 15px currentColor;
+  z-index: 6;
 }
 
-.lightning-storm .cloud::before {
-  width: 25px;
-  height: 25px;
-  top: -10px;
-  left: 10px;
+/* ===== Quantum Orbit ===== */
+.quantum-container {
+  position: relative;
+  width: 220px;
+  height: 220px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  background: transparent !important;
 }
 
-.lightning-storm .cloud::after {
-  width: 35px;
-  height: 35px;
-  top: -15px;
-  right: 10px;
-}
-
-.lightning-storm .lightning-bolt {
+.quantum-core {
   position: absolute;
-  width: 40px;
-  height: 80px;
-  top: 40px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50% !important;
+  background: radial-gradient(circle at 30% 30%, #fff, currentColor);
+  box-shadow: 0 0 40px currentColor;
+  z-index: 10;
+  animation: pulse-core 2s infinite ease-in-out;
+
+  /* ⚡ Chrome 사각형 버그 수정 코드 ⚡ */
+  /* 1. GPU 레이어 분리 */
+  transform: translateZ(1px);
+  /* 2. 마스크로 강제 원형 클리핑 */
+  -webkit-mask-image: radial-gradient(white, white);
+  mask-image: radial-gradient(white, white);
 }
 
-.lightning-storm .lightning-flash {
+@keyframes pulse-core {
+  0%,
+  100% {
+    transform: translateZ(1px) scale(0.9);
+    opacity: 0.8;
+  }
+  50% {
+    transform: translateZ(1px) scale(1.1);
+    opacity: 1;
+  }
+}
+
+.quantum-orbit {
   position: absolute;
   width: 100%;
   height: 100%;
+  border-radius: 50% !important;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  transform-style: preserve-3d;
+
+  /* ⚡ 궤도 깨짐 방지 */
+  will-change: transform;
+}
+
+.orbit-path {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50% !important;
+  border-top: 3px solid currentColor;
+  border-bottom: 3px solid transparent;
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-right: 1px solid transparent;
+  box-shadow: 0 0 15px currentColor;
+
+  /* ⚡ Chrome 3D 렌더링 보정 */
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.orbit-electron {
+  position: absolute;
+  top: 14%;
+  left: 14%;
+  width: 12px;
+  height: 12px;
+  border-radius: 50% !important;
   background: #fff;
-  border-radius: 20px;
+  box-shadow: 0 0 15px #fff;
+  offset-path: path("M 110 10 A 100 100 0 1 1 110 210 A 100 100 0 1 1 110 10");
+
+  /* ⚡ 입자 사각형 버그 수정 */
+  transform: translateZ(2px);
 }
 
-/* ===== 7. Supernova ===== */
-.supernova .supernova-core {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  z-index: 5;
-  box-shadow: 0 0 30px currentColor;
-}
-
-.supernova .supernova-wave {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  border: 2px solid;
-  border-radius: 50%;
-}
-
-.supernova .star-debris {
-  position: absolute;
-  border-radius: 50%;
-}
-
-/* ===== 8. Portal ===== */
-.portal .portal-ring {
-  position: absolute;
-  border: 3px solid;
-  border-radius: 50%;
-  border-style: dashed;
-}
-
-.portal .portal-vortex {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  opacity: 0.6;
-}
-
-.portal .portal-particle {
-  position: absolute;
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.portal .portal-center {
+.portal-core {
   position: absolute;
   width: 60px;
   height: 60px;
+  background: white;
   border-radius: 50%;
+  box-shadow: 0 0 40px 10px currentColor;
   z-index: 5;
 }
 
-/* ===== 9. Lava ===== */
-.lava {
-  overflow: hidden;
-  border-radius: 20px;
-  background: linear-gradient(180deg, #1a1a2e 0%, #2d1810 100%);
-}
-
-.lava .lava-bubble {
+.portal-particles-container {
   position: absolute;
-  border-radius: 50%;
-  bottom: 20%;
-}
-
-.lava .lava-splash {
-  position: absolute;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  bottom: 30%;
-}
-
-.lava .lava-surface {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 40%;
-  border-radius: 50% 50% 0 0;
-}
-
-/* ===== 10. Galaxy Collision ===== */
-.galaxy-collision .galaxy-1,
-.galaxy-collision .galaxy-2 {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-}
-
-.galaxy-collision .galaxy-core {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 20px currentColor;
-}
-
-.galaxy-collision .galaxy-spiral {
   width: 100%;
   height: 100%;
-  border: 2px solid;
-  border-radius: 50%;
-  opacity: 0.5;
 }
 
-.galaxy-collision .collision-star {
+/* ===== Galaxy Collision ===== */
+.galaxy-arm {
   position: absolute;
-  width: 4px;
-  height: 4px;
+  width: 120px;
+  height: 40px;
   border-radius: 50%;
+  border-top: 4px solid currentColor;
+  filter: blur(2px);
+  box-shadow: 0 -5px 15px currentColor;
 }
 
-/* ===== 11. Spinning Card ===== */
+/* ===== Spinning Card ===== */
 .spinning-card-wrapper {
-  perspective: 1000px;
+  perspective: 1200px;
   position: relative;
-  /* FlipCard와 비슷한 크기 영역 확보 */
-  width: 300px; 
-  height: 480px;
+  /* FlipCard와 동일한 크기 적용 */
+  width: 300px;
+  height: 580px;
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 10;
+  transform-style: preserve-3d;
+  box-sizing: border-box;
 }
 
 .spinning-card-body {
-  /* 실제 카드 크기 설정 */
-  width: 260px;
-  height: 400px;
-  border: 4px solid;
+  /* FlipCard와 동일한 크기 및 테두리 반경 */
+  width: 100%;
+  height: 100%;
   border-radius: 20px;
   position: relative;
   transform-style: preserve-3d;
-  background: rgba(20, 20, 35, 0.8); /* 어두운 카드 배경 */
+
+  /* 카드 뒷면 느낌의 배경 (FlipCard와 이질감 없도록) */
+  background: linear-gradient(
+    135deg,
+    rgba(20, 20, 30, 0.9),
+    rgba(40, 40, 60, 0.9)
+  );
   backdrop-filter: blur(10px);
-  z-index: 2;
-  overflow: hidden;
+  -webkit-backdrop-filter: blur(10px);
+
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 30px rgba(0, 0, 0, 0.6),
+    inset 0 0 20px rgba(255, 255, 255, 0.1);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 뒷면이 보여도 사라지지 않도록 설정 */
+  backface-visibility: visible !important;
+  -webkit-backface-visibility: visible !important;
+
+  will-change: transform;
+  box-sizing: border-box;
 }
 
 .spinning-card-pattern {
@@ -369,38 +277,129 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  /* 카드 뒷면 느낌을 주는 그라데이션 */
-  background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.0) 100%);
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 2px,
+    transparent 2px,
+    transparent 10px
+  );
+  border-radius: 20px;
 }
 
 .spinning-card-center-symbol {
-  font-size: 4rem;
-  filter: drop-shadow(0 0 15px currentColor);
+  font-size: 5rem;
+  filter: drop-shadow(0 0 20px currentColor);
   animation: pulse-symbol 2s infinite ease-in-out;
 }
 
 @keyframes pulse-symbol {
-  0%, 100% { transform: scale(0.9); opacity: 0.7; }
-  50% { transform: scale(1.1); opacity: 1; }
+  0%,
+  100% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
 }
 
-.spinning-card-glow {
+.magic-circle-container {
   position: absolute;
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  filter: blur(40px);
-  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translateZ(-300px);
+
+  width: 500px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: -1;
   pointer-events: none;
 }
 
-/* 로딩 텍스트 위치 조정 */
-.loading-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%; /* 부모 컨테이너 높이 사용 */
+.magic-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  box-shadow: 0 0 15px currentColor;
+}
+
+.magic-ring.outer {
+  width: 100%;
+  height: 100%;
+  border-top-color: currentColor;
+  border-bottom-color: currentColor;
+  opacity: 0.3;
+}
+
+.magic-ring.inner {
+  width: 70%;
+  height: 70%;
+  border: 1px dashed currentColor;
+  opacity: 0.5;
+}
+
+@media (max-width: 480px) {
+  /* 카드 크기를 FlipCard 모바일 사이즈에 맞춤 */
+  .spinning-card-wrapper {
+    width: 280px;
+    height: 550px;
+  }
+
+  .spinning-card-body {
+    border-radius: 16px; /* 모바일에서 조금 더 둥글게 */
+  }
+
+  .magic-circle-container {
+    width: 340px;
+    height: 340px;
+  }
+
+  .loading-text {
+    bottom: -60px; /* 모바일에서 텍스트 위치 살짝 조정 */
+    font-size: 1rem;
+  }
+
+  /* 내부 심볼 크기 조절 */
+  .spinning-card-center-symbol {
+    font-size: 3.5rem;
+  }
+
+  /* 카드 선택창 그리드 (이미 적용되어 있다면 생략 가능) */
+  .effect-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* 홀로그램 빛 반사 효과 */
+.holographic-sheen {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transform: skewX(-20deg);
+  pointer-events: none;
+}
+
+.card-decoration-border {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  opacity: 0.5;
 }
 
 /* ===== 효과 선택 모달 ===== */
@@ -437,8 +436,8 @@
 
 .effect-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
   margin-bottom: 20px;
 }
 

@@ -2,759 +2,316 @@ import { motion } from "framer-motion";
 import { useMemo } from "react";
 import "./LoadingEffects.css";
 
-// ===== 1. 우주 폭발 (Cosmic Explosion) =====
-export const CosmicExplosion = ({ color }) => {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        angle: (i / 20) * 360,
-        distance: 80 + Math.random() * 40,
-        size: 4 + Math.random() * 8,
-        isColored: i % 2 === 0,
-        delay: Math.random() * 0.3,
-      })),
-    []
-  );
+// ===== 우주 폭발 (Cosmic Explosion) =====
+export const CosmicExplosion = ({ color }) => (
+  <div className="loading-effect explosion-container">
+    {/* 1. 섬광 (Flash) */}
+    <motion.div
+      className="explosion-flash"
+      animate={{ scale: [0, 1.5, 0], opacity: [0, 1, 0] }}
+      transition={{ duration: 1.2, repeat: Infinity, ease: "easeOut" }}
+    />
 
-  return (
-    <div className="loading-effect cosmic-explosion">
+    {/* 2. 충격파 (Shockwaves) */}
+    {[0, 1, 2].map((i) => (
       <motion.div
-        className="explosion-core"
-        style={{ background: color }}
+        key={i}
+        className="explosion-shockwave"
+        style={{ borderColor: color }}
         animate={{
-          scale: [0, 1.5, 0.8, 1.2, 1],
-          opacity: [1, 0.8, 1, 0.9, 1],
+          width: [0, 300],
+          height: [0, 300],
+          opacity: [1, 0],
+          borderWidth: [5, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          delay: i * 0.4,
+          ease: "easeOut",
+        }}
+      />
+    ))}
+
+    {/* 3. 파편들 (Debris) */}
+    {[...Array(12)].map((_, i) => (
+      <motion.div
+        key={i}
+        style={{
+          position: "absolute",
+          width: 4,
+          height: 4,
+          borderRadius: "50%",
+          background: color,
+          boxShadow: `0 0 10px ${color}`,
+        }}
+        animate={{
+          x: [0, (Math.random() - 0.5) * 300],
+          y: [0, (Math.random() - 0.5) * 300],
+          opacity: [1, 0],
+          scale: [1, 0],
+        }}
+        transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
+      />
+    ))}
+  </div>
+);
+
+// ===== 블랙홀 (Black Hole) =====
+export const BlackHole = ({ color }) => (
+  <div className="loading-effect blackhole-container">
+    {/* 1. 강착 원반 (Accretion Disk) */}
+    <motion.div
+      className="accretion-disk"
+      style={{ color }}
+      animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+      transition={{
+        rotate: { duration: 3, repeat: Infinity, ease: "linear" },
+        scale: { duration: 2, repeat: Infinity, ease: "easeInOut" },
+      }}
+    />
+
+    {/* 2. 사건의 지평선 (Core) */}
+    <div className="event-horizon-core" />
+
+    {/* 3. 광자 고리 (Photon Ring) */}
+    <div className="photon-ring" style={{ color }} />
+
+    {/* 4. 빨려들어가는 별들 */}
+    {[...Array(8)].map((_, i) => (
+      <motion.div
+        key={i}
+        style={{
+          position: "absolute",
+          width: 3,
+          height: 3,
+          background: "#fff",
+          borderRadius: "50%",
+          top: "50%",
+          left: "50%",
+        }}
+        animate={{
+          rotate: [i * 45, i * 45 + 360],
+          x: [100, 0],
+          opacity: [1, 0],
+          scale: [1, 0],
+        }}
+        transition={{
+          duration: 2,
+          repeat: Infinity,
+          delay: i * 0.2,
+          ease: "easeIn",
+        }}
+      />
+    ))}
+  </div>
+);
+
+// ===== 퀀텀 오빗 (Quantum Orbit) =====
+export const QuantumOrbit = ({ color }) => {
+  return (
+    <div className="loading-effect quantum-container" style={{ color: color }}>
+      {/* 중앙 코어 */}
+      <div className="quantum-core" />
+
+      {/* 궤도 1 */}
+      <motion.div
+        className="quantum-orbit"
+        animate={{ rotateX: [0, 360], rotateY: [0, 360], rotateZ: [0, 360] }}
+        transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="orbit-path" />
+      </motion.div>
+
+      {/* 궤도 2 (다른 각도) */}
+      <motion.div
+        className="quantum-orbit"
+        animate={{ rotateX: [120, 480], rotateY: [60, 420] }}
+        transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="orbit-path" />
+      </motion.div>
+
+      {/* 궤도 3 (반대 회전) */}
+      <motion.div
+        className="quantum-orbit"
+        animate={{ rotateX: [240, -120], rotateY: [-60, -420] }}
+        transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+      >
+        <div className="orbit-path" />
+      </motion.div>
+    </div>
+  );
+};
+
+// ===== 포탈 (Portal) =====
+export const Portal = ({ color }) => (
+  <div className="loading-effect portal" style={{ width: 300, height: 300 }}>
+    {/* 1. 소용돌이 배경 (Blur 효과) */}
+    <motion.div
+      className="portal-vortex-advanced"
+      style={{ color }}
+      animate={{ rotate: 360, scale: [1, 1.1, 1] }}
+      transition={{
+        rotate: { duration: 2, repeat: Infinity, ease: "linear" },
+        scale: { duration: 2, repeat: Infinity },
+      }}
+    />
+
+    {/* 2. 강렬한 빛의 핵 (Core) */}
+    <motion.div
+      className="portal-core"
+      style={{ color, background: "white" }}
+      animate={{ scale: [0.8, 1.2, 0.8], opacity: [0.8, 1, 0.8] }}
+      transition={{ duration: 0.8, repeat: Infinity }}
+    />
+
+    {/* 3. 빨려들어가는 입자들 */}
+    {[...Array(12)].map((_, i) => (
+      <motion.div
+        key={i}
+        style={{
+          position: "absolute",
+          width: 4,
+          height: 4,
+          background: "white",
+          borderRadius: "50%",
+          left: "50%",
+          top: "50%",
+          boxShadow: `0 0 10px ${color}`,
+        }}
+        animate={{
+          rotate: [i * 30, i * 30 + 180], // 회전하며 빨려들어감
+          x: [Math.cos(i) * 100, 0], // 밖에서 안으로
+          y: [Math.sin(i) * 100, 0],
+          opacity: [0, 1, 0],
+          scale: [0, 1, 0],
         }}
         transition={{
           duration: 1.5,
           repeat: Infinity,
-          repeatDelay: 0.5,
+          delay: i * 0.1,
+          ease: "easeIn",
         }}
       />
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="explosion-particle"
-          style={{
-            background: p.isColored ? color : "#fff",
-            width: p.size,
-            height: p.size,
-          }}
-          animate={{
-            x: [0, Math.cos((p.angle * Math.PI) / 180) * p.distance, 0],
-            y: [0, Math.sin((p.angle * Math.PI) / 180) * p.distance, 0],
-            scale: [0, 1.5, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            delay: p.delay,
-            repeatDelay: 0.5,
-          }}
-        />
-      ))}
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={`ring-${i}`}
-          className="explosion-ring"
-          style={{ borderColor: color }}
-          animate={{
-            scale: [0, 3],
-            opacity: [1, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            delay: i * 0.3,
-            repeatDelay: 0.5,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ===== 2. 불꽃놀이 (Fireworks) =====
-export const Fireworks = ({ color }) => {
-  const fireworkGroups = useMemo(
-    () => {
-      const colors = [color, "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff"];
-      return Array.from({ length: 5 }, (groupIdx, idx) => ({
-        id: idx,
-        left: 20 + idx * 15,
-        top: 30 + (idx % 2) * 20,
-        color: colors[idx % colors.length],
-        sparks: Array.from({ length: 12 }, (_, sparkIdx) => ({
-          id: sparkIdx,
-          angle: (sparkIdx / 12) * 360,
-        })),
-      }));
-    },
-    [color]
-  );
-
-  return (
-    <div className="loading-effect fireworks">
-      {fireworkGroups.map((group) => (
-        <div
-          key={group.id}
-          className="firework-group"
-          style={{
-            left: `${group.left}%`,
-            top: `${group.top}%`,
-          }}
-        >
-          {group.sparks.map((spark) => (
-            <motion.div
-              key={spark.id}
-              className="firework-spark"
-              style={{ background: group.color }}
-              animate={{
-                x: [0, Math.cos((spark.angle * Math.PI) / 180) * 50],
-                y: [0, Math.sin((spark.angle * Math.PI) / 180) * 50],
-                scale: [0, 1, 0],
-                opacity: [0, 1, 0],
-              }}
-              transition={{
-                duration: 1,
-                repeat: Infinity,
-                delay: group.id * 0.4,
-                repeatDelay: 1.5,
-              }}
-            />
-          ))}
-          <motion.div
-            className="firework-center"
-            style={{ background: group.color }}
-            animate={{
-              scale: [0, 1.5, 0],
-              opacity: [0, 1, 0],
-            }}
-            transition={{
-              duration: 0.5,
-              repeat: Infinity,
-              delay: group.id * 0.4,
-              repeatDelay: 1.5,
-            }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
-
-// ===== 3. 에너지 폭발 (Energy Burst) =====
-export const EnergyBurst = ({ color }) => {
-  const sparks = useMemo(
-    () =>
-      Array.from({ length: 15 }, (_, i) => ({
-        id: i,
-        left: Math.random() * 100,
-        top: Math.random() * 100,
-        delay: Math.random() * 2,
-        repeatDelay: Math.random(),
-      })),
-    []
-  );
-
-  return (
-    <div className="loading-effect energy-burst">
-      <motion.div
-        className="energy-core"
-        style={{
-          background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-          boxShadow: `0 0 60px ${color}`,
-        }}
-        animate={{
-          scale: [1, 1.3, 1],
-          opacity: [0.8, 1, 0.8],
-        }}
-        transition={{
-          duration: 0.5,
-          repeat: Infinity,
-        }}
-      />
-      {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => (
-        <motion.div
-          key={i}
-          className="energy-beam"
-          style={{
-            background: `linear-gradient(90deg, ${color}, transparent)`,
-            transform: `rotate(${i * 45}deg)`,
-          }}
-          animate={{
-            scaleX: [0, 1.5, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: i * 0.1,
-          }}
-        />
-      ))}
-      {sparks.map((spark) => (
-        <motion.div
-          key={spark.id}
-          className="electric-spark"
-          style={{
-            background: color,
-            left: `${spark.left}%`,
-            top: `${spark.top}%`,
-          }}
-          animate={{
-            scale: [0, 1, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 0.3,
-            repeat: Infinity,
-            delay: spark.delay,
-            repeatDelay: spark.repeatDelay,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ===== 4. 블랙홀 (Black Hole) =====
-export const BlackHole = ({ color }) => {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 30 }, (_, i) => {
-        const startAngle = (i / 30) * 360;
-        const startDistance = 100 + Math.random() * 30;
-        return {
-          id: i,
-          startX: Math.cos((startAngle * Math.PI) / 180) * startDistance,
-          startY: Math.sin((startAngle * Math.PI) / 180) * startDistance,
-          color: i % 3 === 0 ? color : "#fff",
-          duration: 2 + Math.random(),
-        };
-      }),
-    [color]
-  );
-
-  return (
-    <div className="loading-effect black-hole">
-      <motion.div
-        className="event-horizon"
-        animate={{ rotate: 360 }}
-        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-      >
-        <div className="accretion-disk" style={{ borderColor: color }} />
-      </motion.div>
-      {particles.map((particle) => (
-        <motion.div
-          key={particle.id}
-          className="absorbed-particle"
-          style={{ background: particle.color }}
-          animate={{
-            x: [particle.startX, 0],
-            y: [particle.startY, 0],
-            scale: [1, 0],
-            opacity: [1, 0],
-            rotate: [0, 720],
-          }}
-          transition={{
-            duration: particle.duration,
-            repeat: Infinity,
-            delay: particle.id * 0.1,
-            ease: "easeIn",
-          }}
-        />
-      ))}
-      <div className="singularity" />
-    </div>
-  );
-};
-
-// ===== 5. 피닉스 (Phoenix) =====
-export const Phoenix = ({ color }) => {
-  const fireParticles = useMemo(
-    () =>
-      Array.from({ length: 25 }, (_, i) => ({
-        id: i,
-        colorType: i % 3,
-        left: 30 + Math.random() * 40,
-        yEnd: -100 - Math.random() * 50,
-        xStart: (Math.random() - 0.5) * 60,
-        xEnd: (Math.random() - 0.5) * 100,
-        duration: 1 + Math.random(),
-        delay: Math.random() * 0.5,
-      })),
-    []
-  );
-
-  const getFireColor = (type) => {
-    if (type === 0) return color;
-    if (type === 1) return "#ff6b35";
-    return "#f7c815";
-  };
-
-  return (
-    <div className="loading-effect phoenix">
-      <motion.div
-        className="phoenix-wing left"
-        style={{
-          background: `linear-gradient(135deg, ${color}, #ff6b35, #f7c815)`,
-        }}
-        animate={{
-          rotate: [-15, 15, -15],
-          scale: [0.9, 1.1, 0.9],
-        }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-      <motion.div
-        className="phoenix-wing right"
-        style={{
-          background: `linear-gradient(-135deg, ${color}, #ff6b35, #f7c815)`,
-        }}
-        animate={{
-          rotate: [15, -15, 15],
-          scale: [0.9, 1.1, 0.9],
-        }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-      {fireParticles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="fire-particle"
-          style={{
-            background: getFireColor(p.colorType),
-            left: `${p.left}%`,
-          }}
-          animate={{
-            y: [0, p.yEnd],
-            x: [p.xStart, p.xEnd],
-            scale: [1, 0],
-            opacity: [1, 0],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            delay: p.delay,
-          }}
-        />
-      ))}
-      <motion.div
-        className="phoenix-core"
-        style={{ background: color }}
-        animate={{
-          scale: [1, 1.3, 1],
-          boxShadow: [
-            `0 0 30px ${color}`,
-            `0 0 60px ${color}`,
-            `0 0 30px ${color}`,
-          ],
-        }}
-        transition={{ duration: 0.5, repeat: Infinity }}
-      />
-    </div>
-  );
-};
-
-// ===== 6. 번개 폭풍 (Lightning Storm) =====
-export const LightningStorm = ({ color }) => (
-  <div className="loading-effect lightning-storm">
-    <div className="storm-clouds">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="cloud"
-          style={{ left: `${i * 30}%` }}
-          animate={{ x: [-10, 10, -10] }}
-          transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
-        />
-      ))}
-    </div>
-    {[0, 1, 2].map((i) => (
-      <motion.svg
-        key={i}
-        className="lightning-bolt"
-        viewBox="0 0 50 100"
-        style={{ left: `${20 + i * 25}%` }}
-        animate={{
-          opacity: [0, 1, 1, 0],
-          scaleY: [0.5, 1, 1, 0.5],
-        }}
-        transition={{
-          duration: 0.3,
-          repeat: Infinity,
-          delay: i * 0.8,
-          repeatDelay: 1.5,
-        }}
-      >
-        <path
-          d="M25 0 L15 40 L25 35 L10 100 L35 50 L25 55 L40 0 Z"
-          fill={color}
-          style={{ filter: `drop-shadow(0 0 10px ${color})` }}
-        />
-      </motion.svg>
     ))}
-    <motion.div
-      className="lightning-flash"
-      animate={{ opacity: [0, 0.3, 0] }}
-      transition={{ duration: 0.2, repeat: Infinity, repeatDelay: 2 }}
-    />
   </div>
 );
 
-// ===== 7. 초신성 (Supernova) =====
-export const Supernova = ({ color }) => {
-  const debris = useMemo(
-    () =>
-      Array.from({ length: 30 }, (_, i) => {
-        const angle = Math.random() * 360;
-        const distance = 50 + Math.random() * 100;
-        return {
-          id: i,
-          xEnd: Math.cos((angle * Math.PI) / 180) * distance,
-          yEnd: Math.sin((angle * Math.PI) / 180) * distance,
-          color: i % 2 === 0 ? color : "#fff",
-          size: 2 + Math.random() * 6,
-          delay: 1 + Math.random() * 0.5,
-        };
-      }),
-    [color]
-  );
-
-  return (
-    <div className="loading-effect supernova">
-      <motion.div
-        className="supernova-core"
-        style={{ background: color }}
-        animate={{
-          scale: [1, 0.3, 3, 1],
-          opacity: [1, 1, 0.5, 1],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          times: [0, 0.3, 0.5, 1],
-        }}
-      />
-      {[0, 1, 2, 3, 4].map((i) => (
-        <motion.div
-          key={i}
-          className="supernova-wave"
-          style={{ borderColor: color }}
-          animate={{
-            scale: [0, 4],
-            opacity: [1, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: 1 + i * 0.2,
-            repeatDelay: 1,
-          }}
-        />
-      ))}
-      {debris.map((d) => (
-        <motion.div
-          key={d.id}
-          className="star-debris"
-          style={{
-            background: d.color,
-            width: d.size,
-            height: d.size,
-          }}
-          animate={{
-            x: [0, d.xEnd],
-            y: [0, d.yEnd],
-            opacity: [0, 1, 0],
-            scale: [0, 1, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: d.delay,
-            repeatDelay: 1,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ===== 8. 포탈 (Portal) =====
-export const Portal = ({ color }) => {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => {
-        const angle = (i / 20) * 360;
-        return {
-          id: i,
-          startX: Math.cos((angle * Math.PI) / 180) * 100,
-          startY: Math.sin((angle * Math.PI) / 180) * 100,
-        };
-      }),
-    []
-  );
-
-  return (
-    <div className="loading-effect portal">
-      {[0, 1, 2].map((i) => (
-        <motion.div
-          key={i}
-          className="portal-ring"
-          style={{
-            borderColor: color,
-            width: 120 + i * 30,
-            height: 120 + i * 30,
-          }}
-          animate={{ rotate: i % 2 === 0 ? 360 : -360 }}
-          transition={{
-            duration: 4 - i * 0.5,
-            repeat: Infinity,
-            ease: "linear",
-          }}
-        />
-      ))}
-      <motion.div
-        className="portal-vortex"
-        style={{
-          background: `conic-gradient(from 0deg, ${color}, transparent, ${color}, transparent, ${color})`,
-        }}
-        animate={{ rotate: 360 }}
-        transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-      />
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="portal-particle"
-          style={{ background: color }}
-          animate={{
-            x: [p.startX, 0],
-            y: [p.startY, 0],
-            scale: [1, 0],
-            opacity: [1, 0],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            delay: p.id * 0.1,
-          }}
-        />
-      ))}
-      <motion.div
-        className="portal-center"
-        style={{
-          background: `radial-gradient(circle, ${color} 0%, transparent 70%)`,
-        }}
-        animate={{
-          scale: [1, 1.5, 1],
-          opacity: [0.5, 1, 0.5],
-        }}
-        transition={{ duration: 1, repeat: Infinity }}
-      />
-    </div>
-  );
-};
-
-// ===== 9. 용암 (Lava) =====
-export const Lava = ({ color }) => {
-  const bubbles = useMemo(
-    () =>
-      Array.from({ length: 10 }, (_, i) => ({
-        id: i,
-        left: 10 + Math.random() * 80,
-        size: 20 + Math.random() * 30,
-        duration: 2 + Math.random(),
-        delay: Math.random() * 2,
-      })),
-    []
-  );
-
-  const splashes = useMemo(
-    () =>
-      Array.from({ length: 15 }, (_, i) => ({
-        id: i,
-        color: i % 2 === 0 ? color : "#ff6b35",
-        left: Math.random() * 100,
-        yEnd: -50 - Math.random() * 50,
-        xStart: (Math.random() - 0.5) * 40,
-        xEnd: (Math.random() - 0.5) * 80,
-        delay: Math.random() * 2,
-      })),
-    [color]
-  );
-
-  return (
-    <div className="loading-effect lava">
-      {bubbles.map((b) => (
-        <motion.div
-          key={b.id}
-          className="lava-bubble"
-          style={{
-            background: `radial-gradient(circle, #ff6b35 30%, ${color} 100%)`,
-            left: `${b.left}%`,
-            width: b.size,
-            height: b.size,
-          }}
-          animate={{
-            y: [100, -20],
-            scale: [0, 1, 1.5, 0],
-            opacity: [0, 1, 1, 0],
-          }}
-          transition={{
-            duration: b.duration,
-            repeat: Infinity,
-            delay: b.delay,
-          }}
-        />
-      ))}
-      {splashes.map((s) => (
-        <motion.div
-          key={s.id}
-          className="lava-splash"
-          style={{
-            background: s.color,
-            left: `${s.left}%`,
-          }}
-          animate={{
-            y: [0, s.yEnd, 20],
-            x: [s.xStart, s.xEnd],
-            scale: [0, 1, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            delay: s.delay,
-          }}
-        />
-      ))}
-      <motion.div
-        className="lava-surface"
-        style={{
-          background: `linear-gradient(0deg, ${color} 0%, #ff6b35 50%, #f7c815 100%)`,
-        }}
-        animate={{ y: [5, -5, 5] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-    </div>
-  );
-};
-
-// ===== 10. 은하 충돌 (Galaxy Collision) =====
-export const GalaxyCollision = ({ color }) => {
-  const stars = useMemo(
-    () =>
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        color: i % 2 === 0 ? color : "#fad0c4",
-        left: 40 + Math.random() * 20,
-        top: 40 + Math.random() * 20,
-        xEnd: (Math.random() - 0.5) * 100,
-        yEnd: (Math.random() - 0.5) * 100,
-        delay: Math.random() * 2,
-      })),
-    [color]
-  );
-
-  return (
-    <div className="loading-effect galaxy-collision">
-      <motion.div
-        className="galaxy-1"
-        animate={{
-          x: [50, 0],
-          rotate: 360,
-        }}
-        transition={{
-          x: { duration: 3, repeat: Infinity, repeatType: "reverse" },
-          rotate: { duration: 10, repeat: Infinity, ease: "linear" },
-        }}
-      >
-        <div className="galaxy-core" style={{ background: color }} />
-        <div className="galaxy-spiral" style={{ borderColor: color }} />
-      </motion.div>
-      <motion.div
-        className="galaxy-2"
-        animate={{
-          x: [-50, 0],
-          rotate: -360,
-        }}
-        transition={{
-          x: { duration: 3, repeat: Infinity, repeatType: "reverse" },
-          rotate: { duration: 8, repeat: Infinity, ease: "linear" },
-        }}
-      >
-        <div className="galaxy-core" style={{ background: "#fad0c4" }} />
-        <div className="galaxy-spiral" style={{ borderColor: "#fad0c4" }} />
-      </motion.div>
-      {stars.map((star) => (
-        <motion.div
-          key={star.id}
-          className="collision-star"
-          style={{
-            background: star.color,
-            left: `${star.left}%`,
-            top: `${star.top}%`,
-          }}
-          animate={{
-            x: [0, star.xEnd],
-            y: [0, star.yEnd],
-            scale: [0, 1, 0],
-            opacity: [0, 1, 0],
-          }}
-          transition={{
-            duration: 2,
-            repeat: Infinity,
-            delay: star.delay,
-          }}
-        />
-      ))}
-    </div>
-  );
-};
-
-// ===== 11. 대형 카드 회전 (Spinning Card) =====
-export const SpinningCard = ({ color }) => (
-  <div className="loading-effect spinning-card-wrapper">
+// ===== 은하 충돌 (Galaxy Collision) =====
+export const GalaxyCollision = ({ color }) => (
+  <div className="loading-effect" style={{ width: 250, height: 250 }}>
+    {/* 은하 1 */}
     <motion.div
-      className="spinning-card-body"
-      style={{
-        borderColor: color,
-        boxShadow: `0 0 30px ${color}44`,
-      }}
-      animate={{
-        rotateY: 360,
-      }}
+      style={{ position: "absolute", color }}
+      animate={{ rotate: 360, x: [30, -30, 30], scale: [1, 0.8, 1] }}
       transition={{
-        duration: 2, // 회전 속도 (초)
-        repeat: Infinity,
-        ease: "linear",
+        rotate: { duration: 8, repeat: Infinity, ease: "linear" },
+        x: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+        scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
       }}
     >
-      {/* 카드의 뒷면 무늬 (FlipCard와 유사한 느낌으로 연출) */}
+      <div className="galaxy-arm" style={{ top: -20, left: -60 }} />
+      <div
+        className="galaxy-arm"
+        style={{ bottom: -20, right: -60, transform: "rotate(180deg)" }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          width: 20,
+          height: 20,
+          background: "#fff",
+          borderRadius: "50%",
+          boxShadow: `0 0 20px ${color}`,
+        }}
+      />
+    </motion.div>
+
+    {/* 은하 2 (반대 색상) */}
+    <motion.div
+      style={{ position: "absolute", color: "#fad0c4" }}
+      animate={{ rotate: -360, x: [-30, 30, -30], scale: [0.8, 1, 0.8] }}
+      transition={{
+        rotate: { duration: 10, repeat: Infinity, ease: "linear" },
+        x: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+        scale: { duration: 5, repeat: Infinity, ease: "easeInOut" },
+      }}
+    >
+      <div className="galaxy-arm" style={{ top: -20, left: -60 }} />
+      <div
+        className="galaxy-arm"
+        style={{ bottom: -20, right: -60, transform: "rotate(180deg)" }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          width: 15,
+          height: 15,
+          background: "#fff",
+          borderRadius: "50%",
+          boxShadow: "0 0 20px #fad0c4",
+        }}
+      />
+    </motion.div>
+  </div>
+);
+
+// ===== 대형 카드 회전 (Spinning Card) =====
+export const SpinningCard = ({ color }) => (
+  <div className="loading-effect spinning-card-wrapper">
+    {/* 1. 배경 마법진 (Magic Circle) */}
+    <div className="magic-circle-container" style={{ color }}>
+      {/* 바깥 고리 */}
+      <motion.div
+        className="magic-ring outer"
+        animate={{ rotate: 360, scale: [1, 1.05, 1] }}
+        transition={{
+          rotate: { duration: 10, repeat: Infinity, ease: "linear" },
+          scale: { duration: 3, repeat: Infinity, ease: "easeInOut" },
+        }}
+      />
+      {/* 안쪽 고리 (반대 방향 회전) */}
+      <motion.div
+        className="magic-ring inner"
+        animate={{ rotate: -360 }}
+        transition={{ duration: 7, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
+
+    {/* 2. 메인 카드 */}
+    <motion.div
+      className="spinning-card-body"
+      style={{ borderColor: color }} // 테두리 색상
+      animate={{
+        rotateY: 360, // Y축 회전
+        y: [-10, 10, -10], // 둥둥 떠있는 느낌 (Levitation)
+      }}
+      transition={{
+        rotateY: { duration: 3, repeat: Infinity, ease: "linear" },
+        y: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+      }}
+    >
+      {/* 카드 내부 패턴 */}
+      <div className="card-decoration-border" style={{ borderColor: color }} />
+
       <div
         className="spinning-card-pattern"
         style={{
-          background: `repeating-linear-gradient(
-              45deg,
-              ${color}11,
-              ${color}11 10px,
-              ${color}22 10px,
-              ${color}22 20px
-            )`,
+          background: `radial-gradient(circle at center, ${color}22 0%, transparent 70%)`,
         }}
       >
-        <div className="spinning-card-center-symbol">🔮</div>
+        {/* 중앙 심볼 */}
+        <motion.div
+          className="spinning-card-center-symbol"
+          style={{ color }}
+          animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.1, 0.9] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        >
+          🔮
+        </motion.div>
       </div>
     </motion.div>
-
-    {/* 주변을 감싸는 신비로운 빛 */}
-    <motion.div
-      className="spinning-card-glow"
-      style={{ background: color }}
-      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-      transition={{ duration: 2, repeat: Infinity }}
-    />
   </div>
 );
 
@@ -767,14 +324,9 @@ export const LOADING_EFFECTS = [
     icon: "💥",
     component: CosmicExplosion,
   },
-  { id: "fireworks", name: "불꽃놀이", icon: "🎆", component: Fireworks },
-  { id: "energy", name: "에너지 버스트", icon: "⚡", component: EnergyBurst },
   { id: "blackhole", name: "블랙홀", icon: "🕳️", component: BlackHole },
-  { id: "phoenix", name: "피닉스", icon: "🔥", component: Phoenix },
-  { id: "lightning", name: "번개 폭풍", icon: "🌩️", component: LightningStorm },
-  { id: "supernova", name: "초신성", icon: "🌟", component: Supernova },
   { id: "portal", name: "포탈", icon: "🌀", component: Portal },
-  { id: "lava", name: "용암", icon: "🌋", component: Lava },
+  { id: "quantum", name: "퀀텀 오빗", icon: "⚛️", component: QuantumOrbit },
   {
     id: "collision",
     name: "은하 충돌",
@@ -800,6 +352,12 @@ const LoadingEffect = ({
         className="loading-text"
         animate={{ opacity: [0.5, 1, 0.5] }}
         transition={{ duration: 1.5, repeat: Infinity }}
+        style={{
+          marginTop: "2rem",
+          fontSize: "1.2rem",
+          fontWeight: "bold",
+          textShadow: "0 0 10px rgba(255,255,255,0.5)",
+        }}
       >
         {text}
       </motion.p>

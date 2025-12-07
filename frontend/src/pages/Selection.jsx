@@ -251,6 +251,23 @@ const Selection = () => {
           </button>
         </div>
 
+        {(currentView === "persona" || currentView === "destiny") && (
+          <motion.button
+            type="button"
+            className="back-button"
+            onClick={handleBack}
+            initial={{ opacity: 0, x: -20 }} // 왼쪽에서 부드럽게 등장
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.3 }}
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+          >
+            <FaArrowLeft size={20} />
+            <span>돌아가기</span>
+          </motion.button>
+        )}
+
         <AnimatePresence mode="wait">
           {/* 메인 선택 화면 */}
           {currentView === "selection" && (
@@ -320,55 +337,60 @@ const Selection = () => {
               exit={{ opacity: 0, x: -100 }}
               transition={{ duration: 0.4 }}
             >
-              {/* 뒤로가기 버튼 */}
-              <motion.button
-                type="button"
-                className="back-button"
-                onClick={handleBack}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <FaArrowLeft size={20} />
-                <span>돌아가기</span>
-              </motion.button>
-
               <h1 className="result-title">
                 {currentView === "persona" ? "🔮 My Persona" : "🌟 My Destiny"}
               </h1>
-
               <div
                 className="result-card-container"
-                style={{ position: "relative" }}
+                style={{
+                  position: "relative",
+                  perspective: "1200px", // 원근감 일치시키기
+                  zIndex: 10,
+                  width: "100%",
+                  height: "100%",
+                  minHeight: "600px", // 카드 공간 확보
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
                 <AnimatePresence mode="wait">
-                  {/* 1. 로딩 중일 때: 회전하는 카드 표시 */}
+                  {/* 1. 로딩 중: 카드가 계속 회전 */}
                   {isLoading && (
                     <motion.div
                       key="loading-card"
-                      initial={{ opacity: 0, scale: 0.8 }}
+                      initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 1.1, filter: "blur(10px)" }}
-                      transition={{ duration: 0.5 }}
-                      style={{ position: "absolute" }} // 위치 고정으로 겹침 방지
+                      exit={{ opacity: 0, transition: { duration: 0.2 } }} // 빠르게 사라지고 결과 카드로 교체
+                      style={{ position: "absolute", zIndex: 20 }}
                     >
                       <LoadingEffect
                         effectId={loadingEffect}
                         color={currentColor}
-                        text="운명의 카드를 찾는 중..." // 텍스트 변경
+                        text="운명의 카드를 찾는 중..."
                       />
                     </motion.div>
                   )}
 
-                  {/* 2. 로딩 완료 시: 결과 카드(FlipCard) 등장 */}
+                  {/* 2. 로딩 완료: 카드가 뒷면(180도)에서 시작해 앞면(0도)으로 뒤집힘 */}
                   {!isLoading && analysisData && (
                     <motion.div
                       key="result-card"
-                      initial={{ opacity: 0, rotateY: 90 }} // 카드가 옆에서 돌아오는 느낌
-                      animate={{ opacity: 1, rotateY: 0 }}
+                      /* rotateY: 180 (뒷면)에서 시작 -> 0 (앞면)으로 회전
+                         마치 회전하던 카드가 멈춰서 뒤집히는 듯한 연출 
+                      */
+                      initial={{ opacity: 0, rotateY: 180, scale: 0.9 }}
+                      animate={{ opacity: 1, rotateY: 0, scale: 1 }}
                       transition={{
                         duration: 0.8,
+                        ease: "easeOut",
                         type: "spring",
-                        bounce: 0.3,
+                        stiffness: 60,
+                        damping: 12,
+                      }}
+                      style={{
+                        transformStyle: "preserve-3d",
+                        backfaceVisibility: "visible",
                       }}
                     >
                       {getCardData(currentView) && (
