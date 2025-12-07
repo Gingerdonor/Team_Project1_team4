@@ -143,40 +143,27 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
 
 // ⭐ 유명인 프로필 컴포넌트 (앞면용)
 const CelebrityProfile = ({ celebrity, color }) => {
-  const [imgError, setImgError] = useState(false);
-
   if (!celebrity) return null;
 
-  // 이미지 URL 결정 (image_url이 없거나 에러 시 DiceBear 아바타 사용)
-  const imageUrl =
-    celebrity.image_url && !imgError
-      ? celebrity.image_url
-      : `${DEFAULT_AVATAR}${encodeURIComponent(celebrity.name)}`;
+  const avatarUrl = celebrity.image_url || `${DEFAULT_AVATAR}${celebrity.name}`;
 
   return (
     <motion.div
-      className="celebrity-profile"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      className="celebrity-profile-front"
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 0.3 }}
     >
-      <div className="celebrity-avatar-wrapper" style={{ borderColor: color }}>
-        <img
-          src={imageUrl}
-          alt={celebrity.name}
-          className="celebrity-avatar"
-          onError={() => setImgError(true)}
-        />
+      <div
+        className="celebrity-avatar-large"
+        style={{
+          borderColor: color,
+          boxShadow: `0 0 20px ${color}, 0 0 40px ${color}40`,
+        }}
+      >
+        <img src={avatarUrl} alt={celebrity.name} />
       </div>
-      <div className="celebrity-info">
-        <span className="celebrity-match-label">같은 MBTI 유명인</span>
-        <span className="celebrity-profile-name">{celebrity.name}</span>
-        {celebrity.description && (
-          <span className="celebrity-profile-desc">
-            {celebrity.description}
-          </span>
-        )}
-      </div>
+      <span className="celebrity-name-large">{celebrity.name}</span>
     </motion.div>
   );
 };
@@ -411,11 +398,11 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
               <span className="mbti-subtitle">{subtitle}</span>
             </div>
 
-            {/* ⭐ 유명인 프로필 (앞면에 추가) */}
-            <CelebrityProfile celebrity={celebrity} color={color} />
-
             {/* MBTI 게이지 */}
             <MbtiGauge typeStr={title} axes={axes} />
+
+            {/* ⭐ 유명인 프로필 (앞면에 추가) */}
+            <CelebrityProfile celebrity={celebrity} color={color} />
 
             <p className="click-hint">Click to Detail</p>
           </div>
