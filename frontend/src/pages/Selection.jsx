@@ -8,6 +8,8 @@ import {
   FaSignOutAlt,
   FaChartBar,
   FaArrowLeft,
+  FaStar,
+  FaTimes,
 } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
@@ -35,6 +37,14 @@ const MBTI_NICKNAMES = {
   ENTJ: "지도자형",
 };
 
+// 카테고리 정의
+const CATEGORIES = [
+  { id: "marvel", label: "마블", tags: ["마블"] },
+  { id: "disney", label: "디즈니", tags: ["디즈니"] },
+  { id: "celebrity", label: "유명인", tags: ["실제인물"] },
+  { id: "custom", label: "커스텀", tags: [] },
+];
+
 const Selection = () => {
   const navigate = useNavigate();
 
@@ -49,6 +59,76 @@ const Selection = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [analysisData, setAnalysisData] = useState(null);
   const analysisDataRef = useRef(null);
+
+  // 카테고리 선택 상태 (기본값: marvel)
+  const [selectedCategory, setSelectedCategory] = useState("marvel");
+
+  // 커스텀 태그 모달 상태
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customTags, setCustomTags] = useState([]);
+
+  // 전체 태그 목록 (API에서 로드)
+  const [availableTags, setAvailableTags] = useState([]);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
+
+  // 태그 목록 로드
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        setIsLoadingTags(true);
+        const response = await fetch("/api/celebrities/tags/all");
+        if (response.ok) {
+          const data = await response.json();
+          setAvailableTags(data.tags || []);
+        }
+      } catch (error) {
+        console.error("태그 목록 로드 실패:", error);
+      } finally {
+        setIsLoadingTags(false);
+      }
+    };
+
+    fetchTags();
+  }, []);
+
+  // 카테고리 선택 핸들러
+  const handleCategorySelect = (categoryId) => {
+    if (categoryId === "custom") {
+      setShowCustomModal(true);
+    } else {
+      setSelectedCategory(categoryId);
+      // 카테고리 변경 시 캐시 초기화
+      analysisDataRef.current = null;
+      setAnalysisData(null);
+    }
+  };
+
+  // 커스텀 태그 토글
+  const toggleCustomTag = (tag) => {
+    setCustomTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
+
+  // 커스텀 태그 적용
+  const applyCustomTags = () => {
+    if (customTags.length > 0) {
+      setSelectedCategory("custom");
+      // 태그 변경 시 캐시 초기화
+      analysisDataRef.current = null;
+      setAnalysisData(null);
+    }
+    setShowCustomModal(false);
+  };
+
+  // 현재 선택된 태그 가져오기
+  const getCurrentTags = () => {
+    if (selectedCategory === "custom") {
+      return customTags;
+    }
+    const category = CATEGORIES.find((c) => c.id === selectedCategory);
+    return category ? category.tags : [];
+  };
 
   // 로딩 효과 설정
   const [loadingEffect, setLoadingEffect] = useState(
@@ -90,7 +170,8 @@ const Selection = () => {
 
   // 분석 데이터 가져오기
   const fetchAnalysisData = async () => {
-    if (analysisDataRef.current) return analysisDataRef.current;
+    // ⚠️ 캐시된 데이터가 있어도, 태그가 변경되면 새로 요청해야 함
+    // 기존: if (analysisDataRef.current) return analysisDataRef.current;
 
     try {
       const token = localStorage.getItem("token");
@@ -100,7 +181,12 @@ const Selection = () => {
         return null;
       }
 
-      const response = await fetch("/api/analyze/today", {
+      // 현재 선택된 태그 가져오기
+      const tags = getCurrentTags();
+      const queryParams =
+        tags.length > 0 ? `?include_tags=${tags.join(",")}` : "";
+
+      const response = await fetch(`/api/analyze/today${queryParams}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -115,7 +201,7 @@ const Selection = () => {
       setAnalysisData(data);
       return data;
     } catch (error) {
-      // console.error(error);
+      console.error(error);
       return null;
     }
   };
@@ -281,6 +367,45 @@ const Selection = () => {
             >
               <h1 className="page-title">오늘의 운명 확인하기</h1>
 
+              {/* 카테고리 탭 버튼 추가 */}
+              <div className="category-tabs">
+                {CATEGORIES.map((category) => (
+                  <button
+                    key={category.id}
+                    type="button"
+                    className={`category-tab ${
+                      selectedCategory === category.id ? "active" : ""
+                    }`}
+                    onClick={() => handleCategorySelect(category.id)}
+                  >
+                    {category.label}
+                    {category.id === "custom" && customTags.length > 0 && (
+                      <span className="custom-tag-count">
+                        {customTags.length}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+
+              {/* 선택된 커스텀 태그 표시 */}
+              {selectedCategory === "custom" && customTags.length > 0 && (
+                <div className="selected-tags-display">
+                  {customTags.map((tag, index) => (
+                    <span key={index} className="selected-tag">
+                      {tag}
+                      <button
+                        type="button"
+                        className="tag-remove-btn"
+                        onClick={() => toggleCustomTag(tag)}
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              )}
+
               <div className="orb-buttons-wrapper">
                 {/* Persona 버튼 */}
                 <motion.button
@@ -419,6 +544,76 @@ const Selection = () => {
         onSelect={handleEffectSelect}
         onClose={() => setShowEffectSelector(false)}
       />
+
+      {/* 커스텀 태그 선택 모달 */}
+      <AnimatePresence>
+        {showCustomModal && (
+          <motion.div
+            className="custom-modal-overlay"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowCustomModal(false)}
+          >
+            <motion.div
+              className="custom-modal"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="custom-modal-header">
+                <h2>🎨 커스텀 태그 선택</h2>
+                <button
+                  type="button"
+                  className="modal-close-btn"
+                  onClick={() => setShowCustomModal(false)}
+                >
+                  <FaTimes />
+                </button>
+              </div>
+
+              <div className="custom-modal-content">
+                {isLoadingTags ? (
+                  <div className="tags-loading">태그 로딩 중...</div>
+                ) : (
+                  <div className="tag-options">
+                    {availableTags.map((tag) => (
+                      <button
+                        key={tag}
+                        type="button"
+                        className={`tag-option ${
+                          customTags.includes(tag) ? "selected" : ""
+                        }`}
+                        onClick={() => toggleCustomTag(tag)}
+                      >
+                        {tag}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="custom-modal-footer">
+                <button
+                  type="button"
+                  className="clear-tags-btn"
+                  onClick={() => setCustomTags([])}
+                >
+                  초기화
+                </button>
+                <button
+                  type="button"
+                  className="apply-tags-btn"
+                  onClick={applyCustomTags}
+                >
+                  적용하기 ({customTags.length}개 선택)
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </SpaceBackground>
   );
 };

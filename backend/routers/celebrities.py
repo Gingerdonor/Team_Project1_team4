@@ -10,6 +10,23 @@ import models
 router = APIRouter(prefix="/api/celebrities", tags=["유명인"])
 
 
+@router.get("/tags/all")
+def get_all_tags(db: Session = Depends(get_db)):
+    """모든 유명인의 태그 목록 조회 (중복 제거)"""
+    celebrities = db.query(models.MbtiCelebrity).all()
+
+    all_tags = set()
+    for celeb in celebrities:
+        try:
+            celeb_tags = json.loads(celeb.tags) if celeb.tags else []
+            all_tags.update(celeb_tags)
+        except (json.JSONDecodeError, TypeError):
+            continue
+
+    # 태그를 정렬해서 반환
+    return {"tags": sorted(list(all_tags)), "count": len(all_tags)}
+
+
 @router.get("/{mbti}")
 def get_celebrity_by_mbti(
     mbti: str,

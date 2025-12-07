@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from datetime import date
 import json
@@ -39,9 +39,9 @@ def get_random_celebrity(
         except (json.JSONDecodeError, TypeError):
             celeb_tags = []
 
-        # include_tags가 있으면 모든 태그가 포함되어야 함
+        # include_tags가 있으면 하나라도 포함되어야 함 (OR 조건)
         if include_tags:
-            if not all(tag in celeb_tags for tag in include_tags):
+            if not any(tag in celeb_tags for tag in include_tags):
                 continue
 
         # exclude_tags가 있으면 해당 태그가 없어야 함
@@ -87,6 +87,7 @@ def celebrity_to_dict(celebrity) -> dict:
     - **my_destiny**: 오늘 잘 맞는 상대의 MBTI  
     - **lucky_element**: 오늘의 행운의 원소 (목, 화, 토, 금, 수)
     - **celebrity**: MBTI에 해당하는 유명인 (랜덤)
+    - **include_tags**: 포함할 태그 필터 (콤마 구분)
     """,
     responses={
         200: {"description": "분석 성공"},
@@ -95,6 +96,7 @@ def celebrity_to_dict(celebrity) -> dict:
     },
 )
 def analyze_today(
+    include_tags: str = Query(default=None, description="포함할 태그 (콤마 구분)"),  # ✅ 추가
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
@@ -142,9 +144,14 @@ def analyze_today(
     lucky_element_key = max(combined["elements"], key=combined["elements"].get)
     partner_axes = logic.get_compatibility_details(axes)
 
-    # 유명인 매칭
-    my_celebrity = get_random_celebrity(db, my_mbti)
-    partner_celebrity = get_random_celebrity(db, partner_mbti)
+    # ✅ 태그 파싱
+    tag_list = None
+    if include_tags:
+        tag_list = [t.strip() for t in include_tags.split(",") if t.strip()]
+
+    # ✅ 유명인 매칭 (태그 필터 적용)
+    my_celebrity = get_random_celebrity(db, my_mbti, include_tags=tag_list)
+    partner_celebrity = get_random_celebrity(db, partner_mbti, include_tags=tag_list)
 
     # DB에 저장
     existing_result = (
