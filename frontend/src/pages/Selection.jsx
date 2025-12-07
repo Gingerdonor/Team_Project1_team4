@@ -172,7 +172,7 @@ const Selection = () => {
         color: "#a18cd1",
         description: pData.description,
         axes: pData.axes,
-        celebrity: pData.celebrity || null,
+        celebrity: null, // My Persona에는 celeb 정보 미표시
       };
     }
     const dData = analysisData.destiny_data || {};
@@ -372,7 +372,7 @@ const Selection = () => {
                       }}
                     >
                       {getCardData(currentView) && (
-                        <FlipCard 
+                        <FlipCard
                           title={getCardData(currentView).title}
                           subtitle={getCardData(currentView).subtitle}
                           color={getCardData(currentView).color}

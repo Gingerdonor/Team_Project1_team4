@@ -41,14 +41,14 @@
 
 .mbti-title {
   font-family: "Orbitron", sans-serif;
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 700;
   margin: 0;
   letter-spacing: 2px;
 }
 
 .mbti-subtitle {
-  font-size: 0.95rem;
+  font-size: 1rem;
   opacity: 0.8;
   margin-top: 5px;
   display: block;
