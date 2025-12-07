@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -36,7 +36,7 @@ const MBTI_TYPES = [
 const AdminPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
-  const [loading, setLoading] = useState(false);
+  const [, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // Dashboard
@@ -75,44 +75,47 @@ const AdminPage = () => {
 
   const token = localStorage.getItem("token");
 
-  const fetchWithAuth = async (url, options = {}) => {
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        ...options.headers,
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-    });
+  const fetchWithAuth = useCallback(
+    async (url, options = {}) => {
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          ...options.headers,
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
-    if (res.status === 403) {
-      setError("관리자 권한이 필요합니다.");
-      throw new Error("Forbidden");
-    }
+      if (res.status === 403) {
+        setError("관리자 권한이 필요합니다.");
+        throw new Error("Forbidden");
+      }
 
-    if (!res.ok) {
-      const data = await res.json();
-      throw new Error(data.detail || "오류가 발생했습니다.");
-    }
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.detail || "오류가 발생했습니다.");
+      }
 
-    return res.json();
-  };
+      return res.json();
+    },
+    [token]
+  );
 
   // 대시보드 데이터 로드
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchWithAuth("/api/admin/dashboard");
       setDashboardData(data);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchWithAuth]);
 
   // 분석 결과 로드
-  const loadAnalysisResults = async () => {
+  const loadAnalysisResults = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -126,14 +129,14 @@ const AdminPage = () => {
       setAnalysisResults(data.data);
       setAnalysisTotalPages(data.total_pages);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [analysisPage, analysisFilters, fetchWithAuth]);
 
   // 유명인 로드
-  const loadCelebrities = async () => {
+  const loadCelebrities = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -148,11 +151,11 @@ const AdminPage = () => {
       setCelebrities(data.data);
       setCelebTotalPages(data.total_pages);
     } catch (err) {
-      console.error(err);
+      // console.error(err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [celebPage, celebFilters, fetchWithAuth]);
 
   useEffect(() => {
     if (!token) {
@@ -160,12 +163,12 @@ const AdminPage = () => {
       return;
     }
     loadDashboard();
-  }, []);
+  }, [token, navigate, loadDashboard]);
 
   useEffect(() => {
     if (activeTab === "analysis") loadAnalysisResults();
     if (activeTab === "celebrities") loadCelebrities();
-  }, [activeTab, analysisPage, celebPage]);
+  }, [activeTab, loadAnalysisResults, loadCelebrities]);
 
   // 분석 결과 수정
   const handleUpdateAnalysis = async (id, updateData) => {
@@ -235,18 +238,21 @@ const AdminPage = () => {
         </div>
         <nav className="admin-nav">
           <button
+            type="button"
             className={`nav-item ${activeTab === "dashboard" ? "active" : ""}`}
             onClick={() => setActiveTab("dashboard")}
           >
             <FaChartBar /> 대시보드
           </button>
           <button
+            type="button"
             className={`nav-item ${activeTab === "analysis" ? "active" : ""}`}
             onClick={() => setActiveTab("analysis")}
           >
             <FaUsers /> 분석 결과
           </button>
           <button
+            type="button"
             className={`nav-item ${
               activeTab === "celebrities" ? "active" : ""
             }`}
@@ -256,6 +262,7 @@ const AdminPage = () => {
           </button>
         </nav>
         <button
+          type="button"
           className="nav-item home-btn"
           onClick={() => navigate("/")}
         >
@@ -268,7 +275,9 @@ const AdminPage = () => {
         {error && (
           <div className="error-banner">
             {error}
-            <button onClick={() => setError(null)}>✕</button>
+            <button type="button" onClick={() => setError(null)}>
+              ✕
+            </button>
           </div>
         )}
 
@@ -371,6 +380,7 @@ const AdminPage = () => {
                 ))}
               </select>
               <button
+                type="button"
                 onClick={() => {
                   setAnalysisPage(1);
                   loadAnalysisResults();
@@ -409,6 +419,7 @@ const AdminPage = () => {
                     <td>{r.lucky_element}</td>
                     <td className="actions">
                       <button
+                        type="button"
                         className="edit-btn"
                         onClick={() =>
                           setEditModal({
@@ -421,6 +432,7 @@ const AdminPage = () => {
                         <FaEdit />
                       </button>
                       <button
+                        type="button"
                         className="delete-btn"
                         onClick={() =>
                           setDeleteModal({
@@ -452,6 +464,7 @@ const AdminPage = () => {
             <div className="content-header">
               <h1>⭐ 유명인 관리</h1>
               <button
+                type="button"
                 className="add-btn"
                 onClick={() =>
                   setEditModal({
@@ -503,6 +516,7 @@ const AdminPage = () => {
                 }
               />
               <button
+                type="button"
                 onClick={() => {
                   setCelebPage(1);
                   loadCelebrities();
@@ -533,8 +547,8 @@ const AdminPage = () => {
                     <td>{c.name}</td>
                     <td>
                       <div className="tags-cell">
-                        {c.tags.slice(0, 3).map((tag, i) => (
-                          <span key={i} className="tag">
+                        {c.tags.slice(0, 3).map((tag) => (
+                          <span key={tag} className="tag">
                             {tag}
                           </span>
                         ))}
@@ -546,6 +560,7 @@ const AdminPage = () => {
                     <td className="desc-cell">{c.description}</td>
                     <td className="actions">
                       <button
+                        type="button"
                         className="edit-btn"
                         onClick={() =>
                           setEditModal({
@@ -558,6 +573,7 @@ const AdminPage = () => {
                         <FaEdit />
                       </button>
                       <button
+                        type="button"
                         className="delete-btn"
                         onClick={() =>
                           setDeleteModal({
@@ -620,13 +636,18 @@ const AdminPage = () => {
 // 페이지네이션 컴포넌트
 const Pagination = ({ page, totalPages, onPageChange }) => (
   <div className="pagination">
-    <button disabled={page <= 1} onClick={() => onPageChange(page - 1)}>
+    <button
+      type="button"
+      disabled={page <= 1}
+      onClick={() => onPageChange(page - 1)}
+    >
       이전
     </button>
     <span>
       {page} / {totalPages}
     </span>
     <button
+      type="button"
       disabled={page >= totalPages}
       onClick={() => onPageChange(page + 1)}
     >
@@ -656,30 +677,39 @@ const EditModal = ({ type, data, onClose, onSave }) => {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div
+      className="modal-overlay"
+      onClick={onClose}
+      role="button"
+      tabIndex={0}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") onClose();
+      }}
+    >
       <motion.div
         className="modal-content"
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button className="modal-close" onClick={onClose}>
+        <button type="button" className="modal-close" onClick={onClose}>
           <FaTimes />
         </button>
         <h2>
-          {type === "analysis"
-            ? "분석 결과 수정"
-            : data.isNew
-            ? "유명인 추가"
-            : "유명인 수정"}
+          {(() => {
+            if (type === "analysis") return "분석 결과 수정";
+            if (data.isNew) return "유명인 추가";
+            return "유명인 수정";
+          })()}
         </h2>
 
         <form onSubmit={handleSubmit}>
           {type === "analysis" ? (
             <>
               <div className="form-group">
-                <label>My Persona (MBTI)</label>
+                <label htmlFor="my-persona">My Persona (MBTI)</label>
                 <select
+                  id="my-persona"
                   value={formData.my_persona || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, my_persona: e.target.value })
@@ -693,8 +723,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 </select>
               </div>
               <div className="form-group">
-                <label>My Destiny (MBTI)</label>
+                <label htmlFor="my-destiny">My Destiny (MBTI)</label>
                 <select
+                  id="my-destiny"
                   value={formData.my_destiny || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, my_destiny: e.target.value })
@@ -708,8 +739,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 </select>
               </div>
               <div className="form-group">
-                <label>행운의 원소</label>
+                <label htmlFor="lucky-element">행운의 원소</label>
                 <input
+                  id="lucky-element"
                   type="text"
                   value={formData.lucky_element || ""}
                   onChange={(e) =>
@@ -718,8 +750,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label>Persona 설명</label>
+                <label htmlFor="persona-desc">Persona 설명</label>
                 <textarea
+                  id="persona-desc"
                   rows={4}
                   value={formData.persona_description || ""}
                   onChange={(e) =>
@@ -731,8 +764,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label>Destiny 설명</label>
+                <label htmlFor="destiny-desc">Destiny 설명</label>
                 <textarea
+                  id="destiny-desc"
                   rows={4}
                   value={formData.destiny_description || ""}
                   onChange={(e) =>
@@ -747,8 +781,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
           ) : (
             <>
               <div className="form-group">
-                <label>MBTI *</label>
+                <label htmlFor="celeb-mbti">MBTI *</label>
                 <select
+                  id="celeb-mbti"
                   value={formData.mbti || ""}
                   onChange={(e) =>
                     setFormData({ ...formData, mbti: e.target.value })
@@ -764,8 +799,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 </select>
               </div>
               <div className="form-group">
-                <label>이름 *</label>
+                <label htmlFor="celeb-name">이름 *</label>
                 <input
+                  id="celeb-name"
                   type="text"
                   value={formData.name || ""}
                   onChange={(e) =>
@@ -775,8 +811,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label>태그 (콤마로 구분)</label>
+                <label htmlFor="celeb-tags">태그 (콜마로 구분)</label>
                 <input
+                  id="celeb-tags"
                   type="text"
                   value={tagsInput}
                   onChange={(e) => setTagsInput(e.target.value)}
@@ -784,8 +821,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label>설명</label>
+                <label htmlFor="celeb-desc">설명</label>
                 <input
+                  id="celeb-desc"
                   type="text"
                   value={formData.description || ""}
                   onChange={(e) =>
@@ -794,8 +832,9 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label>이미지 URL</label>
+                <label htmlFor="celeb-img">이미지 URL</label>
                 <input
+                  id="celeb-img"
                   type="text"
                   value={formData.image_url || ""}
                   onChange={(e) =>
@@ -822,7 +861,15 @@ const EditModal = ({ type, data, onClose, onSave }) => {
 
 // 삭제 확인 모달
 const DeleteModal = ({ onClose, onConfirm }) => (
-  <div className="modal-overlay" onClick={onClose}>
+  <div
+    className="modal-overlay"
+    onClick={onClose}
+    role="button"
+    tabIndex={0}
+    onKeyDown={(e) => {
+      if (e.key === "Escape") onClose();
+    }}
+  >
     <motion.div
       className="modal-content delete-modal"
       initial={{ scale: 0.9, opacity: 0 }}
@@ -832,10 +879,10 @@ const DeleteModal = ({ onClose, onConfirm }) => (
       <h2>⚠️ 삭제 확인</h2>
       <p>정말 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.</p>
       <div className="modal-actions">
-        <button className="cancel-btn" onClick={onClose}>
+        <button type="button" className="cancel-btn" onClick={onClose}>
           취소
         </button>
-        <button className="delete-btn" onClick={onConfirm}>
+        <button type="button" className="delete-btn" onClick={onConfirm}>
           삭제
         </button>
       </div>

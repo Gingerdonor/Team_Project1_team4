@@ -8,7 +8,6 @@ import {
   FaSignOutAlt,
   FaChartBar,
   FaArrowLeft,
-  FaStar,
 } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
 import SpaceBackground from "../components/SpaceBackground";
@@ -52,9 +51,9 @@ const Selection = () => {
   const analysisDataRef = useRef(null);
 
   // 로딩 효과 설정
-  const [loadingEffect, setLoadingEffect] = useState(() => {
-    return localStorage.getItem("loadingEffect") || "card_spin";
-  });
+  const [loadingEffect, setLoadingEffect] = useState(
+    () => localStorage.getItem("loadingEffect") || "card_spin"
+  );
   const [showEffectSelector, setShowEffectSelector] = useState(false);
 
   useEffect(() => {
@@ -116,7 +115,7 @@ const Selection = () => {
       setAnalysisData(data);
       return data;
     } catch (error) {
-      console.error(error);
+      // console.error(error);
       return null;
     }
   };
@@ -175,18 +174,16 @@ const Selection = () => {
         axes: pData.axes,
         celebrity: pData.celebrity || null,
       };
-    } else {
-      const dData = analysisData.destiny_data || {};
-      return {
-        title: dData.mbti || analysisData.my_destiny,
-        subtitle:
-          MBTI_NICKNAMES[dData.mbti || analysisData.my_destiny] || "유형",
-        color: "#fad0c4",
-        description: dData.description,
-        axes: dData.axes,
-        celebrity: dData.celebrity || null,
-      };
     }
+    const dData = analysisData.destiny_data || {};
+    return {
+      title: dData.mbti || analysisData.my_destiny,
+      subtitle: MBTI_NICKNAMES[dData.mbti || analysisData.my_destiny] || "유형",
+      color: "#fad0c4",
+      description: dData.description,
+      axes: dData.axes,
+      celebrity: dData.celebrity || null,
+    };
   };
 
   const currentColor = currentView === "persona" ? "#a18cd1" : "#fad0c4";
@@ -374,7 +371,16 @@ const Selection = () => {
                         bounce: 0.3,
                       }}
                     >
-                      <FlipCard {...getCardData(currentView)} />
+                      {getCardData(currentView) && (
+                        <FlipCard 
+                          title={getCardData(currentView).title}
+                          subtitle={getCardData(currentView).subtitle}
+                          color={getCardData(currentView).color}
+                          description={getCardData(currentView).description}
+                          axes={getCardData(currentView).axes}
+                          celebrity={getCardData(currentView).celebrity}
+                        />
+                      )}
                     </motion.div>
                   )}
                 </AnimatePresence>

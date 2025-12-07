@@ -34,6 +34,7 @@ const EffectSelector = ({ isOpen, currentEffect, onSelect, onClose }) => {
           <div className="effect-grid">
             {LOADING_EFFECTS.map((effect) => (
               <button
+                type="button"
                 key={effect.id}
                 className={`effect-option ${
                   selected === effect.id ? "selected" : ""
@@ -47,10 +48,18 @@ const EffectSelector = ({ isOpen, currentEffect, onSelect, onClose }) => {
           </div>
 
           <div className="effect-selector-actions">
-            <button className="effect-btn secondary" onClick={onClose}>
+            <button
+              type="button"
+              className="effect-btn secondary"
+              onClick={onClose}
+            >
               취소
             </button>
-            <button className="effect-btn primary" onClick={handleConfirm}>
+            <button
+              type="button"
+              className="effect-btn primary"
+              onClick={handleConfirm}
+            >
               적용하기
             </button>
           </div>

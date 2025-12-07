@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useMemo } from "react";
 import "./LoadingEffects.css";
 
@@ -78,20 +78,20 @@ export const CosmicExplosion = ({ color }) => {
 
 // ===== 2. 불꽃놀이 (Fireworks) =====
 export const Fireworks = ({ color }) => {
-  const colors = [color, "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff"];
-
   const fireworkGroups = useMemo(
-    () =>
-      Array.from({ length: 5 }, (_, idx) => ({
+    () => {
+      const colors = [color, "#ff6b6b", "#ffd93d", "#6bcb77", "#4d96ff"];
+      return Array.from({ length: 5 }, (groupIdx, idx) => ({
         id: idx,
         left: 20 + idx * 15,
         top: 30 + (idx % 2) * 20,
         color: colors[idx % colors.length],
-        sparks: Array.from({ length: 12 }, (_, i) => ({
-          id: i,
-          angle: (i / 12) * 360,
+        sparks: Array.from({ length: 12 }, (_, sparkIdx) => ({
+          id: sparkIdx,
+          angle: (sparkIdx / 12) * 360,
         })),
-      })),
+      }));
+    },
     [color]
   );
 
@@ -714,53 +714,49 @@ export const GalaxyCollision = ({ color }) => {
 };
 
 // ===== 11. 대형 카드 회전 (Spinning Card) =====
-export const SpinningCard = ({ color }) => {
-  return (
-    <div className="loading-effect spinning-card-wrapper">
-      <motion.div
-        className="spinning-card-body"
+export const SpinningCard = ({ color }) => (
+  <div className="loading-effect spinning-card-wrapper">
+    <motion.div
+      className="spinning-card-body"
+      style={{
+        borderColor: color,
+        boxShadow: `0 0 30px ${color}44`,
+      }}
+      animate={{
+        rotateY: 360,
+      }}
+      transition={{
+        duration: 2, // 회전 속도 (초)
+        repeat: Infinity,
+        ease: "linear",
+      }}
+    >
+      {/* 카드의 뒷면 무늬 (FlipCard와 유사한 느낌으로 연출) */}
+      <div
+        className="spinning-card-pattern"
         style={{
-          borderColor: color,
-          boxShadow: `0 0 30px ${color}44`,
-        }}
-        animate={{ 
-          rotateY: 360,
-        }}
-        transition={{
-          duration: 2, // 회전 속도 (초)
-          repeat: Infinity,
-          ease: "linear",
-        }}
-      >
-        {/* 카드의 뒷면 무늬 (FlipCard와 유사한 느낌으로 연출) */}
-        <div 
-          className="spinning-card-pattern"
-          style={{
-            background: `repeating-linear-gradient(
+          background: `repeating-linear-gradient(
               45deg,
               ${color}11,
               ${color}11 10px,
               ${color}22 10px,
               ${color}22 20px
-            )`
-          }}
-        >
-          <div className="spinning-card-center-symbol">
-            🔮
-          </div>
-        </div>
-      </motion.div>
-      
-      {/* 주변을 감싸는 신비로운 빛 */}
-      <motion.div 
-        className="spinning-card-glow"
-        style={{ background: color }}
-        animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-    </div>
-  );
-};
+            )`,
+        }}
+      >
+        <div className="spinning-card-center-symbol">🔮</div>
+      </div>
+    </motion.div>
+
+    {/* 주변을 감싸는 신비로운 빛 */}
+    <motion.div
+      className="spinning-card-glow"
+      style={{ background: color }}
+      animate={{ scale: [1, 1.2, 1], opacity: [0.3, 0.6, 0.3] }}
+      transition={{ duration: 2, repeat: Infinity }}
+    />
+  </div>
+);
 
 // ===== 로딩 효과 목록 =====
 export const LOADING_EFFECTS = [

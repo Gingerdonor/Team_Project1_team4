@@ -123,6 +123,7 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
           <div className="save-modal-options">
             {options.map((option) => (
               <button
+                type="button"
                 key={option.id}
                 className="save-option-btn"
                 onClick={() => onSelect(option.id)}
@@ -132,7 +133,7 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
               </button>
             ))}
           </div>
-          <button className="save-modal-cancel" onClick={onClose}>
+          <button type="button" className="save-modal-cancel" onClick={onClose}>
             취소
           </button>
         </motion.div>
@@ -332,9 +333,9 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
         }
 
         if (canvas) {
-          const blob = await new Promise((resolve) =>
-            canvas.toBlob(resolve, "image/png")
-          );
+          const blob = await new Promise((resolve) => {
+            canvas.toBlob((b) => resolve(b), "image/png");
+          });
           const file = new File([blob], `${title}_analysis.png`, {
             type: "image/png",
           });
@@ -431,8 +432,8 @@ const FlipCard = ({ title, subtitle, color, description, axes, celebrity }) => {
                   )}
                   {celebrity.tags && celebrity.tags.length > 0 && (
                     <div className="celebrity-tags">
-                      {celebrity.tags.slice(0, 4).map((tag, index) => (
-                        <span key={index} className="celebrity-tag">
+                      {celebrity.tags.slice(0, 4).map((tag) => (
+                        <span key={tag} className="celebrity-tag">
                           {tag}
                         </span>
                       ))}
