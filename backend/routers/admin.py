@@ -7,6 +7,7 @@ import os
 import uuid
 import io
 import csv
+import shutil
 
 from database import get_db
 from core.security import get_admin_user
@@ -62,7 +63,7 @@ async def admin_upload_image(
     file: UploadFile = File(...),
     admin_user: models.User = Depends(get_admin_user),
 ):
-    """이미지 업로드"""
+    """이미지 업로드 (원본 파일명 유지)"""
     if not os.path.exists(IMAGES_DIR):
         os.makedirs(IMAGES_DIR)
 
@@ -81,9 +82,17 @@ async def admin_upload_image(
             status_code=400, detail="파일 크기는 5MB를 초과할 수 없습니다."
         )
 
-    # 고유한 파일명 생성
-    unique_filename = f"{uuid.uuid4().hex}{ext}"
-    filepath = os.path.join(IMAGES_DIR, unique_filename)
+    # 원본 파일명 사용 (중복 시 숫자 붙임)
+    original_filename = file.filename
+    filename = original_filename
+    filepath = os.path.join(IMAGES_DIR, filename)
+
+    # 중복 체크 및 이름 변경 (예: avatar.svg -> avatar_1.svg)
+    counter = 1
+    while os.path.exists(filepath):
+        name, ext = os.path.splitext(original_filename)
+        filename = f"{name}_{counter}{ext}"
+        filepath = os.path.join(IMAGES_DIR, filename)
 
     # 파일 저장
     with open(filepath, "wb") as f:
@@ -91,8 +100,8 @@ async def admin_upload_image(
 
     return {
         "message": "이미지가 업로드되었습니다.",
-        "filename": unique_filename,
-        "url": f"/static/images/{unique_filename}",
+        "filename": filename,  # 변경된 파일명 반환
+        "url": f"/static/images/{filename}",
     }
 
 

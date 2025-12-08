@@ -820,7 +820,7 @@ const AdminPage = () => {
                 />
               </label>
               <span className="upload-hint">
-                * 허용 형식: JPG, PNG, GIF, WebP (최대 5MB)
+                * 허용 형식: JPG, PNG, GIF, WebP, SVG (최대 5MB)
               </span>
             </div>
 
