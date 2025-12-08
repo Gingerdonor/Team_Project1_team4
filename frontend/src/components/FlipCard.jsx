@@ -7,6 +7,9 @@ import "./FlipCard.css";
 const DEFAULT_AVATAR_PATH = "/static/images/avatar.svg";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
+// ✅ 로컬 fallback 이미지 (public 폴더에 위치)
+const LOCAL_FALLBACK_IMAGE = "/images/default-avatar.svg";
+
 // 게이지 바 컴포넌트
 const MbtiGauge = ({ typeStr, axes }) => {
   const getRatio = (left, right) => {
@@ -143,19 +146,24 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
   );
 };
 
-// ⭐ 유명인 프로필 컴포넌트
+// ⭐ 유명인 프로필 컴포넌트 - 수정됨
 const CelebrityProfile = ({ celebrity, color }) => {
+  const [imageError, setImageError] = useState(false); // ✅ 에러 상태 추적
+
   if (!celebrity) return null;
 
-  // 사용할 이미지 경로 결정 (DB에 없으면 로컬 SVG 기본 이미지 사용)
+  // 사용할 이미지 경로 결정
   const targetPath = celebrity.image_url || DEFAULT_AVATAR_PATH;
 
-  // 전체 URL 완성 로직
-  // "http"로 시작하지 않는 내부 경로(/static...)라면 백엔드 주소를 붙여줌
   let finalImageUrl = targetPath;
   if (targetPath && !targetPath.startsWith("http")) {
     finalImageUrl = `${BACKEND_URL}${targetPath}`;
   }
+
+  // ✅ celebrity가 바뀌면 에러 상태 리셋
+  useEffect(() => {
+    setImageError(false);
+  }, [celebrity?.image_url]);
 
   return (
     <motion.div
@@ -172,13 +180,14 @@ const CelebrityProfile = ({ celebrity, color }) => {
         }}
       >
         <img
-          src={finalImageUrl}
+          src={imageError ? LOCAL_FALLBACK_IMAGE : finalImageUrl} // ✅ 에러 시 로컬 이미지
           alt={celebrity.name}
           crossOrigin="anonymous"
-          // 에러 핸들링: 이미지 로드 실패 시 기본 SVG로 대체
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = `${BACKEND_URL}${DEFAULT_AVATAR_PATH}`;
+          onError={() => {
+            if (!imageError) {
+              // ✅ 한 번만 실행
+              setImageError(true);
+            }
           }}
         />
       </div>
