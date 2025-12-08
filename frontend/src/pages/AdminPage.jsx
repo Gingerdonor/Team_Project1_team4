@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
@@ -14,6 +14,9 @@ import {
   FaImage,
   FaUpload,
   FaCopy,
+  FaFileExport,
+  FaFileImport,
+  FaDownload,
 } from "react-icons/fa";
 import "./AdminPage.css";
 
@@ -80,6 +83,9 @@ const AdminPage = () => {
     type: null,
     id: null,
   });
+
+  // 파일 업로드를 위한 ref 생성
+  const fileInputRef = useRef(null);
 
   // API 호출 헬퍼
   const fetchWithAuth = useCallback(async (url, options = {}) => {
@@ -224,6 +230,72 @@ const AdminPage = () => {
       () => alert("URL이 클립보드에 복사되었습니다."),
       () => alert("클립보드 복사에 실패했습니다.")
     );
+  };
+
+  // --- CSV 내보내기 핸들러 ---
+  const handleExport = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await fetch("/api/admin/celebrities/export", {
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      });
+
+      if (!response.ok) throw new Error("내보내기 실패");
+
+      // Blob으로 변환하여 다운로드 트리거
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `celebrities_export_${new Date()
+        .toISOString()
+        .slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // --- CSV 가져오기 핸들러 ---
+  const handleImport = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (
+      !confirm("기존 데이터가 업데이트되거나 추가됩니다. 계속하시겠습니까?")
+    ) {
+      e.target.value = "";
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetchWithAuth("/api/admin/celebrities/import", {
+        method: "POST",
+        body: formData,
+      });
+
+      alert(res.message);
+      if (res.errors && res.errors.length > 0) {
+        console.warn("Import errors:", res.errors);
+        alert(`일부 오류가 발생했습니다:\n${res.errors.join("\n")}`);
+      }
+
+      loadCelebrities(); // 목록 갱신
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setLoading(false);
+      e.target.value = ""; // 입력 초기화
+    }
   };
 
   // 1. 탭이 변경될 때 데이터를 초기화하고 로드하는 효과
@@ -557,26 +629,69 @@ const AdminPage = () => {
           <div className="celebrities-tab">
             <div className="content-header">
               <h1>⭐ 유명인 관리</h1>
-              <button
-                type="button"
-                className="add-btn"
-                onClick={() =>
-                  setEditModal({
-                    open: true,
-                    type: "celebrity",
-                    data: {
-                      mbti: "",
-                      name: "",
-                      tags: [],
-                      description: "",
-                      image_url: "",
-                      isNew: true,
-                    },
-                  })
-                }
+              <div
+                className="header-actions"
+                style={{ display: "flex", gap: "10px" }}
               >
-                <FaPlus /> 유명인 추가
-              </button>
+                {/* 가져오기/내보내기 버튼 그룹 */}
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={handleExport}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <FaFileExport /> 내보내기
+                </button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImport}
+                  accept=".csv"
+                  style={{ display: "none" }}
+                />
+                <button
+                  type="button"
+                  className="secondary-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "5px",
+                    padding: "8px 16px",
+                    cursor: "pointer",
+                  }}
+                >
+                  <FaFileImport /> 가져오기
+                </button>
+
+                <button
+                  type="button"
+                  className="add-btn"
+                  onClick={() =>
+                    setEditModal({
+                      open: true,
+                      type: "celebrity",
+                      data: {
+                        mbti: "",
+                        name: "",
+                        tags: [],
+                        description: "",
+                        image_url: "",
+                        isNew: true,
+                      },
+                    })
+                  }
+                >
+                  <FaPlus /> 유명인 추가
+                </button>
+              </div>
             </div>
 
             <div className="filters">

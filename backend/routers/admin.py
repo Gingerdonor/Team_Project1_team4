@@ -1,10 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 from collections import Counter
 import json
 import os
 import uuid
+import io
+import csv
 
 from database import get_db
 from core.security import get_admin_user
@@ -305,6 +307,136 @@ def admin_delete_analysis_result(
 
 
 # --- 유명인 관리 ---
+
+
+@router.get("/celebrities/export")
+def admin_export_celebrities(
+    admin_user: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    """유명인 목록 CSV 내보내기"""
+    celebrities = db.query(models.MbtiCelebrity).order_by(models.MbtiCelebrity.id).all()
+
+    output = io.StringIO()
+    writer = csv.writer(output)
+
+    # CSV 헤더
+    writer.writerow(["id", "mbti", "name", "tags", "description", "image_url"])
+
+    for celeb in celebrities:
+        # 태그는 JSON 문자열 그대로 내보내거나, 보기 좋게 가공 가능 (여기선 원본 유지)
+        writer.writerow(
+            [
+                celeb.id,
+                celeb.mbti,
+                celeb.name,
+                celeb.tags,  # DB에 저장된 JSON 문자열 그대로
+                celeb.description,
+                celeb.image_url,
+            ]
+        )
+
+    output.seek(0)
+
+    # 한글 깨짐 방지를 위해 BOM(utf-8-sig) 추가
+    response = StreamingResponse(
+        iter([output.getvalue().encode("utf-8-sig")]), media_type="text/csv"
+    )
+    response.headers["Content-Disposition"] = (
+        "attachment; filename=celebrities_export.csv"
+    )
+    return response
+
+
+@router.post("/celebrities/import")
+async def admin_import_celebrities(
+    file: UploadFile = File(...),
+    admin_user: models.User = Depends(get_admin_user),
+    db: Session = Depends(get_db),
+):
+    """유명인 목록 CSV 가져오기 (대량 등록/수정)"""
+    if not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="CSV 파일만 업로드 가능합니다.")
+
+    content = await file.read()
+    # utf-8-sig로 디코딩하여 BOM 처리
+    decoded = content.decode("utf-8-sig")
+
+    reader = csv.DictReader(io.StringIO(decoded))
+
+    success_count = 0
+    errors = []
+
+    for row in reader:
+        try:
+            # 필수 필드 확인
+            if not row.get("mbti") or not row.get("name"):
+                continue
+
+            # MBTI 대문자 변환
+            mbti = row["mbti"].strip().upper()
+            if len(mbti) != 4:
+                continue
+
+            # 태그 처리 (JSON 파싱 시도, 실패 시 리스트로 변환)
+            tags_str = row.get("tags", "[]")
+            try:
+                # 이미 JSON 형식이면 유효성만 체크
+                json.loads(tags_str)
+                tags = tags_str
+            except json.JSONDecodeError:
+                # 일반 문자열이면 콤마로 구분된 태그로 간주
+                tags_list = [t.strip() for t in tags_str.split(",") if t.strip()]
+                tags = json.dumps(tags_list, ensure_ascii=False)
+
+            # ID가 있으면 수정 시도, 없으면 추가
+            celeb_id = row.get("id")
+            existing = None
+
+            if celeb_id:
+                existing = (
+                    db.query(models.MbtiCelebrity)
+                    .filter(models.MbtiCelebrity.id == celeb_id)
+                    .first()
+                )
+
+            # 이름과 MBTI로 중복 체크 (ID가 없을 경우)
+            if not existing:
+                existing = (
+                    db.query(models.MbtiCelebrity)
+                    .filter(
+                        models.MbtiCelebrity.mbti == mbti,
+                        models.MbtiCelebrity.name == row["name"],
+                    )
+                    .first()
+                )
+
+            if existing:
+                # 업데이트
+                existing.mbti = mbti
+                existing.name = row["name"]
+                existing.tags = tags
+                existing.description = row.get("description", "")
+                existing.image_url = row.get("image_url", "")
+            else:
+                # 신규 생성
+                new_celeb = models.MbtiCelebrity(
+                    mbti=mbti,
+                    name=row["name"],
+                    tags=tags,
+                    description=row.get("description", ""),
+                    image_url=row.get("image_url", ""),
+                )
+                db.add(new_celeb)
+
+            success_count += 1
+
+        except Exception as e:
+            errors.append(f"{row.get('name', 'Unknown')}: {str(e)}")
+
+    db.commit()
+
+    return {"message": f"{success_count}건 처리 완료", "errors": errors}
 
 
 @router.get("/celebrities")
