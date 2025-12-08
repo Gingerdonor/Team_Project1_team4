@@ -8,7 +8,6 @@ import {
   FaSignOutAlt,
   FaChartBar,
   FaArrowLeft,
-  FaStar,
   FaTimes,
 } from "react-icons/fa";
 import FlipCard from "../components/FlipCard";
@@ -82,6 +81,7 @@ const Selection = () => {
           setAvailableTags(data.tags || []);
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("태그 목록 로드 실패:", error);
       } finally {
         setIsLoadingTags(false);
@@ -201,6 +201,7 @@ const Selection = () => {
       setAnalysisData(data);
       return data;
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
       return null;
     }
@@ -238,7 +239,8 @@ const Selection = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
-      console.error("로그아웃 API 호출 실패:", error);
+        // eslint-disable-next-line no-console
+        console.error("로그아웃 API 호출 실패:", error);
     } finally {
       localStorage.clear();
       navigate("/");
@@ -391,8 +393,8 @@ const Selection = () => {
               {/* 선택된 커스텀 태그 표시 */}
               {selectedCategory === "custom" && customTags.length > 0 && (
                 <div className="selected-tags-display">
-                  {customTags.map((tag, index) => (
-                    <span key={index} className="selected-tag">
+                  {customTags.map((tag) => (
+                    <span key={tag} className="selected-tag">
                       {tag}
                       <button
                         type="button"

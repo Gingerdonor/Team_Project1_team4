@@ -128,6 +128,7 @@ const Settings = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("로그아웃 API 호출 실패:", error);
     } finally {
       localStorage.clear();

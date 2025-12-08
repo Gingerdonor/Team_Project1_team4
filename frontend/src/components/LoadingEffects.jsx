@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { useMemo } from "react";
 import "./LoadingEffects.css";
 
 // ===== 우주 폭발 (Cosmic Explosion) =====
@@ -34,9 +33,11 @@ export const CosmicExplosion = ({ color }) => (
     ))}
 
     {/* 3. 파편들 (Debris) */}
-    {[...Array(12)].map((_, i) => (
+    {[...Array(12)].map((_, i) => {
+      const debrisId = `debris-${i}`;
+      return (
       <motion.div
-        key={i}
+        key={debrisId}
         style={{
           position: "absolute",
           width: 4,
@@ -53,7 +54,8 @@ export const CosmicExplosion = ({ color }) => (
         }}
         transition={{ duration: 1.5, repeat: Infinity, ease: "easeOut" }}
       />
-    ))}
+    );
+    })}
   </div>
 );
 
@@ -78,9 +80,11 @@ export const BlackHole = ({ color }) => (
     <div className="photon-ring" style={{ color }} />
 
     {/* 4. 빨려들어가는 별들 */}
-    {[...Array(8)].map((_, i) => (
+    {[...Array(8)].map((_, i) => {
+      const starId = `blackhole-star-${i}`;
+      return (
       <motion.div
-        key={i}
+        key={starId}
         style={{
           position: "absolute",
           width: 3,
@@ -103,14 +107,14 @@ export const BlackHole = ({ color }) => (
           ease: "easeIn",
         }}
       />
-    ))}
+    );
+    })}
   </div>
 );
 
 // ===== 퀀텀 오빗 (Quantum Orbit) =====
-export const QuantumOrbit = ({ color }) => {
-  return (
-    <div className="loading-effect quantum-container" style={{ color: color }}>
+export const QuantumOrbit = ({ color }) => (
+    <div className="loading-effect quantum-container" style={{ color }}>
       {/* 중앙 코어 */}
       <div className="quantum-core" />
 
@@ -142,7 +146,6 @@ export const QuantumOrbit = ({ color }) => {
       </motion.div>
     </div>
   );
-};
 
 // ===== 포탈 (Portal) =====
 export const Portal = ({ color }) => (
@@ -167,9 +170,11 @@ export const Portal = ({ color }) => (
     />
 
     {/* 3. 빨려들어가는 입자들 */}
-    {[...Array(12)].map((_, i) => (
+    {[...Array(12)].map((_, i) => {
+      const particleId = `portal-particle-${i}`;
+      return (
       <motion.div
-        key={i}
+        key={particleId}
         style={{
           position: "absolute",
           width: 4,
@@ -194,7 +199,8 @@ export const Portal = ({ color }) => (
           ease: "easeIn",
         }}
       />
-    ))}
+    );
+    })}
   </div>
 );
 

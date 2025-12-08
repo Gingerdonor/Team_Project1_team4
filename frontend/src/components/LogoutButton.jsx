@@ -15,6 +15,7 @@ const LogoutButton = ({ onLogoutSuccess }) => {
           onLogoutSuccess();
         }
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("로그아웃 실패:", error);
       } finally {
         setIsLoading(false);

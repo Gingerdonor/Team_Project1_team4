@@ -48,6 +48,7 @@ const CalendarPage = () => {
       const data = await response.json();
       setCalendarData(data.data || {});
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("캘린더 데이터 로드 실패:", error);
     } finally {
       setIsLoading(false);
@@ -70,6 +71,7 @@ const CalendarPage = () => {
       if (!response.ok) return null;
       return await response.json();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("분석 결과 로드 실패:", error);
       return null;
     }

@@ -684,9 +684,10 @@ const AdminPage = () => {
             <h1>🖼️ 이미지 관리</h1>
 
             <div className="image-upload-section">
-              <label className="upload-btn">
+              <label htmlFor="image-upload" className="upload-btn">
                 <FaUpload /> {imageUploading ? "업로드 중..." : "이미지 업로드"}
                 <input
+                  id="image-upload"
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}

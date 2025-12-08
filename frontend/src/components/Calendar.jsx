@@ -17,6 +17,7 @@ const Calendar = ({ onDateSelect }) => {
       const response = await calendarAPI.getMonth(year, month);
       setCalendarData(response.data.data || {});
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("캘린더 데이터 로드 실패:", error);
     } finally {
       setIsLoading(false);
@@ -50,6 +51,7 @@ const Calendar = ({ onDateSelect }) => {
         const response = await calendarAPI.getDate(dateStr);
         onDateSelect(response.data);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("분석 결과 로드 실패:", error);
       }
     }

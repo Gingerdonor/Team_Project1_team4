@@ -148,7 +148,7 @@ const CelebrityProfile = ({ celebrity, color }) => {
   if (!celebrity) return null;
 
   // 사용할 이미지 경로 결정 (DB에 없으면 로컬 SVG 기본 이미지 사용)
-  let targetPath = celebrity.image_url || DEFAULT_AVATAR_PATH;
+  const targetPath = celebrity.image_url || DEFAULT_AVATAR_PATH;
 
   // 전체 URL 완성 로직
   // "http"로 시작하지 않는 내부 경로(/static...)라면 백엔드 주소를 붙여줌

@@ -41,6 +41,7 @@ export const useAuth = () => {
     try {
       await authAPI.logout();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("로그아웃 API 호출 실패:", error);
     } finally {
       localStorage.removeItem("access_token");
