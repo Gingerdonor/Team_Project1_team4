@@ -19,7 +19,7 @@ IMAGES_DIR = os.path.join(
 )
 
 # 허용된 이미지 확장자
-ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".svg"}
 
 
 # --- 이미지 관리 ---
