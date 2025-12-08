@@ -226,22 +226,35 @@ const AdminPage = () => {
     );
   };
 
-  // 탭 변경 시 데이터 로드
+  // 1. 탭이 변경될 때 데이터를 초기화하고 로드하는 효과
   useEffect(() => {
     if (activeTab === "dashboard") loadDashboard();
-    else if (activeTab === "analysis") loadAnalysisResults();
-    else if (activeTab === "celebrities") loadCelebrities();
-    else if (activeTab === "images") loadImages();
+    else if (activeTab === "analysis") {
+      // 탭 진입 시 첫 페이지 로드
+      if (analysisPage === 1) loadAnalysisResults();
+      else setAnalysisPage(1);
+    } else if (activeTab === "celebrities") {
+      // 탭 진입 시 첫 페이지 로드
+      if (celebPage === 1) loadCelebrities();
+      else setCelebPage(1);
+    } else if (activeTab === "images") loadImages();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
-  // 유명인 페이지 변경 시 데이터 로드
+  // 2. [누락된 부분 추가] 분석 결과 페이지나 필터가 변경되면 데이터 로드
+  useEffect(() => {
+    if (activeTab === "analysis") {
+      loadAnalysisResults();
+    }
+  }, [analysisPage, analysisFilters, loadAnalysisResults, activeTab]);
+
+  // 3. [수정] 유명인 관리 페이지나 필터가 변경되면 데이터 로드
+  // 기존 코드에서 eslint-disable을 제거하고 의존성을 명확히 함
   useEffect(() => {
     if (activeTab === "celebrities") {
       loadCelebrities();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [celebPage, celebFilters]);
+  }, [celebPage, celebFilters, loadCelebrities, activeTab]);
 
   // 분석 결과 수정
   const handleEditAnalysis = async (data) => {
@@ -304,9 +317,9 @@ const AdminPage = () => {
 
   // 파일 크기 포맷
   const formatFileSize = (bytes) => {
-    if (bytes < 1024) return `${bytes  } B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)  } KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)  } MB`;
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   return (
@@ -466,13 +479,7 @@ const AdminPage = () => {
                   </option>
                 ))}
               </select>
-              <button
-                type="button"
-                onClick={() => {
-                  setAnalysisPage(1);
-                  loadAnalysisResults();
-                }}
-              >
+              <button type="button" onClick={() => setAnalysisPage(1)}>
                 <FaSearch /> 검색
               </button>
             </div>
@@ -602,13 +609,7 @@ const AdminPage = () => {
                   setCelebFilters({ ...celebFilters, tag: e.target.value })
                 }
               />
-              <button
-                type="button"
-                onClick={() => {
-                  setCelebPage(1);
-                  loadCelebrities();
-                }}
-              >
+              <button type="button" onClick={() => setCelebPage(1)}>
                 <FaSearch /> 검색
               </button>
             </div>
