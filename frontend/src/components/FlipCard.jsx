@@ -4,7 +4,8 @@ import html2canvas from "html2canvas";
 import "./FlipCard.css";
 
 // 기본 프로필 이미지 (이미지가 없을 때 사용)
-const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/personas/svg? seed=";
+const DEFAULT_AVATAR_PATH = "/static/images/avatar.svg";
+const BACKEND_URL = "http://127.0.0.1:8000";
 
 // 게이지 바 컴포넌트
 const MbtiGauge = ({ typeStr, axes }) => {
@@ -142,15 +143,18 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
   );
 };
 
-// ⭐ 유명인 프로필 컴포넌트 (백엔드 이미지 연동 버전)
+// ⭐ 유명인 프로필 컴포넌트
 const CelebrityProfile = ({ celebrity, color }) => {
   if (!celebrity) return null;
 
-  // 외부 링크("http...")는 그대로 쓰고, 내부 경로("/static...")는 백엔드 주소를 붙여줍니다.
-  let imageUrl = celebrity.image_url || `${DEFAULT_AVATAR}${celebrity.name}`;
+  // 사용할 이미지 경로 결정 (DB에 없으면 로컬 SVG 기본 이미지 사용)
+  let targetPath = celebrity.image_url || DEFAULT_AVATAR_PATH;
 
-  if (celebrity.image_url && !celebrity.image_url.startsWith("http")) {
-    imageUrl = `http://127.0.0.1:8000${celebrity.image_url}`;
+  // 전체 URL 완성 로직
+  // "http"로 시작하지 않는 내부 경로(/static...)라면 백엔드 주소를 붙여줌
+  let finalImageUrl = targetPath;
+  if (targetPath && !targetPath.startsWith("http")) {
+    finalImageUrl = `${BACKEND_URL}${targetPath}`;
   }
 
   return (
@@ -168,12 +172,13 @@ const CelebrityProfile = ({ celebrity, color }) => {
         }}
       >
         <img
-          src={imageUrl}
+          src={finalImageUrl}
           alt={celebrity.name}
-          crossOrigin="anonymous" // 카드 저장(html2canvas)시 CORS 에러 방지
+          crossOrigin="anonymous"
+          // 에러 핸들링: 이미지 로드 실패 시 기본 SVG로 대체
           onError={(e) => {
             e.target.onerror = null;
-            e.target.src = `${DEFAULT_AVATAR}${celebrity.name}`;
+            e.target.src = `${BACKEND_URL}${DEFAULT_AVATAR_PATH}`;
           }}
         />
       </div>
