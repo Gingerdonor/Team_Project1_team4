@@ -235,6 +235,14 @@ const AdminPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
+  // 유명인 페이지 변경 시 데이터 로드
+  useEffect(() => {
+    if (activeTab === "celebrities") {
+      loadCelebrities();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [celebPage, celebFilters]);
+
   // 분석 결과 수정
   const handleEditAnalysis = async (data) => {
     try {
