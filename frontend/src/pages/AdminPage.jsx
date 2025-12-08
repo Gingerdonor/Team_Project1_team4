@@ -321,12 +321,16 @@ const AdminPage = () => {
   }, [analysisPage, analysisFilters, loadAnalysisResults, activeTab]);
 
   // 3. [수정] 유명인 관리 페이지나 필터가 변경되면 데이터 로드
-  // 기존 코드에서 eslint-disable을 제거하고 의존성을 명확히 함
   useEffect(() => {
     if (activeTab === "celebrities") {
-      loadCelebrities();
+      // 0.5초 동안 추가 입력이 없으면 그때 1번만 요청 (디바운싱)
+      const timer = setTimeout(() => {
+        loadCelebrities();
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
-  }, [celebPage, celebFilters, loadCelebrities, activeTab]);
+  }, [celebPage, celebFilters, activeTab]);
 
   // 분석 결과 수정
   const handleEditAnalysis = async (data) => {
