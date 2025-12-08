@@ -142,11 +142,16 @@ const SaveShareModal = ({ isOpen, onClose, onSelect, actionType }) => {
   );
 };
 
-// ⭐ 유명인 프로필 컴포넌트 (앞면용)
+// ⭐ 유명인 프로필 컴포넌트 (백엔드 이미지 연동 버전)
 const CelebrityProfile = ({ celebrity, color }) => {
   if (!celebrity) return null;
 
-  const avatarUrl = celebrity.image_url || `${DEFAULT_AVATAR}${celebrity.name}`;
+  // 외부 링크("http...")는 그대로 쓰고, 내부 경로("/static...")는 백엔드 주소를 붙여줍니다.
+  let imageUrl = celebrity.image_url || `${DEFAULT_AVATAR}${celebrity.name}`;
+
+  if (celebrity.image_url && !celebrity.image_url.startsWith("http")) {
+    imageUrl = `http://127.0.0.1:8000${celebrity.image_url}`;
+  }
 
   return (
     <motion.div
@@ -162,7 +167,15 @@ const CelebrityProfile = ({ celebrity, color }) => {
           boxShadow: `0 0 20px ${color}, 0 0 40px ${color}40`,
         }}
       >
-        <img src={avatarUrl} alt={celebrity.name} />
+        <img
+          src={imageUrl}
+          alt={celebrity.name}
+          crossOrigin="anonymous" // 카드 저장(html2canvas)시 CORS 에러 방지
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = `${DEFAULT_AVATAR}${celebrity.name}`;
+          }}
+        />
       </div>
       <span className="celebrity-name-large">{celebrity.name}</span>
     </motion.div>
