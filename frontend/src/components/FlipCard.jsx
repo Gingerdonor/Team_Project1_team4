@@ -5,7 +5,7 @@ import "./FlipCard.css";
 
 // 기본 프로필 이미지 (이미지가 없을 때 사용)
 const DEFAULT_AVATAR_PATH = "/static/images/avatar.svg";
-const BACKEND_URL = "http://127.0.0.1:8000";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:8000";
 
 // 게이지 바 컴포넌트
 const MbtiGauge = ({ typeStr, axes }) => {
