@@ -1,7 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, UploadFile, File
+from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from collections import Counter
 import json
+import os
+import uuid
 
 from database import get_db
 from core.security import get_admin_user
@@ -9,6 +12,109 @@ import models
 import schemas
 
 router = APIRouter(prefix="/api/admin", tags=["관리자"])
+
+# 이미지 저장 경로
+IMAGES_DIR = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)), "static", "images"
+)
+
+# 허용된 이미지 확장자
+ALLOWED_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+
+
+# --- 이미지 관리 ---
+
+
+@router.get("/images")
+def admin_get_images(
+    admin_user: models.User = Depends(get_admin_user),
+):
+    """이미지 목록 조회"""
+    if not os.path.exists(IMAGES_DIR):
+        os.makedirs(IMAGES_DIR)
+
+    images = []
+    for filename in os.listdir(IMAGES_DIR):
+        filepath = os.path.join(IMAGES_DIR, filename)
+        if os.path.isfile(filepath):
+            ext = os.path.splitext(filename)[1].lower()
+            if ext in ALLOWED_EXTENSIONS:
+                stat = os.stat(filepath)
+                images.append(
+                    {
+                        "filename": filename,
+                        "url": f"/static/images/{filename}",
+                        "size": stat.st_size,
+                        "created_at": stat.st_ctime,
+                    }
+                )
+
+    # 최신순 정렬
+    images.sort(key=lambda x: x["created_at"], reverse=True)
+
+    return {"images": images, "total": len(images)}
+
+
+@router.post("/images")
+async def admin_upload_image(
+    file: UploadFile = File(...),
+    admin_user: models.User = Depends(get_admin_user),
+):
+    """이미지 업로드"""
+    if not os.path.exists(IMAGES_DIR):
+        os.makedirs(IMAGES_DIR)
+
+    # 파일 확장자 검증
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in ALLOWED_EXTENSIONS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"허용되지 않은 파일 형식입니다. 허용: {', '.join(ALLOWED_EXTENSIONS)}",
+        )
+
+    # 파일 크기 검증 (5MB 제한)
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(
+            status_code=400, detail="파일 크기는 5MB를 초과할 수 없습니다."
+        )
+
+    # 고유한 파일명 생성
+    unique_filename = f"{uuid.uuid4().hex}{ext}"
+    filepath = os.path.join(IMAGES_DIR, unique_filename)
+
+    # 파일 저장
+    with open(filepath, "wb") as f:
+        f.write(contents)
+
+    return {
+        "message": "이미지가 업로드되었습니다.",
+        "filename": unique_filename,
+        "url": f"/static/images/{unique_filename}",
+    }
+
+
+@router.delete("/images/{filename}")
+def admin_delete_image(
+    filename: str,
+    admin_user: models.User = Depends(get_admin_user),
+):
+    """이미지 삭제"""
+    # 보안: 경로 조작 방지
+    if "/" in filename or "\\" in filename or ".." in filename:
+        raise HTTPException(status_code=400, detail="잘못된 파일명입니다.")
+
+    filepath = os.path.join(IMAGES_DIR, filename)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=404, detail="이미지를 찾을 수 없습니다.")
+
+    if not os.path.isfile(filepath):
+        raise HTTPException(status_code=400, detail="잘못된 요청입니다.")
+
+    os.remove(filepath)
+
+    return {"message": "이미지가 삭제되었습니다.", "filename": filename}
 
 
 # --- 대시보드 ---

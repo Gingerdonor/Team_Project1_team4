@@ -96,7 +96,7 @@ def celebrity_to_dict(celebrity) -> dict:
     },
 )
 def analyze_today(
-    include_tags: str = Query(default=None, description="포함할 태그 (콤마 구분)"),  # ✅ 추가
+    include_tags: str = Query(default=None, description="포함할 태그 (콤마 구분)"),
     current_user: models.User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

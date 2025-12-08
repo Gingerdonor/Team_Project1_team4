@@ -11,6 +11,11 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
       },
+      "/static": {
+        target: "http://127.0.0.1:8000", // 정적 파일도 백엔드로 프록시
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
 });

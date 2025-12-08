@@ -11,6 +11,9 @@ import {
   FaPlus,
   FaSearch,
   FaTimes,
+  FaImage,
+  FaUpload,
+  FaCopy,
 } from "react-icons/fa";
 import "./AdminPage.css";
 
@@ -36,6 +39,7 @@ const MBTI_TYPES = [
 const AdminPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("dashboard");
+  // we don't need the loading value in this file, only setter
   const [, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -61,6 +65,10 @@ const AdminPage = () => {
     tag: "",
   });
 
+  // Images
+  const [images, setImages] = useState([]);
+  const [imageUploading, setImageUploading] = useState(false);
+
   // Modals
   const [editModal, setEditModal] = useState({
     open: false,
@@ -73,42 +81,34 @@ const AdminPage = () => {
     id: null,
   });
 
-  const token = localStorage.getItem("token");
+  // API 호출 헬퍼
+  const fetchWithAuth = useCallback(async (url, options = {}) => {
+    const token = localStorage.getItem("token");
+    const headers = {
+      ...(options.headers || {}),
+      ...(options.body instanceof FormData
+        ? {}
+        : { "Content-Type": "application/json" }),
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    };
 
-  const fetchWithAuth = useCallback(
-    async (url, options = {}) => {
-      const res = await fetch(url, {
-        ...options,
-        headers: {
-          ...options.headers,
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+    const res = await fetch(url, { ...options, headers });
 
-      if (res.status === 403) {
-        setError("관리자 권한이 필요합니다.");
-        throw new Error("Forbidden");
-      }
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.detail || "요청 실패");
+    }
+    return res.json();
+  }, []);
 
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.detail || "오류가 발생했습니다.");
-      }
-
-      return res.json();
-    },
-    [token]
-  );
-
-  // 대시보드 데이터 로드
+  // 대시보드 로드
   const loadDashboard = useCallback(async () => {
     setLoading(true);
     try {
       const data = await fetchWithAuth("/api/admin/dashboard");
       setDashboardData(data);
     } catch (err) {
-      // console.error(err);
+      setError(err.message);
     } finally {
       setLoading(false);
     }
@@ -157,25 +157,90 @@ const AdminPage = () => {
     }
   }, [celebPage, celebFilters, fetchWithAuth]);
 
-  useEffect(() => {
-    if (!token) {
-      navigate("/");
-      return;
+  // 이미지 목록 로드
+  const loadImages = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchWithAuth("/api/admin/images");
+      setImages(data.images || []);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
-    loadDashboard();
-  }, [token, navigate, loadDashboard]);
+  }, [fetchWithAuth]);
 
+  // 이미지 업로드
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setImageUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const token = localStorage.getItem("token");
+      const res = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.detail || "업로드 실패");
+      }
+
+      await loadImages();
+      alert("이미지가 업로드되었습니다.");
+    } catch (err) {
+      alert(err.message);
+    } finally {
+      setImageUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  // 이미지 삭제
+  const handleImageDelete = async (filename) => {
+    if (!confirm("정말 이 이미지를 삭제하시겠습니까?")) return;
+
+    try {
+      await fetchWithAuth(`/api/admin/images/${filename}`, {
+        method: "DELETE",
+      });
+      await loadImages();
+      alert("이미지가 삭제되었습니다.");
+    } catch (err) {
+      alert(err.message);
+    }
+  };
+
+  // URL 복사
+  const handleCopyUrl = (url) => {
+    const fullUrl = `${window.location.origin}${url}`;
+    navigator.clipboard.writeText(fullUrl).then(
+      () => alert("URL이 클립보드에 복사되었습니다."),
+      () => alert("클립보드 복사에 실패했습니다.")
+    );
+  };
+
+  // 탭 변경 시 데이터 로드
   useEffect(() => {
-    if (activeTab === "analysis") loadAnalysisResults();
-    if (activeTab === "celebrities") loadCelebrities();
-  }, [activeTab, loadAnalysisResults, loadCelebrities]);
+    if (activeTab === "dashboard") loadDashboard();
+    else if (activeTab === "analysis") loadAnalysisResults();
+    else if (activeTab === "celebrities") loadCelebrities();
+    else if (activeTab === "images") loadImages();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   // 분석 결과 수정
-  const handleUpdateAnalysis = async (id, updateData) => {
+  const handleEditAnalysis = async (data) => {
     try {
-      await fetchWithAuth(`/api/admin/analysis-results/${id}`, {
+      await fetchWithAuth(`/api/admin/analysis-results/${data.id}`, {
         method: "PUT",
-        body: JSON.stringify(updateData),
+        body: JSON.stringify(data),
       });
       setEditModal({ open: false, type: null, data: null });
       loadAnalysisResults();
@@ -197,10 +262,10 @@ const AdminPage = () => {
     }
   };
 
-  // 유명인 추가/수정
-  const handleSaveCelebrity = async (data, isNew = false) => {
+  // 유명인 저장 (추가/수정)
+  const handleSaveCelebrity = async (data) => {
     try {
-      if (isNew) {
+      if (data.isNew) {
         await fetchWithAuth("/api/admin/celebrities", {
           method: "POST",
           body: JSON.stringify(data),
@@ -227,6 +292,13 @@ const AdminPage = () => {
     } catch (err) {
       alert(err.message);
     }
+  };
+
+  // 파일 크기 포맷
+  const formatFileSize = (bytes) => {
+    if (bytes < 1024) return `${bytes  } B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)  } KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)  } MB`;
   };
 
   return (
@@ -260,14 +332,21 @@ const AdminPage = () => {
           >
             <FaStar /> 유명인 관리
           </button>
+          <button
+            type="button"
+            className={`nav-item ${activeTab === "images" ? "active" : ""}`}
+            onClick={() => setActiveTab("images")}
+          >
+            <FaImage /> 이미지 관리
+          </button>
+          <button
+            type="button"
+            className="nav-item home-btn"
+            onClick={() => navigate("/")}
+          >
+            <FaHome /> 홈으로
+          </button>
         </nav>
-        <button
-          type="button"
-          className="nav-item home-btn"
-          onClick={() => navigate("/")}
-        >
-          <FaHome /> 홈으로
-        </button>
       </aside>
 
       {/* 메인 콘텐츠 */}
@@ -276,14 +355,14 @@ const AdminPage = () => {
           <div className="error-banner">
             {error}
             <button type="button" onClick={() => setError(null)}>
-              ✕
+              <FaTimes />
             </button>
           </div>
         )}
 
         {/* 대시보드 탭 */}
         {activeTab === "dashboard" && dashboardData && (
-          <div className="dashboard-content">
+          <div className="dashboard-tab">
             <h1>📊 대시보드</h1>
             <div className="stats-grid">
               <div className="stat-card">
@@ -348,8 +427,8 @@ const AdminPage = () => {
 
         {/* 분석 결과 탭 */}
         {activeTab === "analysis" && (
-          <div className="analysis-content">
-            <h1>📝 분석 결과 관리</h1>
+          <div className="analysis-tab">
+            <h1>📋 분석 결과 관리</h1>
 
             <div className="filters">
               <input
@@ -460,7 +539,7 @@ const AdminPage = () => {
 
         {/* 유명인 관리 탭 */}
         {activeTab === "celebrities" && (
-          <div className="celebrities-content">
+          <div className="celebrities-tab">
             <div className="content-header">
               <h1>⭐ 유명인 관리</h1>
               <button
@@ -598,6 +677,72 @@ const AdminPage = () => {
             />
           </div>
         )}
+
+        {/* 이미지 관리 탭 */}
+        {activeTab === "images" && (
+          <div className="images-tab">
+            <h1>🖼️ 이미지 관리</h1>
+
+            <div className="image-upload-section">
+              <label className="upload-btn">
+                <FaUpload /> {imageUploading ? "업로드 중..." : "이미지 업로드"}
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={imageUploading}
+                  style={{ display: "none" }}
+                />
+              </label>
+              <span className="upload-hint">
+                * 허용 형식: JPG, PNG, GIF, WebP (최대 5MB)
+              </span>
+            </div>
+
+            <div className="image-grid">
+              {images.length === 0 ? (
+                <p className="no-images">업로드된 이미지가 없습니다.</p>
+              ) : (
+                images.map((img) => (
+                  <motion.div
+                    key={img.filename}
+                    className="image-card"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                  >
+                    <div className="image-preview">
+                      <img src={img.url} alt={img.filename} />
+                    </div>
+                    <div className="image-info">
+                      <p className="image-filename" title={img.filename}>
+                        {img.filename}
+                      </p>
+                      <p className="image-size">{formatFileSize(img.size)}</p>
+                    </div>
+                    <div className="image-actions">
+                      <button
+                        type="button"
+                        className="copy-btn"
+                        onClick={() => handleCopyUrl(img.url)}
+                        title="URL 복사"
+                      >
+                        <FaCopy />
+                      </button>
+                      <button
+                        type="button"
+                        className="delete-btn"
+                        onClick={() => handleImageDelete(img.filename)}
+                        title="삭제"
+                      >
+                        <FaTrash />
+                      </button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
+            </div>
+          </div>
+        )}
       </main>
 
       {/* 수정 모달 */}
@@ -606,27 +751,24 @@ const AdminPage = () => {
           type={editModal.type}
           data={editModal.data}
           onClose={() => setEditModal({ open: false, type: null, data: null })}
-          onSave={(data) => {
-            if (editModal.type === "analysis") {
-              handleUpdateAnalysis(data.id, data);
-            } else {
-              handleSaveCelebrity(data, data.isNew);
-            }
-          }}
+          onSave={
+            editModal.type === "analysis"
+              ? handleEditAnalysis
+              : handleSaveCelebrity
+          }
         />
       )}
 
       {/* 삭제 확인 모달 */}
       {deleteModal.open && (
         <DeleteModal
+          type={deleteModal.type}
           onClose={() => setDeleteModal({ open: false, type: null, id: null })}
-          onConfirm={() => {
-            if (deleteModal.type === "analysis") {
-              handleDeleteAnalysis(deleteModal.id);
-            } else {
-              handleDeleteCelebrity(deleteModal.id);
-            }
-          }}
+          onConfirm={() =>
+            deleteModal.type === "analysis"
+              ? handleDeleteAnalysis(deleteModal.id)
+              : handleDeleteCelebrity(deleteModal.id)
+          }
         />
       )}
     </div>
@@ -698,7 +840,7 @@ const EditModal = ({ type, data, onClose, onSave }) => {
         <h2>
           {(() => {
             if (type === "analysis") return "분석 결과 수정";
-            if (data.isNew) return "유명인 추가";
+            if (data && data.isNew) return "유명인 추가";
             return "유명인 수정";
           })()}
         </h2>
@@ -811,7 +953,7 @@ const EditModal = ({ type, data, onClose, onSave }) => {
                 />
               </div>
               <div className="form-group">
-                <label htmlFor="celeb-tags">태그 (콜마로 구분)</label>
+                <label htmlFor="celeb-tags">태그 (콤마로 구분)</label>
                 <input
                   id="celeb-tags"
                   type="text"
