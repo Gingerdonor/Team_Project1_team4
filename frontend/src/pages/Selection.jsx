@@ -40,7 +40,7 @@ const MBTI_NICKNAMES = {
 const CATEGORIES = [
   { id: "marvel", label: "마블", tags: ["마블"] },
   { id: "disney", label: "디즈니", tags: ["디즈니"] },
-  { id: "celebrity", label: "유명인", tags: ["실제인물"] },
+  { id: "celebrity", label: "유명인", tags: ["실제인물", "한국"] },
   { id: "custom", label: "커스텀", tags: [] },
 ];
 
@@ -239,8 +239,8 @@ const Selection = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
     } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error("로그아웃 API 호출 실패:", error);
+      // eslint-disable-next-line no-console
+      console.error("로그아웃 API 호출 실패:", error);
     } finally {
       localStorage.clear();
       navigate("/");
